@@ -25,4 +25,10 @@ public class Transition {
 	{
 		return this.semanticActionList;
 	}
+	
+	@Override
+	public String toString()
+	{
+		return "[ Transition to " + this.newState + " ] with semantic actions: " + this.semanticActionList;
+	}
 }

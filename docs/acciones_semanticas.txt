@@ -1,0 +1,19 @@
+Acción semántica 1:
+- Devolver a la entrada el último carácter leído
+
+Acción semántica 2:
+- Inicializar string vacío
+
+Acción semántica 3:
+- Agregar carácter al string
+
+Acción semántica 4:
+- Buscar en la TPR
+    Si está: devolver la palabra reservada
+    No está: buscar en la TS
+      Si no está:
+        - Dar de alta en la TS
+      Devolver ID + Puntero TS
+
+Acción semántica 5:
+- Error léxico
