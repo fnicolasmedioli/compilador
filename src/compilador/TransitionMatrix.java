@@ -3,10 +3,11 @@ package compilador;
 import java.util.Vector;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.List;
 
 public class TransitionMatrix {
 
-	private static Vector<HashMap<String, Integer>> matrix;
+	private static Vector<HashMap<String, Transition>> matrix;
 	
 	private final static String VALID_CHARS[] = {
 		"_", "{", "}", "(", ")", ";", ",", "*", "\s",
@@ -26,145 +27,145 @@ public class TransitionMatrix {
 		
 		matrix = new Vector<>();
 		
-		HashMap<String, Integer> s0 = new HashMap<>();
-		s0.put("_", 1);
-		s0.put("{", 18);
-		s0.put("}", 18);
-		s0.put("(", 18);
-		s0.put(")", 18);
-		s0.put(";", 18);
-		s0.put(",", 18);
-		s0.put("*", 19);
-		s0.put("\s", 0);
-		s0.put("\t", 0);
-		s0.put("\n", 0);
-		s0.put("%", 21);
-		s0.put(".", 4);
-		s0.put("-", 10);
-		s0.put("+", 12);
-		s0.put("/", 12);
-		s0.put("=", 13);
-		s0.put("<", 15);
-		s0.put(">", 15);
-		s0.put("!", 17);
-		this.insertNumbers(s0, 2);
-		this.insertLetters(s0, 1);
+		HashMap<String, Transition> s0 = new HashMap<>();
+		s0.put("_", new Transition(1, null));
+		s0.put("{", new Transition(18, null));
+		s0.put("}", new Transition(18, null));
+		s0.put("(", new Transition(18, null));
+		s0.put(")", new Transition(18, null));
+		s0.put(";", new Transition(18, null));
+		s0.put(",", new Transition(18, null));
+		s0.put("*", new Transition(19, null));
+		s0.put("\s", new Transition(0, null));
+		s0.put("\t", new Transition(0, null));
+		s0.put("\n", new Transition(0, null));
+		s0.put("%", new Transition(21, null));
+		s0.put(".", new Transition(4, null));
+		s0.put("-", new Transition(10, null));
+		s0.put("+", new Transition(12, null));
+		s0.put("/", new Transition(12, null));
+		s0.put("=", new Transition(13, null));
+		s0.put("<", new Transition(15, null));
+		s0.put(">", new Transition(15, null));
+		s0.put("!", new Transition(17, null));
+		this.insertNumbers(s0, new Transition(2, null));
+		this.insertLetters(s0, new Transition(1, null));
 		matrix.add(s0);
 		
-		HashMap<String, Integer> s1 = new HashMap<>();
-		s1.put("_", 1);
-		this.insertNumbers(s1, 1);
-		this.insertLetters(s1, 1);
-		this.insertCLN_(s1, FINAL_STATE);
+		HashMap<String, Transition> s1 = new HashMap<>();
+		s1.put("_", new Transition(1, null));
+		this.insertNumbers(s1, new Transition(1, null));
+		this.insertLetters(s1, new Transition(1, null));
+		this.insertCLN_(s1, new Transition(FINAL_STATE, null));
 		matrix.add(s1);
 		
-		HashMap<String, Integer> s2 = new HashMap<>();
-		this.insertNumbers(s2, 2);
-		s2.put(".", 8);
-		s2.put("_", 3);
+		HashMap<String, Transition> s2 = new HashMap<>();
+		this.insertNumbers(s2, new Transition(2, null));
+		s2.put(".", new Transition(8, null));
+		s2.put("_", new Transition(3, null));
 		matrix.add(s2);
 		
-		HashMap<String, Integer> s3 = new HashMap<>();
-		s3.put("l", FINAL_STATE);
+		HashMap<String, Transition> s3 = new HashMap<>();
+		s3.put("l", new Transition(FINAL_STATE, null));
 		matrix.add(s3);
 		
-		HashMap<String, Integer> s4 = new HashMap<>();
-		this.insertLetters(s4, FINAL_STATE);
-		this.insertNumbers(s4, 5);
+		HashMap<String, Transition> s4 = new HashMap<>();
+		this.insertLetters(s4, new Transition(FINAL_STATE, null));
+		this.insertNumbers(s4, new Transition(5, null));
 		matrix.add(s4);
 		
-		HashMap<String, Integer> s5 = new HashMap<>();
-		s5.put("d", 6);
-		s5.put("D", 6);
-		this.insertNumbers(s5, 5);
-		this.insertCNdD(s5, FINAL_STATE);
+		HashMap<String, Transition> s5 = new HashMap<>();
+		s5.put("d", new Transition(6, null));
+		s5.put("D", new Transition(6, null));
+		this.insertNumbers(s5, new Transition(5, null));
+		this.insertCNdD(s5, new Transition(FINAL_STATE, null));
 		matrix.add(s5);
 
-		HashMap<String, Integer> s6 = new HashMap<>();
-		s6.put("+", 7);
-		s6.put("-", 7);
+		HashMap<String, Transition> s6 = new HashMap<>();
+		s6.put("+", new Transition(7, null));
+		s6.put("-", new Transition(7, null));
 		matrix.add(s6);
 		
-		HashMap<String, Integer> s7 = new HashMap<>();
-		this.insertNumbers(s7, 9);
+		HashMap<String, Transition> s7 = new HashMap<>();
+		this.insertNumbers(s7, new Transition(9, null));
 		matrix.add(s7);
 		
-		HashMap<String, Integer> s8 = new HashMap<>();
-		s8.put("d", 6);
-		s8.put("D", 6);
-		this.insertNumbers(s8, 5);
-		this.insertCNdD(s8, FINAL_STATE);
+		HashMap<String, Transition> s8 = new HashMap<>();
+		s8.put("d", new Transition(6, null));
+		s8.put("D", new Transition(6, null));
+		this.insertNumbers(s8, new Transition(5, null));
+		this.insertCNdD(s8, new Transition(FINAL_STATE, null));
 		matrix.add(s8);
 		
-		HashMap<String, Integer> s9 = new HashMap<>();
-		this.insertNumbers(s9, 9);
-		this.insertCNdD(s9, FINAL_STATE);
+		HashMap<String, Transition> s9 = new HashMap<>();
+		this.insertNumbers(s9, new Transition(9, null));
+		this.insertCNdD(s9, new Transition(FINAL_STATE, null));
 		matrix.add(s9);
 		
-		HashMap<String, Integer> s10 = new HashMap<>();
-		s10.put("=", 11);
-		this.insertAllBut(s10, FINAL_STATE, "=");
+		HashMap<String, Transition> s10 = new HashMap<>();
+		s10.put("=", new Transition(11, null));
+		this.insertAllBut(s10, new Transition(FINAL_STATE, null), "=");
 		matrix.add(s10);
 		
-		HashMap<String, Integer> s11 = new HashMap<>();
-		this.insertAll(s11, FINAL_STATE);
+		HashMap<String, Transition> s11 = new HashMap<>();
+		this.insertAll(s11, new Transition(FINAL_STATE, null));
 		matrix.add(s11);
 		
-		HashMap<String, Integer> s12 = new HashMap<>();
-		this.insertAll(s12, FINAL_STATE);
+		HashMap<String, Transition> s12 = new HashMap<>();
+		this.insertAll(s12, new Transition(FINAL_STATE, null));
 		matrix.add(s12);
 		
-		HashMap<String, Integer> s13 = new HashMap<>();
-		s13.put("=", 14);
+		HashMap<String, Transition> s13 = new HashMap<>();
+		s13.put("=", new Transition(14, null));
 		matrix.add(s13);
 		
-		HashMap<String, Integer> s14 = new HashMap<>();
-		this.insertAll(s14, FINAL_STATE);
+		HashMap<String, Transition> s14 = new HashMap<>();
+		this.insertAll(s14, new Transition(FINAL_STATE, null));
 		matrix.add(s14);
 		
-		HashMap<String, Integer> s15 = new HashMap<>();
-		s15.put("=", 16);
-		this.insertAllBut(s15, FINAL_STATE, "=");
+		HashMap<String, Transition> s15 = new HashMap<>();
+		s15.put("=", new Transition(16, null));
+		this.insertAllBut(s15, new Transition(FINAL_STATE, null), "=");
 		matrix.add(s15);
 		
-		HashMap<String, Integer> s16 = new HashMap<>();
-		this.insertAll(s16, FINAL_STATE);
+		HashMap<String, Transition> s16 = new HashMap<>();
+		this.insertAll(s16, new Transition(FINAL_STATE, null));
 		matrix.add(s16);
 		
-		HashMap<String, Integer> s17 = new HashMap<>();
-		s17.put("!", FINAL_STATE);
+		HashMap<String, Transition> s17 = new HashMap<>();
+		s17.put("!", new Transition(FINAL_STATE, null));
 		matrix.add(s17);
 		
-		HashMap<String, Integer> s18 = new HashMap<>();
-		this.insertAll(s18, FINAL_STATE);
+		HashMap<String, Transition> s18 = new HashMap<>();
+		this.insertAll(s18, new Transition(FINAL_STATE, null));
 		matrix.add(s18);
 		
-		HashMap<String, Integer> s19 = new HashMap<>();
-		s19.put("*", 20);
-		this.insertAllBut(s19, FINAL_STATE, "*");
+		HashMap<String, Transition> s19 = new HashMap<>();
+		s19.put("*", new Transition(20, null));
+		this.insertAllBut(s19, new Transition(FINAL_STATE, null), "*");
 		matrix.add(s19);
 		
-		HashMap<String, Integer> s20 = new HashMap<>();
-		s20.put("\n", FINAL_STATE);
-		this.insertAllBut(s20, 20, "\n");
+		HashMap<String, Transition> s20 = new HashMap<>();
+		s20.put("\n", new Transition(FINAL_STATE, null));
+		this.insertAllBut(s20, new Transition(20, null), "\n");
 		matrix.add(s20);
 		
-		HashMap<String, Integer> s21 = new HashMap<>();
-		s21.put("%", FINAL_STATE);
-		this.insertAllBut(s21, 21, "%");
+		HashMap<String, Transition> s21 = new HashMap<>();
+		s21.put("%", new Transition(FINAL_STATE, null));
+		this.insertAllBut(s21, new Transition(21, null), "%");
 		matrix.add(s21);
 	}
 	
-	private void insertLetters(Map<String, Integer> m, Integer newState)
+	private void insertLetters(Map<String, Transition> m, Transition transition)
 	{
 		String[] ar = { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z" };
-		this.insertArray(m, newState, ar);
+		this.insertArray(m, transition, ar);
 	}
 	
-	private void insertNumbers(Map<String, Integer> m, Integer newState)
+	private void insertNumbers(Map<String, Transition> m, Transition transition)
 	{
 		String[] ar = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
-		this.insertArray(m, newState, ar);
+		this.insertArray(m, transition, ar);
 	}
 	
 	/**
@@ -172,11 +173,11 @@ public class TransitionMatrix {
 	 * @param m
 	 * @param newState
 	 */
-	private void insertCLN_(Map<String, Integer> m, Integer newState)
+	private void insertCLN_(Map<String, Transition> m, Transition transition)
 	{
 		String[] ar = { "{", "}", "(", ")", ";", ",", "*",
 			"\s", "\t", "\n", "%", ".", "-", "+", "/", "=", "!" };
-		this.insertArray(m, newState, ar);
+		this.insertArray(m, transition, ar);
 	}
 	
 	/**
@@ -184,7 +185,7 @@ public class TransitionMatrix {
 	 * @param m
 	 * @param newState
 	 */
-	private void insertCNdD(Map<String, Integer> m, Integer newState)
+	private void insertCNdD(Map<String, Transition> m, Transition transition)
 	{
 		String[] ar = { "_", "{", "}", "(", ")", ";", ",", "*",
 			"\s", "\t", "\n", "%", ".", "-", "+", "/", "=",
@@ -193,34 +194,34 @@ public class TransitionMatrix {
 			"u", "v", "w", "x", "y", "z", "A", "B", "C", "E",
 			"F", "G", "H", "I", "J", "K", "L", "M", "N", "O",
 			"P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z" };
-		this.insertArray(m, newState, ar);
+		this.insertArray(m, transition, ar);
 	}
 	
-	private void insertAllBut(Map<String, Integer> m, Integer newState, String avoid)
+	private void insertAllBut(Map<String, Transition> m, Transition transition, String avoid)
 	{
 		for (int i = 0; i < VALID_CHARS.length; i++)
 			if (! VALID_CHARS[i].equals(avoid))
-				m.put(VALID_CHARS[i], newState);
+				m.put(VALID_CHARS[i], transition);
 	}
 	
-	private void insertAll(Map<String, Integer> m, Integer newState)
+	private void insertAll(Map<String, Transition> m, Transition transition)
 	{
 		for (int i = 0; i < VALID_CHARS.length; i++)
-			m.put(VALID_CHARS[i], newState);
+			m.put(VALID_CHARS[i], transition);
 	}
 	
-	private void insertArray(Map<String, Integer> map, Integer newState, String[] array)
+	private void insertArray(Map<String, Transition> map, Transition transition, String[] array)
 	{
 		for (String t : array)
-			map.put(t, newState);
+			map.put(t, transition);
 	}
 	
-	public Integer getTransition(Integer from, String charRead)
+	public Transition getTransition(Integer from, String charRead)
 	{
-		Map<String, Integer> transitions = matrix.get(from);
+		Map<String, Transition> transitions = matrix.get(from);
 		if (!transitions.containsKey(charRead))
 			// Return to initial state
-			return 0;
+			return new Transition(0, null);
 		return transitions.get(charRead);
 	}
 }
