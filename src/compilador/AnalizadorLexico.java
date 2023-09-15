@@ -3,25 +3,25 @@ package compilador;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
-import java.util.HashMap;
+
+import compilador.semantic_actions.*;
 
 public class AnalizadorLexico {
 	
 	private TransitionMatrix transitionMatrix;
 	private String codigoFuente;
 	
-	private int readIndex;
-	private int currentState;
+	private LexicalAnalyzerState state;
 	
-	private ReservedWordTable reservedWordTable;
-	private HashMap<String, Integer> symbolTable;
+	private static SemanticAction[] semanticActionArray = {
+		null,
+		new SemanticAction1()
+	};
 	
 	public AnalizadorLexico(String rutaArchivoFuente) throws FileNotFoundException
 	{
-		this.reservedWordTable = new ReservedWordTable();
 		this.transitionMatrix = new TransitionMatrix();
-		this.currentState = 0;
-		this.readIndex = 0;
+		this.state = new LexicalAnalyzerState();
 		this.cargarArchivo(rutaArchivoFuente);
 	}
     
@@ -37,40 +37,31 @@ public class AnalizadorLexico {
         lector.close();
     }
     
+    public LexicalAnalyzerState getState()
+    {
+    	return this.state;
+    }
+    
     public void getToken()
     {
-    	String lexeme = "";
-    	boolean readComplete = false;
+    	this.state.startTokenReading();
     	
-    	while (!readComplete)
+    	while (this.state.tokenReading())
     	{
-    		Character readChar = codigoFuente.charAt(readIndex);
+    		Character readChar = codigoFuente.charAt(
+    			this.state.getReadIndex()
+    		);
         	Transition transition = transitionMatrix.getTransition(
-        		currentState,
+        		this.state.getCurrentstate(),
         		readChar
             );
-        	this.currentState = transition.getNewState();
+        	this.state.setNewState(transition.getNewState());
         	
-        	for (Integer semanticAction : transition.getSemanticActionList())
-        	{
-        		if (semanticAction == 1)
-        			if (this.readIndex != 0)
-        				this.readIndex--;
-        		if (semanticAction == 2)
-        			lexeme = "";
-        		if (semanticAction == 3)
-        			lexeme += readChar;
-        		if (semanticAction == 4)
-        		{
-        			
-        		}
-        		if (semanticAction == 5)
-        		{
-        			lexeme = "";
-        			System.out.println("Error léxico");
-        		}
-        	}
-        	readIndex++;
+        	for (Integer semanticAction: transition.getSemanticActionList())
+        		AnalizadorLexico.semanticActionArray[semanticAction]
+        			.run(this.state);
+        	
+        	this.state.incrementReadIndex();
     	}
     }
     
