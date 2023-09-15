@@ -6,10 +6,10 @@ import java.util.Scanner;
 
 import compilador.semantic_actions.*;
 
-public class AnalizadorLexico {
+public class LexicalAnalyzer {
 	
 	private TransitionMatrix transitionMatrix;
-	private String codigoFuente;
+	private String sourceCode;
 	
 	private LexicalAnalyzerState state;
 	
@@ -18,28 +18,23 @@ public class AnalizadorLexico {
 		new SemanticAction1()
 	};
 	
-	public AnalizadorLexico(String rutaArchivoFuente) throws FileNotFoundException
+	public LexicalAnalyzer(String sourceFilePath) throws FileNotFoundException
 	{
 		this.transitionMatrix = new TransitionMatrix();
 		this.state = new LexicalAnalyzerState();
-		this.cargarArchivo(rutaArchivoFuente);
+		this.loadSourceFile(sourceFilePath);
 	}
     
-    public void cargarArchivo(String rutaArchivo) throws FileNotFoundException
+    public void loadSourceFile(String sourceFilePath) throws FileNotFoundException
     {
-    	codigoFuente = "";
-        Scanner lector = new Scanner(new File(rutaArchivo));
-        while (lector.hasNextLine())
+    	this.sourceCode = "";
+        Scanner scanner = new Scanner(new File(sourceFilePath));
+        while (scanner.hasNextLine())
         {
-        	String linea = lector.nextLine();
-        	codigoFuente += linea + "\n";
+        	String line = scanner.nextLine();
+        	this.sourceCode += line + "\n";
         }
-        lector.close();
-    }
-    
-    public LexicalAnalyzerState getState()
-    {
-    	return this.state;
+        scanner.close();
     }
     
     public void getToken()
@@ -48,7 +43,7 @@ public class AnalizadorLexico {
     	
     	while (this.state.tokenReading())
     	{
-    		Character readChar = codigoFuente.charAt(
+    		Character readChar = this.sourceCode.charAt(
     			this.state.getReadIndex()
     		);
         	Transition transition = transitionMatrix.getTransition(
@@ -58,7 +53,7 @@ public class AnalizadorLexico {
         	this.state.setNewState(transition.getNewState());
         	
         	for (Integer semanticAction: transition.getSemanticActionList())
-        		AnalizadorLexico.semanticActionArray[semanticAction]
+        		LexicalAnalyzer.semanticActionArray[semanticAction]
         			.run(this.state);
         	
         	this.state.incrementReadIndex();
