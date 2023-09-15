@@ -6,6 +6,7 @@ public class LexicalAnalyzerState {
 	private int currentState;
 	private String currentLexeme;
 	private boolean tokenReading;
+	private char lastReadChar;
 	
 	public LexicalAnalyzerState()
 	{
@@ -13,6 +14,17 @@ public class LexicalAnalyzerState {
 		this.currentState = 0;
 		this.currentLexeme = "";
 		this.tokenReading = true;
+		this.lastReadChar = '\0';
+	}
+	
+	public char getLastReadChar()
+	{
+		return this.lastReadChar;
+	}
+	
+	public void setLastReadChar(char c)
+	{
+		this.lastReadChar = c;
 	}
 	
 	public void decrementReadIndex()

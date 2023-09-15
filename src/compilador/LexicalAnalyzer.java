@@ -12,6 +12,7 @@ public class LexicalAnalyzer {
 	private String sourceCode;
 	
 	private LexicalAnalyzerState state;
+	private SymbolTable symbolTable;
 	
 	private static SemanticAction[] semanticActionArray = {
 		null,
@@ -23,6 +24,7 @@ public class LexicalAnalyzer {
 		this.transitionMatrix = new TransitionMatrix();
 		this.state = new LexicalAnalyzerState();
 		this.loadSourceFile(sourceFilePath);
+		this.symbolTable = new SymbolTable();
 	}
     
     public void loadSourceFile(String sourceFilePath) throws FileNotFoundException
@@ -43,18 +45,21 @@ public class LexicalAnalyzer {
     	
     	while (this.state.tokenReading())
     	{
-    		Character readChar = this.sourceCode.charAt(
-    			this.state.getReadIndex()
+    		this.state.setLastReadChar(
+    			this.sourceCode.charAt(
+    				this.state.getReadIndex()
+    			)
     		);
+    		
         	Transition transition = transitionMatrix.getTransition(
         		this.state.getCurrentstate(),
-        		readChar
+        		this.state.getLastReadChar()
             );
         	this.state.setNewState(transition.getNewState());
         	
         	for (Integer semanticAction: transition.getSemanticActionList())
         		LexicalAnalyzer.semanticActionArray[semanticAction]
-        			.run(this.state);
+        			.run(this.state, this.symbolTable);
         	
         	this.state.incrementReadIndex();
     	}

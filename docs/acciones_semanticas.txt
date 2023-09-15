@@ -3,17 +3,19 @@ Acción semántica 1:
 
 Acción semántica 2:
 - Inicializar string vacío
+- Agregar carácter al string
 
 Acción semántica 3:
 - Agregar carácter al string
 
 Acción semántica 4:
-- Buscar en la TPR
-    Si está: devolver la palabra reservada
-    No está: buscar en la TS
-      Si no está:
-        - Dar de alta en la TS
-      Devolver ID + Puntero TS
+- Buscar en la TS
+  Si está,
+    Si es PR, devolver la Palabra Reservada
+    Si no, Devolver ID + Punt TS
+  Si no está,
+    Alta en la TS
+    Devolver ID + Punt TS
 
 Acción semántica 5:
 - Error léxico
