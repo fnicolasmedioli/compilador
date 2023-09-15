@@ -6,8 +6,8 @@ public class SymbolTable {
 
 	private HashMap<String, Token> table;
 	
-	private static final Token IDENTIFIER_TOKEN = new Token(25, false);
-	private static final Token CONSTANT_TOKEN = new Token(26, false);
+	private static final Token IDENTIFIER_TOKEN = new Token(27, false);
+	private static final Token CONSTANT_TOKEN = new Token(28, false);
 	
 	public SymbolTable()
 	{
@@ -61,5 +61,7 @@ public class SymbolTable {
 		table.put("PRINT", new Token(22, true));
 		table.put("CLASS", new Token(23, true));
 		table.put("VOID", new Token(24, true));
+		table.put("LONG", new Token(25, true));
+		table.put("UINT", new Token(26, true));
 	}	
 }

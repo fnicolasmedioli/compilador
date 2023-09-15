@@ -67,6 +67,7 @@ public class TransitionMatrix {
         
         HashMap<Character, Transition> s3 = new HashMap<>();
         s3.put('l', new Transition(FINAL_STATE, List.of(3, 5)));
+        s3.put('u', new Transition(22, List.of(3)));
         matrix.add(s3);
         
         HashMap<Character, Transition> s4 = new HashMap<>();
@@ -155,6 +156,10 @@ public class TransitionMatrix {
         s21.put('%', new Transition(0, null));
         this.insertAllBut(s21, new Transition(21, null), '%');
         matrix.add(s21);
+        
+        HashMap<Character, Transition> s22 = new HashMap<>();
+        s22.put('i', new Transition(FINAL_STATE, List.of(3, 5)));
+        matrix.add(s22);
     }
     
     private void insertLetters(Map<Character, Transition> m, Transition transition)
