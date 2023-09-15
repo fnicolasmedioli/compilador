@@ -16,7 +16,12 @@ public class LexicalAnalyzer {
 	
 	private static SemanticAction[] semanticActionArray = {
 		null,
-		new SemanticAction1()
+		new SemanticAction1(),
+		new SemanticAction2(),
+		new SemanticAction3(),
+		new SemanticAction4(),
+		new SemanticAction5(),
+		new SemanticAction6(),
 	};
 	
 	public LexicalAnalyzer(String sourceFilePath) throws FileNotFoundException

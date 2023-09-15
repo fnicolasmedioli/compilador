@@ -18,4 +18,9 @@ Acción semántica 4:
     Devolver ID + Punt TS
 
 Acción semántica 5:
-- Error léxico
+- Verificar rango de la constante
+- Alta en la TS
+- Devolver CTE + Punt TS
+
+Acción semántica 6:
+- Devolver token predefinido

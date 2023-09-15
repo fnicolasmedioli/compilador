@@ -6,10 +6,33 @@ public class SymbolTable {
 
 	private HashMap<String, Token> table;
 	
+	private static final Token IDENTIFIER_TOKEN = new Token(25, false);
+	private static final Token CONSTANT_TOKEN = new Token(26, false);
+	
 	public SymbolTable()
 	{
 		table = new HashMap<>();
 		loadPredefinedTable();
+	}
+	
+	public Token getTokenByLexeme(String lexeme)
+	{
+		return table.get(lexeme);
+	}
+	
+	public boolean contains(String lexeme)
+	{
+		return table.containsKey(lexeme);
+	}
+	
+	public void addIdentifier(String lexeme)
+	{
+		table.put(lexeme, IDENTIFIER_TOKEN);
+	}
+	
+	public void addConstant(String lexeme)
+	{
+		table.put(lexeme, CONSTANT_TOKEN);
 	}
 	
 	private void loadPredefinedTable()
