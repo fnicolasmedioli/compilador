@@ -44,12 +44,30 @@ public class LexicalAnalyzer {
         scanner.close();
     }
     
+    public boolean doRemainTokens()
+    {
+    	return this.state.getReadIndex() < this.sourceCode.length();
+    }
+    
     public void getToken()
     {
     	this.state.startTokenReading();
     	
     	while (this.state.tokenReading())
     	{
+    		
+    		if (this.state.getReadIndex() == this.sourceCode.length())
+    		{
+    			if ( this.state.getCurrentState() == TransitionMatrix.INITIAL_STATE
+	    			&& this.state.getCurrentState() == TransitionMatrix.FINAL_STATE )
+    				return;
+    			else
+    			{
+        			System.out.println("Error: final inesperado de archivo");
+        			return;
+    			}
+    		}
+    		
     		this.state.setLastReadChar(
     			this.sourceCode.charAt(
     				this.state.getReadIndex()
