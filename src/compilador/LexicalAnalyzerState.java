@@ -47,7 +47,7 @@ public class LexicalAnalyzerState {
 		this.currentState = newState;
 	}
 	
-	public int getCurrentstate()
+	public int getCurrentState()
 	{
 		return this.currentState;
 	}
@@ -75,6 +75,7 @@ public class LexicalAnalyzerState {
 	public void startTokenReading()
 	{
 		this.tokenReading = true;
+		this.currentState = 0;
 	}
 	
 	public void finishTokenReading()

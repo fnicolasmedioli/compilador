@@ -57,9 +57,21 @@ public class LexicalAnalyzer {
     		);
     		
         	Transition transition = transitionMatrix.getTransition(
-        		this.state.getCurrentstate(),
+        		this.state.getCurrentState(),
         		this.state.getLastReadChar()
             );
+        	
+        	if (transition == null)
+        	{
+        		System.out.println("Error lexico: caracter inesperado");
+        		System.out.println("Estado inicial: " + this.state.getCurrentState());
+        		System.out.println("Con el caracter: '" + this.state.getLastReadChar() + "'");
+        		this.state.incrementReadIndex();
+        		return;
+        	}
+        	
+        	System.out.println(transition);
+        	
         	this.state.setNewState(transition.getNewState());
         	
         	for (Integer semanticAction: transition.getSemanticActionList())

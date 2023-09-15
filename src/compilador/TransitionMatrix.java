@@ -19,7 +19,7 @@ public class TransitionMatrix {
         'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
         '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'
     };
-    private final static Integer FINAL_STATE = 23;
+    private final static Integer FINAL_STATE = 0;
     
     public TransitionMatrix()
     {
@@ -221,8 +221,7 @@ public class TransitionMatrix {
     {
         Map<Character, Transition> transitions = matrix.get(from);
         if (!transitions.containsKey(charRead))
-            // Return to initial state
-            return new Transition(null, List.of(5));
+            return null;
         return transitions.get(charRead);
     }
 }
