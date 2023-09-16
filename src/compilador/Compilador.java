@@ -26,6 +26,9 @@ public class Compilador {
 	
 	public static int yylex()
 	{
-		return 4;
+		if (lexicalAnalyzer.doRemainTokens() == false)
+			return 0;
+		
+		return 0;
 	}
 }
