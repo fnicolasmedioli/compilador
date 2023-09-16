@@ -38,7 +38,7 @@ public class SymbolTable {
 		table.put(lexeme, new Token(Parser.CTE_UINT, false));
 	}
 	
-	public void adddConstantDOUBLE(String lexeme)
+	public void addConstantDOUBLE(String lexeme)
 	{
 		table.put(lexeme, new Token(Parser.CTE_DOUBLE, false));
 	}

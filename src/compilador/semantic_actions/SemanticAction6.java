@@ -1,7 +1,6 @@
 package compilador.semantic_actions;
 
-import compilador.LexicalAnalyzerState;
-import compilador.SymbolTable;
+import compilador.*;
 
 public class SemanticAction6 implements SemanticAction {
 	
@@ -10,7 +9,9 @@ public class SemanticAction6 implements SemanticAction {
 		LexicalAnalyzerState lexicalAnalyzerState,
 		SymbolTable symbolTable )
 	{
-		
+		String lexeme = lexicalAnalyzerState.getCurrentLexeme();
+		lexicalAnalyzerState.setTokenToReturn(symbolTable.getTokenByLexeme(lexeme).getTokenID());
+		lexicalAnalyzerState.finishTokenReading();
 	}
 	
 }

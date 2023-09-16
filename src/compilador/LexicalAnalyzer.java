@@ -49,7 +49,7 @@ public class LexicalAnalyzer {
     	return this.state.getReadIndex() < this.sourceCode.length();
     }
     
-    public void getToken()
+    public int getToken()
     {
     	this.state.startTokenReading();
     	
@@ -60,11 +60,11 @@ public class LexicalAnalyzer {
     		{
     			if ( this.state.getCurrentState() == TransitionMatrix.INITIAL_STATE
 	    			&& this.state.getCurrentState() == TransitionMatrix.FINAL_STATE )
-    				return;
+    				return 0;
     			else
     			{
         			System.out.println("Error: final inesperado de archivo");
-        			return;
+        			return 0;
     			}
     		}
     		
@@ -85,10 +85,8 @@ public class LexicalAnalyzer {
         		System.out.println("Estado inicial: " + this.state.getCurrentState());
         		System.out.println("Con el caracter: '" + this.state.getLastReadChar() + "'");
         		this.state.incrementReadIndex();
-        		return;
+        		return 0;
         	}
-        	
-        	System.out.println(transition);
         	
         	this.state.setNewState(transition.getNewState());
         	
@@ -98,6 +96,8 @@ public class LexicalAnalyzer {
         	
         	this.state.incrementReadIndex();
     	}
+    	
+    	return this.state.getTokenToReturn();
     }
     
 }

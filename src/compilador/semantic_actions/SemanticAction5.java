@@ -1,5 +1,6 @@
 package compilador.semantic_actions;
 
+import compilador.Compilador;
 import compilador.LexicalAnalyzerState;
 import compilador.SymbolTable;
 
@@ -23,9 +24,13 @@ public class SemanticAction5 implements SemanticAction {
 			
 			if (
 				num.length() > MAX_LONG.length()
-				|| num.compareTo(MAX_LONG) > 0
+				|| num.compareTo(MAX_LONG) < 0
 			)
 				System.out.println("Error, constante fuera de rango: " + lexeme);
+			
+			symbolTable.addConstantLONG(lexeme);
+			Compilador.setyylval(lexeme);
+			lexicalAnalyzerState.setTokenToReturn(symbolTable.getTokenByLexeme(lexeme).getTokenID());
 		}
 		else if (lexeme.substring(lexeme.length() - 3).equals("_ui"))
 		{
@@ -35,12 +40,27 @@ public class SemanticAction5 implements SemanticAction {
 			
 			if (
 				num.length() > MAX_UINT.length()
-				|| num.compareTo(MAX_UINT) > 0
+				|| num.compareTo(MAX_UINT) < 0
 			)
-				System.out.println("Error, constante fuera de rango: " + lexeme);	
-		}		
-		
-		System.out.println("Lexema encontrado: " + lexicalAnalyzerState.getCurrentLexeme());
+				System.out.println("Error, constante fuera de rango: " + lexeme);
+			
+			symbolTable.addConstantUINT(lexeme);
+			Compilador.setyylval(lexeme);
+			lexicalAnalyzerState.setTokenToReturn(symbolTable.getTokenByLexeme(lexeme).getTokenID());
+		}
+		else
+		{
+			// Check DOUBLE
+			
+			/*
+			 * 
+			 */
+			
+			symbolTable.addConstantDOUBLE(lexeme);
+			Compilador.setyylval(lexeme);
+			lexicalAnalyzerState.setTokenToReturn(symbolTable.getTokenByLexeme(lexeme).getTokenID());			
+		}
+
 		lexicalAnalyzerState.finishTokenReading();
 	}
 	

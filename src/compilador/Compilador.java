@@ -18,10 +18,11 @@ public class Compilador {
         }
 
         Compilador.parser = new Parser();
-
         
-        //while (lexicalAnalyzer.doRemainTokens())
-        //	lexicalAnalyzer.getToken();
+        while (lexicalAnalyzer.doRemainTokens())
+        {
+        	System.out.println(lexicalAnalyzer.getToken());
+        }
 	}
 	
 	public static int yylex()
@@ -30,5 +31,10 @@ public class Compilador {
 			return 0;
 		
 		return 0;
+	}
+	
+	public static void setyylval(String v)
+	{
+		parser.setyylval(v);
 	}
 }
