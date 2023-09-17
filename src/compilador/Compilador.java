@@ -19,9 +19,14 @@ public class Compilador {
 
         Compilador.parser = new Parser();
         
-        while (lexicalAnalyzer.doRemainTokens())
+        while (true)
         {
-        	System.out.println(lexicalAnalyzer.getToken());
+        	int tokenID = lexicalAnalyzer.getToken();
+        	if (tokenID == 0)
+        		break;
+        	
+        	String lexeme = parser.getyylval();
+        	System.out.println("TOKEN: " + tokenID + "\tLexema: '" + lexeme + "'");
         }
 	}
 	
@@ -30,11 +35,16 @@ public class Compilador {
 		if (lexicalAnalyzer.doRemainTokens() == false)
 			return 0;
 		
-		return 0;
+		return lexicalAnalyzer.getToken();
 	}
 	
 	public static void setyylval(String v)
 	{
 		parser.setyylval(v);
+	}
+	
+	public static String getyylval()
+	{
+		return parser.getyylval();
 	}
 }

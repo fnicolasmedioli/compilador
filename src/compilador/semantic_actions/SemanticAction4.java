@@ -22,12 +22,25 @@ public class SemanticAction4 implements SemanticAction {
 		if (symbolTable.contains(lexeme))
 		{
 			Token t = symbolTable.getTokenByLexeme(lexeme);
-			if (t.isPredefined() == false)
-				Compilador.setyylval(lexeme);
+			//if (t.isPredefined() == false)
+			Compilador.setyylval(lexeme);
 			lexicalAnalyzerState.setTokenToReturn(t.getTokenID());
 		}
 		else
 		{
+			// ID must be lowercase, _, or digit
+			
+			for (char c : lexeme.toCharArray())
+				if (
+					c != '_'
+					&& ((int)c < 48 || (int)c > 57)
+					&& ((int)c < 97 || (int)c > 122)
+				)
+				{
+					System.out.println("Error, los identificadores deben ser minusculas");
+					return;
+				}		
+			
 			symbolTable.addIdentifier(lexeme);
 			Token t = symbolTable.getTokenByLexeme(lexeme);
 			Compilador.setyylval(lexeme);

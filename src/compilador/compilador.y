@@ -27,3 +27,8 @@ public void setyylval(String v)
 {
     this.yylval = new ParserVal(v);
 }
+
+public String getyylval()
+{
+    return this.yylval.sval;
+}
