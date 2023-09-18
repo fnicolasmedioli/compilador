@@ -9,7 +9,46 @@
 
 %%
 
-programa    :   VOID
+programa    :   '{' lista_sentencias '}'
+            ;
+
+lista_sentencias    :   lista_sentencias sentencia
+                    |   sentencia ','
+                    ;
+
+sentencia	:	sentencia_ejecutable
+			|	sentencia_declarativa
+			;
+					
+tipo	:	LONG
+		|	UINT
+		|	DOUBLE
+		;
+		
+lista_identificadores	:	lista_identificadores ';' ID
+						|	ID
+						;
+						
+sentencia_declarativa	:	tipo lista_identificadores
+
+sentencia_ejecutable	:	ID '=' expr
+
+constante	:	CTE_LONG
+			|	CTE_UINT
+			|	CTE_DOUBLE
+
+expr	:	expr '+' term
+		|	expr '-' term
+		|	term
+		;
+
+term	:	term '*' factor
+		|	term '/' factor
+		|	factor
+		;
+		
+factor	:	ID
+		|	constante
 
 %%
 
