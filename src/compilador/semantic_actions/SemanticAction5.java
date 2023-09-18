@@ -8,6 +8,8 @@ public class SemanticAction5 implements SemanticAction {
 	
 	private static final String MAX_LONG = "2147483648"; // pow(2, 31)
 	private static final String MAX_UINT = "65535"; // pow(2, 16) - 1
+	private static final double MIN_DOUBLE = 2.2250738585072014E-308;
+	private static final double MAX_DOUBLE = 1.7976931348623157E+308;
 	
 	@Override
 	public void run(
@@ -52,9 +54,15 @@ public class SemanticAction5 implements SemanticAction {
 		{
 			// Check DOUBLE
 			
-			/*
-			 * 
-			 */
+			double conv = Double.parseDouble(lexeme.replace('D', 'e').replace('d', 'e'));
+			
+			System.out.println(conv);
+			
+			if (
+				conv != 0 &&
+				(conv > MAX_DOUBLE || conv < MIN_DOUBLE)
+			)
+				System.out.println("Error, constante fuera de rango: " + lexeme);
 			
 			symbolTable.addConstantDOUBLE(lexeme);
 			Compilador.setyylval(lexeme);
