@@ -15,10 +15,13 @@ public class SemanticAction5 implements SemanticAction {
 	public void run(
 		LexicalAnalyzerState lexicalAnalyzerState,
 		SymbolTable symbolTable )
-	{
+	{		
 		String lexeme = lexicalAnalyzerState.getCurrentLexeme();
 		
-		if (lexeme.substring(lexeme.length() - 2).equals("_l"))
+		if (
+			lexeme.length() > 2 &&
+			lexeme.substring(lexeme.length() - 2).equals("_l")
+		)
 		{
 			// Check LONG
 			
@@ -34,7 +37,10 @@ public class SemanticAction5 implements SemanticAction {
 			Compilador.setyylval(lexeme);
 			lexicalAnalyzerState.setTokenToReturn(symbolTable.getTokenByLexeme(lexeme).getTokenID());
 		}
-		else if (lexeme.substring(lexeme.length() - 3).equals("_ui"))
+		else if (
+			lexeme.length() > 3 &&
+			lexeme.substring(lexeme.length() - 3).equals("_ui")
+		)
 		{
 			// Check UINT
 			
@@ -55,8 +61,6 @@ public class SemanticAction5 implements SemanticAction {
 			// Check DOUBLE
 			
 			double conv = Double.parseDouble(lexeme.replace('D', 'e').replace('d', 'e'));
-			
-			System.out.println(conv);
 			
 			if (
 				conv != 0 &&
