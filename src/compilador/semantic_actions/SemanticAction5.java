@@ -24,7 +24,7 @@ public class SemanticAction5 implements SemanticAction {
 			
 			if (
 				num.length() > MAX_LONG.length()
-				|| num.compareTo(MAX_LONG) < 0
+				|| (num.length() == MAX_LONG.length() && num.compareTo(MAX_LONG) > 0)
 			)
 				System.out.println("Error, constante fuera de rango: " + lexeme);
 			
@@ -40,7 +40,7 @@ public class SemanticAction5 implements SemanticAction {
 			
 			if (
 				num.length() > MAX_UINT.length()
-				|| num.compareTo(MAX_UINT) < 0
+				|| (num.length() == MAX_UINT.length() && num.compareTo(MAX_UINT) > 0)
 			)
 				System.out.println("Error, constante fuera de rango: " + lexeme);
 			
