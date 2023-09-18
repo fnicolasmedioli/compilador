@@ -121,6 +121,7 @@ public class TransitionMatrix {
         
         HashMap<Character, Transition> s13 = new HashMap<>();
         s13.put('=', new Transition(14, List.of(3)));
+        this.insertAllBut(s13, new Transition(FINAL_STATE, List.of(1, 6)), '=');
         matrix.add(s13);
         
         HashMap<Character, Transition> s14 = new HashMap<>();
