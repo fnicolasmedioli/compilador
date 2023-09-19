@@ -13,11 +13,12 @@ programa    :   '{' lista_sentencias '}'
             ;
 
 lista_sentencias    :   lista_sentencias sentencia
-                    |   sentencia ','
+                    |   sentencia
                     ;
 
 sentencia	:	sentencia_ejecutable
 			|	sentencia_declarativa
+            |   funcion
 			;
 					
 tipo	:	LONG
@@ -29,13 +30,16 @@ lista_identificadores	:	lista_identificadores ';' ID
 						|	ID
 						;
 						
-sentencia_declarativa	:	tipo lista_identificadores
+sentencia_declarativa	:	tipo lista_identificadores ','
+                        ;
 
-sentencia_ejecutable	:	ID '=' expr
+sentencia_ejecutable	:	ID '=' expr ','
+                        ;
 
 constante	:	CTE_LONG
 			|	CTE_UINT
 			|	CTE_DOUBLE
+            ;
 
 expr	:	expr '+' term
 		|	expr '-' term
@@ -49,6 +53,14 @@ term	:	term '*' factor
 		
 factor	:	ID
 		|	constante
+        ;
+
+parametro   :   tipo ID
+            ;
+
+funcion :   VOID ID '(' parametro ')' '{' lista_sentencias '}'
+        |   VOID ID '(' ')' '{' lista_sentencias '}'
+        ;
 
 %%
 
