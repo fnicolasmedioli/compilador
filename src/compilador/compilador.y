@@ -12,55 +12,82 @@
 programa    :   '{' lista_sentencias '}'
             ;
 
-lista_sentencias    :   lista_sentencias sentencia
-                    |   sentencia
+comparador  :   CMP_GE
+            |   CMP_LE
+            |   CMP_EQUAL
+            |   CMP_NOT_EQUAL
+            ;
+
+condicion   :   expr comparador expr
+            ;
+
+lista_sentencias    :   lista_sentencias sentencia_ej
+                    |   lista_sentencias sentencia_de
+                    |   sentencia_ej
+                    |   sentencia_de
                     ;
 
-sentencia	:	sentencia_ejecutable
-			|	sentencia_declarativa
-            |   funcion
-			;
-					
-tipo	:	LONG
-		|	UINT
-		|	DOUBLE
-		;
-		
-lista_identificadores	:	lista_identificadores ';' ID
-						|	ID
-						;
-						
-sentencia_declarativa	:	tipo lista_identificadores ','
-                        ;
-
-sentencia_ejecutable	:	ID '=' expr ','
-                        ;
-
-constante	:	CTE_LONG
-			|	CTE_UINT
-			|	CTE_DOUBLE
-            ;
-
-expr	:	expr '+' term
-		|	expr '-' term
-		|	term
-		;
-
-term	:	term '*' factor
-		|	term '/' factor
-		|	factor
-		;
-		
-factor	:	ID
-		|	constante
+lista_sentencias_ej :   lista_sentencias_ej sentencia_ej
+                    |   sentencia_ej
+                    ;
+                    
+tipo    :   LONG
+        |   UINT
+        |   DOUBLE
         ;
 
-parametro   :   tipo ID
+lista_identificadores   :   lista_identificadores ';' ID
+                        |   ID
+                        ;
+                        
+sentencia_de    :   tipo lista_identificadores ','
+                |   definicion_funcion ','
+                ;
+
+invocacion_funcion  :   ID '(' ')'
+                    |   ID '(' parametro_real ')'
+                    ;
+
+sentencia_ej    :   ID '=' expr ','
+                |   invocacion_funcion ','
+                |   sentencia_if ','
+                ;
+
+sentencia_if    :   IF '(' condicion ')' sentencia_ej END_IF
+                |   IF '(' condicion ')' '{' lista_sentencias_ej '}' END_IF
+                |   IF '(' condicion ')' sentencia_ej ELSE sentencia_ej END_IF
+                |   IF '(' condicion ')' sentencia_ej ELSE '{' lista_sentencias_ej '}' END_IF
+                |   IF '(' condicion ')' '{' lista_sentencias_ej '}' ELSE sentencia_ej END_IF
+                ;
+
+constante   :   CTE_LONG
+            |   CTE_UINT
+            |   CTE_DOUBLE
             ;
 
-funcion :   VOID ID '(' parametro ')' '{' lista_sentencias '}'
-        |   VOID ID '(' ')' '{' lista_sentencias '}'
+expr    :   expr '+' term
+        |   expr '-' term
+        |   term
         ;
+
+term    :   term '*' factor
+        |   term '/' factor
+        |   factor
+        ;
+        
+factor  :   ID
+        |   constante
+        ;
+
+parametro_formal    :   tipo ID
+                    ;
+
+parametro_real  :   expr
+                ;
+
+definicion_funcion  :   VOID ID '(' parametro_formal ')' '{' lista_sentencias '}'
+                    |   VOID ID '(' ')' '{' lista_sentencias '}'
+                    ;
 
 %%
 
