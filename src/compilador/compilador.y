@@ -16,6 +16,8 @@ comparador  :   CMP_GE
             |   CMP_LE
             |   CMP_EQUAL
             |   CMP_NOT_EQUAL
+            |   '>'
+            |   '<'
             ;
 
 condicion   :   expr comparador expr
@@ -58,6 +60,7 @@ sentencia_if    :   IF '(' condicion ')' sentencia_ej END_IF
                 |   IF '(' condicion ')' sentencia_ej ELSE sentencia_ej END_IF
                 |   IF '(' condicion ')' sentencia_ej ELSE '{' lista_sentencias_ej '}' END_IF
                 |   IF '(' condicion ')' '{' lista_sentencias_ej '}' ELSE sentencia_ej END_IF
+                |   IF '(' condicion ')' '{' lista_sentencias_ej '}' ELSE '{' lista_sentencias_ej '}' END_IF
                 ;
 
 constante   :   CTE_LONG
