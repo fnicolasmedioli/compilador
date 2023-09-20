@@ -2,7 +2,6 @@ package compilador;
 
 import java.util.HashMap;
 
-
 public class SymbolTable {
 
 	private HashMap<String, Token> table;
@@ -77,5 +76,6 @@ public class SymbolTable {
 		table.put("IMPL", new Token(Parser.IMPL, true));
 		table.put("FOR", new Token(Parser.FOR, true));
 		table.put("IMPL", new Token(Parser.IMPL, true));
+		table.put("RETURN", new Token(Parser.RETURN, true));
 	}	
 }

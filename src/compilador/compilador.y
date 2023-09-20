@@ -3,7 +3,7 @@
        CTE_LONG CTE_UINT CTE_DOUBLE
        CMP_GE CMP_LE CMP_EQUAL CMP_NOT_EQUAL
        SUB_ASIGN
-       DO UNTIL IMPL FOR
+       DO UNTIL IMPL FOR RETURN
 
 %start programa
 
@@ -29,9 +29,19 @@ lista_sentencias    :   lista_sentencias sentencia_ej
                     |   sentencia_de
                     ;
 
+lista_sentencias_ret    :   lista_sentencias_ret sentencia_ej_ret
+                        |   lista_sentencias_ret sentencia_de
+                        |   sentencia_ej_ret
+                        |   sentencia_de
+                        ;
+
 lista_sentencias_ej :   lista_sentencias_ej sentencia_ej
                     |   sentencia_ej
                     ;
+
+lista_sentencias_ej_ret :   lista_sentencias_ej_ret sentencia_ej_ret
+                        |   sentencia_ej_ret
+                        ;
                     
 tipo    :   LONG
         |   UINT
@@ -55,6 +65,12 @@ sentencia_ej    :   ID '=' expr ','
                 |   sentencia_if ','
                 ;
 
+sentencia_ej_ret    :   ID '=' expr ','
+                    |   invocacion_funcion ','
+                    |   sentencia_if_ret ','
+                    |   RETURN ','
+                    ;
+
 sentencia_if    :   IF '(' condicion ')' sentencia_ej END_IF
                 |   IF '(' condicion ')' '{' lista_sentencias_ej '}' END_IF
                 |   IF '(' condicion ')' sentencia_ej ELSE sentencia_ej END_IF
@@ -62,6 +78,14 @@ sentencia_if    :   IF '(' condicion ')' sentencia_ej END_IF
                 |   IF '(' condicion ')' '{' lista_sentencias_ej '}' ELSE sentencia_ej END_IF
                 |   IF '(' condicion ')' '{' lista_sentencias_ej '}' ELSE '{' lista_sentencias_ej '}' END_IF
                 ;
+
+sentencia_if_ret    :   IF '(' condicion ')' sentencia_ej_ret END_IF
+                    |   IF '(' condicion ')' '{' lista_sentencias_ej_ret '}' END_IF
+                    |   IF '(' condicion ')' sentencia_ej_ret ELSE sentencia_ej_ret END_IF
+                    |   IF '(' condicion ')' sentencia_ej_ret ELSE '{' lista_sentencias_ej_ret '}' END_IF
+                    |   IF '(' condicion ')' '{' lista_sentencias_ej_ret '}' ELSE sentencia_ej_ret END_IF
+                    |   IF '(' condicion ')' '{' lista_sentencias_ej_ret '}' ELSE '{' lista_sentencias_ej_ret '}' END_IF
+                    ;
 
 constante   :   CTE_LONG
             |   CTE_UINT
@@ -88,8 +112,8 @@ parametro_formal    :   tipo ID
 parametro_real  :   expr
                 ;
 
-definicion_funcion  :   VOID ID '(' parametro_formal ')' '{' lista_sentencias '}'
-                    |   VOID ID '(' ')' '{' lista_sentencias '}'
+definicion_funcion  :   VOID ID '(' parametro_formal ')' '{' lista_sentencias_ret '}'
+                    |   VOID ID '(' ')' '{' lista_sentencias_ret '}'
                     ;
 
 %%
