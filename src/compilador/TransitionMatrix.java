@@ -138,7 +138,7 @@ public class TransitionMatrix {
         matrix.add(s16);
         
         HashMap<Character, Transition> s17 = new HashMap<>();
-        s17.put('!', new Transition(FINAL_STATE, List.of(3)));
+        s17.put('!', new Transition(FINAL_STATE, List.of(3, 6)));
         matrix.add(s17);
         
         HashMap<Character, Transition> s18 = new HashMap<>();
