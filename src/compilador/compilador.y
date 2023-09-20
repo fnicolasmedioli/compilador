@@ -60,15 +60,21 @@ invocacion_funcion  :   ID '(' ')'
                     |   ID '(' parametro_real ')'
                     ;
 
-sentencia_ej    :   ID '=' expr ','
+op_asignacion_aumentada :   '='
+                        |   SUB_ASIGN
+                        ;
+
+sentencia_ej    :   ID op_asignacion_aumentada expr ','
                 |   invocacion_funcion ','
                 |   sentencia_if ','
+                |   do_until ','
                 ;
 
-sentencia_ej_ret    :   ID '=' expr ','
+sentencia_ej_ret    :   ID op_asignacion_aumentada expr ','
                     |   invocacion_funcion ','
                     |   sentencia_if_ret ','
                     |   RETURN ','
+                    |   do_until_ret ','
                     ;
 
 sentencia_if    :   IF '(' condicion ')' sentencia_ej END_IF
@@ -115,6 +121,17 @@ parametro_real  :   expr
 definicion_funcion  :   VOID ID '(' parametro_formal ')' '{' lista_sentencias_ret '}'
                     |   VOID ID '(' ')' '{' lista_sentencias_ret '}'
                     ;
+
+
+do_until    :   DO sentencia_ej UNTIL '(' condicion ')'
+            |   DO '{' lista_sentencias_ej '}' UNTIL '(' condicion ')'
+            ;
+
+do_until_ret    :   DO sentencia_ej UNTIL '(' condicion ')'
+                |   DO '{' lista_sentencias_ej_ret '}' UNTIL '(' condicion ')'
+                ;
+
+
 
 %%
 
