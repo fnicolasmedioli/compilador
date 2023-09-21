@@ -9,133 +9,164 @@
 
 %%
 
-programa    :   '{' lista_sentencias '}'
-            ;
+programa
+    : '{' lista_sentencias '}'
+    ;
 
-comparador  :   CMP_GE
-            |   CMP_LE
-            |   CMP_EQUAL
-            |   CMP_NOT_EQUAL
-            |   '>'
-            |   '<'
-            ;
+comparador
+    : CMP_GE
+    | CMP_LE
+    | CMP_EQUAL
+    | CMP_NOT_EQUAL
+    | '>'
+    | '<'
+    ;
 
-condicion   :   expr comparador expr
-            ;
-
-lista_sentencias    :   lista_sentencias sentencia_ej
-                    |   lista_sentencias sentencia_de
-                    |   sentencia_ej
-                    |   sentencia_de
-                    ;
-
-lista_sentencias_ret    :   lista_sentencias_ret sentencia_ej_ret
-                        |   lista_sentencias_ret sentencia_de
-                        |   sentencia_ej_ret
-                        |   sentencia_de
-                        ;
-
-lista_sentencias_ej :   lista_sentencias_ej sentencia_ej
-                    |   sentencia_ej
-                    ;
-
-lista_sentencias_ej_ret :   lista_sentencias_ej_ret sentencia_ej_ret
-                        |   sentencia_ej_ret
-                        ;
+condicion
+    : expr comparador expr
+    ;
                     
-tipo    :   LONG
-        |   UINT
-        |   DOUBLE
-        |   STRING
-        ;
+tipo
+    : LONG
+    | UINT
+    | DOUBLE
+    | STRING
+    ;
 
-lista_identificadores   :   lista_identificadores ';' ID
-                        |   ID
-                        ;
+lista_identificadores
+    : lista_identificadores ';' ID
+    | ID
+    ;
                         
-sentencia_de    :   tipo lista_identificadores ','
-                |   definicion_funcion ','
-                ;
+sentencia_declarativa
+    : tipo lista_identificadores ','
+    | definicion_funcion ','
+    | definicion_clase ','
+    ;
 
-invocacion_funcion  :   ID '(' ')'
-                    |   ID '(' parametro_real ')'
-                    ;
+sentencia_ejecutable
+    : ID op_asignacion_aumentada expr ','
+    | acceso_atributo op_asignacion_aumentada expr ','
+    | invocacion_funcion ','
+    | sentencia_if ','
+    | do_until ','
+    | PRINT CTE_STRING ',' { System.out.println($2.sval); }
+    | RETURN ','
+    ;
 
-op_asignacion_aumentada :   '='
-                        |   SUB_ASIGN
-                        ;
+lista_sentencias
+    : lista_sentencias sentencia_ejecutable
+    | lista_sentencias sentencia_declarativa
+    | sentencia_ejecutable
+    | sentencia_declarativa
+    ;
 
-sentencia_ej    :   ID op_asignacion_aumentada expr ','
-                |   invocacion_funcion ','
-                |   sentencia_if ','
-                |   do_until ','
-                |   PRINT CTE_STRING ',' { System.out.println($2.sval); }
-                ;
+lista_sentencias_ejecutables
+    : lista_sentencias_ejecutables sentencia_ejecutable
+    | sentencia_ejecutable
+    ;
 
-sentencia_ej_ret    :   ID op_asignacion_aumentada expr ','
-                    |   invocacion_funcion ','
-                    |   sentencia_if_ret ','
-                    |   RETURN ','
-                    |   do_until_ret ','
-                    |   PRINT CTE_STRING ',' { System.out.println($2.sval); }
-                    ;
+invocacion_funcion
+    : ID '(' ')'
+    | ID '(' parametro_real ')'
+    ;
 
-sentencia_if    :   IF '(' condicion ')' sentencia_ej END_IF
-                |   IF '(' condicion ')' '{' lista_sentencias_ej '}' END_IF
-                |   IF '(' condicion ')' sentencia_ej ELSE sentencia_ej END_IF
-                |   IF '(' condicion ')' sentencia_ej ELSE '{' lista_sentencias_ej '}' END_IF
-                |   IF '(' condicion ')' '{' lista_sentencias_ej '}' ELSE sentencia_ej END_IF
-                |   IF '(' condicion ')' '{' lista_sentencias_ej '}' ELSE '{' lista_sentencias_ej '}' END_IF
-                ;
+op_asignacion_aumentada
+    : '='
+    | SUB_ASIGN
+    ;
 
-sentencia_if_ret    :   IF '(' condicion ')' sentencia_ej_ret END_IF
-                    |   IF '(' condicion ')' '{' lista_sentencias_ej_ret '}' END_IF
-                    |   IF '(' condicion ')' sentencia_ej_ret ELSE sentencia_ej_ret END_IF
-                    |   IF '(' condicion ')' sentencia_ej_ret ELSE '{' lista_sentencias_ej_ret '}' END_IF
-                    |   IF '(' condicion ')' '{' lista_sentencias_ej_ret '}' ELSE sentencia_ej_ret END_IF
-                    |   IF '(' condicion ')' '{' lista_sentencias_ej_ret '}' ELSE '{' lista_sentencias_ej_ret '}' END_IF
-                    ;
+sentencia_if
+    : IF '(' condicion ')' sentencia_ejecutable END_IF
+    | IF '(' condicion ')' '{' lista_sentencias_ejecutables '}' END_IF
+    | IF '(' condicion ')' sentencia_ejecutable ELSE sentencia_ejecutable END_IF
+    | IF '(' condicion ')' sentencia_ejecutable ELSE '{' lista_sentencias_ejecutables '}' END_IF
+    | IF '(' condicion ')' '{' lista_sentencias_ejecutables '}' ELSE sentencia_ejecutable END_IF
+    | IF '(' condicion ')' '{' lista_sentencias_ejecutables '}' ELSE '{' lista_sentencias_ejecutables '}' END_IF
+    ;
 
-constante   :   CTE_LONG
-            |   CTE_UINT
-            |   CTE_DOUBLE
-            |   CTE_STRING
-            ;
+constante
+    : CTE_LONG
+    | CTE_UINT
+    | CTE_DOUBLE
+    | CTE_STRING
+    ;
 
-expr    :   expr '+' term
-        |   expr '-' term
-        |   term
-        ;
+expr
+    : expr '+' term
+    | expr '-' term
+    | term
+    ;
 
-term    :   term '*' factor
-        |   term '/' factor
-        |   factor
-        ;
+term
+    : term '*' factor
+    | term '/' factor
+    | factor
+    ;
         
-factor  :   ID
-        |   constante
-        ;
+factor
+    : ID
+    | constante
+    ;
 
-parametro_formal    :   tipo ID
-                    ;
+parametro_formal
+    : tipo ID
+    ;
 
-parametro_real  :   expr
-                ;
+parametro_real
+    : expr
+    ;
 
-definicion_funcion  :   VOID ID '(' parametro_formal ')' '{' lista_sentencias_ret '}'
-                    |   VOID ID '(' ')' '{' lista_sentencias_ret '}'
-                    ;
+definicion_funcion
+    : VOID ID '(' parametro_formal ')' '{' lista_sentencias '}'
+    | VOID ID '(' ')' '{' lista_sentencias '}'
+    ;
 
+do_until
+    : DO sentencia_ejecutable UNTIL '(' condicion ')'
+    | DO '{' lista_sentencias_ejecutables '}' UNTIL '(' condicion ')'
+    ;
 
-do_until    :   DO sentencia_ej UNTIL '(' condicion ')'
-            |   DO '{' lista_sentencias_ej '}' UNTIL '(' condicion ')'
-            ;
+metodo
+    : definicion_funcion
+    ;
 
-do_until_ret    :   DO sentencia_ej UNTIL '(' condicion ')'
-                |   DO '{' lista_sentencias_ej_ret '}' UNTIL '(' condicion ')'
-                ;
+acceso_atributo
+    : ID '.' ID
+    | acceso_atributo '.' ID
+    | acceso_atributo '.' invocacion_funcion
+    ;
 
+definicion_clase
+    : CLASS ID '{' cuerpo_clase '}'
+    | CLASS ID '{' '}'
+    ;
 
+cuerpo_clase
+    : clase_lista_atributos clase_lista_metodos clase_lista_composicion
+    | clase_lista_atributos clase_lista_metodos
+    | clase_lista_atributos clase_lista_composicion
+    | clase_lista_metodos clase_lista_composicion
+    | clase_lista_atributos
+    | clase_lista_metodos
+    | clase_lista_composicion
+    ;
+
+clase_lista_atributos
+    : clase_lista_atributos tipo lista_identificadores ','
+    | tipo lista_identificadores ','
+    | ID lista_identificadores ','
+    ;
+
+clase_lista_metodos
+    : clase_lista_metodos metodo ','
+    | metodo ','
+    ;
+
+clase_lista_composicion
+    : clase_lista_composicion ID ','
+    | ID ','
+    ;
 
 %%
 

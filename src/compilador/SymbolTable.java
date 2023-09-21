@@ -62,6 +62,7 @@ public class SymbolTable {
 		table.put("<", new Token((int)'<', true));
 		table.put(">", new Token((int)'>', true));
 		table.put("*", new Token((int)'*', true));
+		table.put(".", new Token((int)'.', true));
 		table.put("IF", new Token(Parser.IF, true));
 		table.put("ELSE", new Token(Parser.ELSE, true));
 		table.put("END_IF", new Token(Parser.END_IF, true));
