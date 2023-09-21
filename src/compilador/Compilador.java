@@ -9,7 +9,7 @@ public class Compilador {
 	{
         try
         {
-        	Compilador.lexicalAnalyzer = new LexicalAnalyzer("source.fn");        	
+        	Compilador.lexicalAnalyzer = new LexicalAnalyzer("Source.txt");
         }
         catch (Exception e)
         {
@@ -28,6 +28,8 @@ public class Compilador {
         	String lexeme = parser.getyylval();
         	System.out.println("TOKEN: " + tokenID + "\tLexema: '" + lexeme + "'");
         }
+
+
 	}
 	
 	public static int yylex()
