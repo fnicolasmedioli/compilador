@@ -11,6 +11,10 @@ public class SemanticAction2 implements SemanticAction {
 		SymbolTable symbolTable )
 	{
 		lexicalAnalyzerState.resetLexeme();
+		
+		if (lexicalAnalyzerState.getLastReadChar() == '\n')
+			return;
+		
 		lexicalAnalyzerState.addSymbolToLexeme(
 			lexicalAnalyzerState.getLastReadChar()
 		);

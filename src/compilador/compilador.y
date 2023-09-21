@@ -1,6 +1,6 @@
 %token IF ELSE END_IF PRINT CLASS VOID ID
-       LONG UINT DOUBLE
-       CTE_LONG CTE_UINT CTE_DOUBLE
+       LONG UINT DOUBLE STRING
+       CTE_LONG CTE_UINT CTE_DOUBLE CTE_STRING
        CMP_GE CMP_LE CMP_EQUAL CMP_NOT_EQUAL
        SUB_ASIGN
        DO UNTIL IMPL FOR RETURN
@@ -46,6 +46,7 @@ lista_sentencias_ej_ret :   lista_sentencias_ej_ret sentencia_ej_ret
 tipo    :   LONG
         |   UINT
         |   DOUBLE
+        |   STRING
         ;
 
 lista_identificadores   :   lista_identificadores ';' ID
@@ -68,6 +69,7 @@ sentencia_ej    :   ID op_asignacion_aumentada expr ','
                 |   invocacion_funcion ','
                 |   sentencia_if ','
                 |   do_until ','
+                |   PRINT CTE_STRING ',' { System.out.println($2.sval); }
                 ;
 
 sentencia_ej_ret    :   ID op_asignacion_aumentada expr ','
@@ -75,6 +77,7 @@ sentencia_ej_ret    :   ID op_asignacion_aumentada expr ','
                     |   sentencia_if_ret ','
                     |   RETURN ','
                     |   do_until_ret ','
+                    |   PRINT CTE_STRING ',' { System.out.println($2.sval); }
                     ;
 
 sentencia_if    :   IF '(' condicion ')' sentencia_ej END_IF
@@ -96,6 +99,7 @@ sentencia_if_ret    :   IF '(' condicion ')' sentencia_ej_ret END_IF
 constante   :   CTE_LONG
             |   CTE_UINT
             |   CTE_DOUBLE
+            |   CTE_STRING
             ;
 
 expr    :   expr '+' term

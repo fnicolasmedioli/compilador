@@ -42,6 +42,11 @@ public class SymbolTable {
 		table.put(lexeme, new Token(Parser.CTE_DOUBLE, false));
 	}
 	
+	public void addStringLiteral(String lexeme)
+	{
+		table.put(lexeme, new Token(Parser.CTE_STRING, false));
+	}
+	
 	private void loadPredefinedTable()
 	{
 		table.put("{", new Token((int)'{', true));

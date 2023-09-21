@@ -6,7 +6,7 @@ Acción semántica 2:
 - Agregar carácter al string
 
 Acción semántica 3:
-- Agregar carácter al string
+- Agregar carácter al string (en caso de que sea diferente de salto de linea)
 
 Acción semántica 4:
 - Buscar en la TS
@@ -24,3 +24,10 @@ Acción semántica 5:
 
 Acción semántica 6:
 - Devolver token predefinido
+
+Acción semántica 7:
+- Inicializar string vacío
+
+Acción semántica 8:
+- Agregar string a la tabla
+- Retornarla
