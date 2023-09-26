@@ -83,5 +83,6 @@ public class SymbolTable {
 		table.put("FOR", new Token(Parser.FOR, true));
 		table.put("RETURN", new Token(Parser.RETURN, true));
 		table.put(":", new Token((int)':', true));
+		table.put("TOD", new Token(Parser.TOD, true));
 	}	
 }

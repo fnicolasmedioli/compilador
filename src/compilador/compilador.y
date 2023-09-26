@@ -3,7 +3,7 @@
        CTE_LONG CTE_UINT CTE_DOUBLE CTE_STRING
        CMP_GE CMP_LE CMP_EQUAL CMP_NOT_EQUAL
        SUB_ASIGN
-       DO UNTIL IMPL FOR RETURN
+       DO UNTIL IMPL FOR RETURN TOD
 
 %start programa
 
@@ -94,6 +94,11 @@ constante
     ;
 
 expr
+    : basic_expr
+    | TOD '(' basic_expr ')'
+    ;
+
+basic_expr
     : expr '+' term
     | expr '-' term
     | term
