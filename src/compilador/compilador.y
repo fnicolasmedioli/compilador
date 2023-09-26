@@ -42,6 +42,7 @@ sentencia_declarativa
     : tipo lista_identificadores ','
     | definicion_funcion ','
     | definicion_clase ','
+    | implementacion ','
     ;
 
 sentencia_ejecutable
@@ -166,6 +167,10 @@ clase_lista_metodos
 clase_lista_composicion
     : clase_lista_composicion ID ','
     | ID ','
+    ;
+
+implementacion
+    : IMPL FOR ID ':' '{' clase_lista_metodos '}'
     ;
 
 %%

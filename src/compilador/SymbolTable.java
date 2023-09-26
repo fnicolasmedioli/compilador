@@ -81,7 +81,7 @@ public class SymbolTable {
 		table.put("UNTIL", new Token(Parser.UNTIL, true));
 		table.put("IMPL", new Token(Parser.IMPL, true));
 		table.put("FOR", new Token(Parser.FOR, true));
-		table.put("IMPL", new Token(Parser.IMPL, true));
 		table.put("RETURN", new Token(Parser.RETURN, true));
+		table.put(":", new Token((int)':', true));
 	}	
 }

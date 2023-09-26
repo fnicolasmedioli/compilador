@@ -37,6 +37,7 @@ public class TransitionMatrix {
         s0.put(')', new Transition(18, List.of(2)));
         s0.put(';', new Transition(18, List.of(2)));
         s0.put(',', new Transition(18, List.of(2)));
+        s0.put(':', new Transition(18, List.of(2)));
         s0.put('*', new Transition(19, List.of(2)));
         s0.put('\s', new Transition(0, null));
         s0.put('\t', new Transition(0, null));
