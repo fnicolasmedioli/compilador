@@ -87,10 +87,11 @@ sentencia_if
     ;
 
 constante
-    : CTE_LONG
-    | CTE_UINT
-    | CTE_DOUBLE
+    : CTE_UINT
     | CTE_STRING
+    | CTE_DOUBLE
+    | CTE_LONG      { if (!ConstantRange.isValidLONG($1.sval, false)) CompilerMessagePrinter.error("Los enteros con signo arrancan en 0, por lo tanto el rango es [0, 2147483647]"); }
+    | '-' CTE_LONG
     ;
 
 expr
