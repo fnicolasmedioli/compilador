@@ -51,7 +51,7 @@ sentencia_ejecutable
     | invocacion_funcion ','
     | sentencia_if ','
     | do_until ','
-    | PRINT CTE_STRING ',' { System.out.println($2.sval); }
+    | PRINT CTE_STRING ',' { /* System.out.println($2.sval); */ }
     | RETURN ','
     ;
 
@@ -182,7 +182,7 @@ implementacion
 
 void yyerror(String msg)
 {
-    System.out.println("Parser error: " + msg);
+    CompilerMessagePrinter.error(msg);
 }
 
 int yylex()

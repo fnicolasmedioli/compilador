@@ -8,6 +8,7 @@ public class LexicalAnalyzerState {
 	private boolean tokenReading;
 	private char lastReadChar;
 	private int tokenToReturn;
+	private int currentLine;
 	
 	public LexicalAnalyzerState()
 	{
@@ -17,6 +18,17 @@ public class LexicalAnalyzerState {
 		this.tokenReading = true;
 		this.lastReadChar = '\0';
 		this.tokenToReturn = 0;
+		this.currentLine = 1;
+	}
+	
+	public int getCurrentLine()
+	{
+		return this.currentLine;
+	}
+	
+	public void incrementCurrentLine()
+	{
+		this.currentLine++;
 	}
 	
 	public void setTokenToReturn(int t)

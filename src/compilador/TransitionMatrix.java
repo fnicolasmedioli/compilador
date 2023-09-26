@@ -41,7 +41,7 @@ public class TransitionMatrix {
         s0.put('*', new Transition(19, List.of(2)));
         s0.put('\s', new Transition(0, null));
         s0.put('\t', new Transition(0, null));
-        s0.put('\n', new Transition(0, null));
+        s0.put('\n', new Transition(0, List.of(9)));
         s0.put('%', new Transition(21, List.of(7)));        
         s0.put('.', new Transition(4, List.of(2)));        
         s0.put('-', new Transition(10, List.of(2)));

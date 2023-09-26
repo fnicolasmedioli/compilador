@@ -23,7 +23,8 @@ public class LexicalAnalyzer {
 		new SemanticAction5(),
 		new SemanticAction6(),
 		new SemanticAction7(),
-		new SemanticAction8()
+		new SemanticAction8(),
+		new SemanticAction9()
 	};
 	
 	public LexicalAnalyzer(String sourceFilePath) throws FileNotFoundException
@@ -65,7 +66,7 @@ public class LexicalAnalyzer {
     				return 0;
     			else
     			{
-        			System.out.println("Error: final inesperado de archivo");
+        			CompilerMessagePrinter.error("final de archivo inesperado");        			
         			return 0;
     			}
     		}
@@ -83,9 +84,9 @@ public class LexicalAnalyzer {
         	
         	if (transition == null)
         	{
-        		System.out.println("Error lexico: caracter inesperado");
-        		System.out.println("Estado inicial: " + this.state.getCurrentState());
-        		System.out.println("Con el caracter: '" + this.state.getLastReadChar() + "'");
+        		CompilerMessagePrinter.error("lexico: caracter inesperado");
+        		CompilerMessagePrinter.error("estado: " + this.state.getCurrentState());
+        		CompilerMessagePrinter.error("leyendo: '" + this.state.getLastReadChar() + "'");
         		this.state.incrementReadIndex();
         		return 0;
         	}
@@ -94,7 +95,7 @@ public class LexicalAnalyzer {
         	
         	for (Integer semanticAction: transition.getSemanticActionList())
         		LexicalAnalyzer.semanticActionArray[semanticAction]
-        			.run(this.state, this.symbolTable);
+            			.run(this.state, this.symbolTable);
         	
         	this.state.incrementReadIndex();
     	}

@@ -31,3 +31,6 @@ Acción semántica 7:
 Acción semántica 8:
 - Agregar string a la tabla
 - Retornarla
+
+Acción semántica 9:
+- Incrementa el contador de lineas

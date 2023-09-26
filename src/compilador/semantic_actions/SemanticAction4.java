@@ -11,18 +11,20 @@ public class SemanticAction4 implements SemanticAction {
 	{
 		
 		String lexeme = lexicalAnalyzerState.getCurrentLexeme();
-		
-		
+
 		if (lexeme.length() > 20)
 		{
-			System.out.println("WARNING: Lexeme truncated");
-			lexeme = lexeme.substring(0, 20);
+			String trunc = lexeme.substring(0, 20);
+			CompilerMessagePrinter.warning(
+				"[Linea " + lexicalAnalyzerState.getCurrentLine() + "] " +
+				"lexema truncado\n\t" + lexeme + " -> " + trunc
+			);
+			lexeme = trunc;
 		}		
 		
 		if (symbolTable.contains(lexeme))
 		{
 			Token t = symbolTable.getTokenByLexeme(lexeme);
-			//if (t.isPredefined() == false)
 			Compilador.setyylval(lexeme);
 			lexicalAnalyzerState.setTokenToReturn(t.getTokenID());
 		}
@@ -37,7 +39,10 @@ public class SemanticAction4 implements SemanticAction {
 					&& ((int)c < 97 || (int)c > 122)
 				)
 				{
-					System.out.println("Error, los identificadores deben ser minusculas");
+					CompilerMessagePrinter.error(
+						"[Linea " + lexicalAnalyzerState.getCurrentLine() + "] " +
+						"los identificadores deben ser minusculas"
+					);
 					return;
 				}		
 			

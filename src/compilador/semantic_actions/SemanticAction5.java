@@ -1,6 +1,7 @@
 package compilador.semantic_actions;
 
 import compilador.Compilador;
+import compilador.CompilerMessagePrinter;
 import compilador.LexicalAnalyzerState;
 import compilador.SymbolTable;
 
@@ -31,7 +32,10 @@ public class SemanticAction5 implements SemanticAction {
 				num.length() > MAX_LONG.length()
 				|| (num.length() == MAX_LONG.length() && num.compareTo(MAX_LONG) > 0)
 			)
-				System.out.println("Error, constante fuera de rango: " + lexeme);
+				CompilerMessagePrinter.error(
+					"[Linea " + lexicalAnalyzerState.getCurrentLine() + "] " +
+					"constante LONG fuera de rango: " + lexeme
+				);
 			
 			symbolTable.addConstantLONG(lexeme);
 			Compilador.setyylval(lexeme);
@@ -50,7 +54,10 @@ public class SemanticAction5 implements SemanticAction {
 				num.length() > MAX_UINT.length()
 				|| (num.length() == MAX_UINT.length() && num.compareTo(MAX_UINT) > 0)
 			)
-				System.out.println("Error, constante fuera de rango: " + lexeme);
+				CompilerMessagePrinter.error(
+					"[Linea " + lexicalAnalyzerState.getCurrentLine() + "] " +
+					"constante UINT fuera de rango: " + lexeme
+				);
 			
 			symbolTable.addConstantUINT(lexeme);
 			Compilador.setyylval(lexeme);
@@ -66,7 +73,10 @@ public class SemanticAction5 implements SemanticAction {
 				conv != 0 &&
 				(conv > MAX_DOUBLE || conv < MIN_DOUBLE)
 			)
-				System.out.println("Error, constante fuera de rango: " + lexeme);
+				CompilerMessagePrinter.error(
+					"[Linea " + lexicalAnalyzerState.getCurrentLine() + "] " +
+					"constante DOUBLE fuera de rango: " + lexeme
+				);
 			
 			symbolTable.addConstantDOUBLE(lexeme);
 			Compilador.setyylval(lexeme);
