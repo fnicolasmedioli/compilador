@@ -1,5 +1,7 @@
 package compilador;
 
+import java.util.List;
+
 public class CompilerMessagePrinter {
 	
 	private static final String ANSI_YELLOW = "\u001B[33m";
@@ -19,5 +21,19 @@ public class CompilerMessagePrinter {
 	static public void error(String msg)
 	{
 		printWithColor(msg, ANSI_RED);
+	}
+	
+	static public void printTokenList(List<Integer> tokenList)
+	{
+		System.out.println("Lista de tokens leidos:");
+		for (int token : tokenList)		
+			System.out.println(Token.getTokenDescription(token));
+	}
+	
+	static public void printSyntaticStructures(List<Integer> structuresList)
+	{
+		System.out.println("Estructuras sintacticas encontradas:");
+		for (int structure : structuresList)
+			System.out.println(Token.getTokenDescription(structure));
 	}
 }

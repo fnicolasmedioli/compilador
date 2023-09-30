@@ -51,7 +51,7 @@ sentencia_ejecutable
     | invocacion_funcion ','
     | sentencia_if ','
     | do_until ','
-    | PRINT CTE_STRING ',' { /* System.out.println($2.sval); */ }
+    | PRINT CTE_STRING ','
     | RETURN ','
     ;
 
@@ -90,7 +90,11 @@ constante
     : CTE_UINT
     | CTE_STRING
     | CTE_DOUBLE
-    | CTE_LONG      { if (!ConstantRange.isValidLONG($1.sval, false)) CompilerMessagePrinter.error("Los enteros con signo arrancan en 0, por lo tanto el rango es [0, 2147483647]"); }
+    | CTE_LONG
+        {
+            if (!ConstantRange.isValidLONG($1.sval, false))
+                CompilerMessagePrinter.error("Los enteros con signo arrancan en 0, por lo tanto el rango es [0, 2147483647]");
+        }
     | '-' CTE_LONG
     ;
 
@@ -180,6 +184,11 @@ implementacion
     ;
 
 %%
+
+void addSyntacticStructure(int structure)
+{
+    Compilador.addSyntacticStructure(structure);
+}
 
 void yyerror(String msg)
 {

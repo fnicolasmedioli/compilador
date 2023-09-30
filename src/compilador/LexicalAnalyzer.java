@@ -4,6 +4,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
 
+import java.util.List;
+import java.util.LinkedList;
+
 import compilador.semantic_actions.*;
 
 public class LexicalAnalyzer {
@@ -13,6 +16,8 @@ public class LexicalAnalyzer {
 	
 	private LexicalAnalyzerState state;
 	public SymbolTable symbolTable;
+	
+	private LinkedList<Integer> readedTokensList;
 	
 	private static SemanticAction[] semanticActionArray = {
 		null,
@@ -33,6 +38,7 @@ public class LexicalAnalyzer {
 		this.state = new LexicalAnalyzerState();
 		this.loadSourceFile(sourceFilePath);
 		this.symbolTable = new SymbolTable();
+		this.readedTokensList = new LinkedList<>();
 	}
     
     public void loadSourceFile(String sourceFilePath) throws FileNotFoundException
@@ -52,6 +58,11 @@ public class LexicalAnalyzer {
     	return this.state.getReadIndex() < this.sourceCode.length();
     }
     
+    public List<Integer> getReadedTokensList()
+    {
+    	return this.readedTokensList;
+    }
+    
     public int getToken()
     {
     	this.state.startTokenReading();
@@ -60,16 +71,7 @@ public class LexicalAnalyzer {
     	{
     		
     		if (this.state.getReadIndex() == this.sourceCode.length())
-    		{
-    			if ( this.state.getCurrentState() == TransitionMatrix.INITIAL_STATE
-	    			&& this.state.getCurrentState() == TransitionMatrix.FINAL_STATE )
-    				return 0;
-    			else
-    			{
-        			CompilerMessagePrinter.error("final de archivo inesperado");        			
-        			return 0;
-    			}
-    		}
+	    		return 0;
     		
     		this.state.setLastReadChar(
     			this.sourceCode.charAt(
@@ -85,8 +87,6 @@ public class LexicalAnalyzer {
         	if (transition == null)
         	{
         		CompilerMessagePrinter.error("lexico: caracter inesperado");
-        		CompilerMessagePrinter.error("estado: " + this.state.getCurrentState());
-        		CompilerMessagePrinter.error("leyendo: '" + this.state.getLastReadChar() + "'");
         		this.state.incrementReadIndex();
         		return 0;
         	}
@@ -100,7 +100,11 @@ public class LexicalAnalyzer {
         	this.state.incrementReadIndex();
     	}
     	
-    	return this.state.getTokenToReturn();
+    	int token = this.state.getTokenToReturn();
+    	
+    	readedTokensList.add(token);
+    	
+    	return token;
     }
     
 }
