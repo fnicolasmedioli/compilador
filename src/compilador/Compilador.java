@@ -54,7 +54,7 @@ public class Compilador {
 		return parser.getyylval();
 	}
 	
-	public void addSyntacticStructure(int structure)
+	public static void addSyntacticStructure(int structure)
 	{
 	    syntacticStructures.add(structure);
 	}
