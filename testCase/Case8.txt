@@ -1,0 +1,12 @@
+**comentario 1
+{
+** comentario 2
+
+aux_1=3,
+
+* comentario 3
+
+** comentario 
+4
+
+}
