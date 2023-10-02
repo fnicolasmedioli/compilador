@@ -1,14 +1,14 @@
 {
-%hola mundo%
+PRINT %hola mundo%,
 
-hola mundo%
-
-
-%hola
-
-mundo%
+PRINT hola mundo%,
 
 
+PRINT %hola
 
-%hola mundo%
+	mundo%,
+
+
+
+PRINT %hola mundo,
 }
