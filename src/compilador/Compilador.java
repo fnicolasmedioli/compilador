@@ -27,11 +27,21 @@ public class Compilador {
         }
 
         parser = new Parser();
-        boolean parseSuccess = (parser.yyparse() == 0) ? true : false;
+        
+        boolean parseSuccess = true;
+        try {
+        	parseSuccess = (parser.yyparse() == 0) ? true : false;
+        } catch (Exception e) {
+        	parseSuccess = false;
+        }      
         
         CompilerMessagePrinter.printTokenList(lexicalAnalyzer.getReadedTokensList());
-        System.out.println();
-        CompilerMessagePrinter.printSyntacticTree(syntacticTree);
+        
+        if (parseSuccess)
+        {
+        	System.out.println();
+            CompilerMessagePrinter.printSyntacticTree(syntacticTree);
+        }
 	}
 	
 	public static int yylex()
