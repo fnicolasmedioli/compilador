@@ -1,14 +1,10 @@
 package compilador;
 
-import java.util.List;
-import java.util.LinkedList;
-
 public class Compilador {
 	
 	private static LexicalAnalyzer lexicalAnalyzer;
 	private static Parser parser;
-	
-	private static List<Integer> syntacticStructures;
+	private static SyntacticTreeNode syntacticTree;
 
 	public static void main(String[] args)
 	{
@@ -30,12 +26,12 @@ public class Compilador {
         	return;
         }
 
-        syntacticStructures = new LinkedList<>();
         parser = new Parser();
         boolean parseSuccess = (parser.yyparse() == 0) ? true : false;
         
         CompilerMessagePrinter.printTokenList(lexicalAnalyzer.getReadedTokensList());
-        CompilerMessagePrinter.printSyntaticStructures(syntacticStructures);
+        System.out.println();
+        CompilerMessagePrinter.printSyntacticTree(syntacticTree);
 	}
 	
 	public static int yylex()
@@ -54,8 +50,8 @@ public class Compilador {
 		return parser.getyylval();
 	}
 	
-	public static void addSyntacticStructure(int structure)
+	public static void setSyntacticTree(SyntacticTreeNode r)
 	{
-	    syntacticStructures.add(structure);
+		Compilador.syntacticTree = r;
 	}
 }

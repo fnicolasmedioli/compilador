@@ -10,7 +10,8 @@
 %%
 
 programa
-    : '{' lista_sentencias '}'
+    : '{' lista_sentencias '}'  { Compilador.setSyntacticTree((SyntacticTreeNode)$2.obj); }
+    | '{' '}'
     ;
 
 comparador
@@ -37,27 +38,27 @@ lista_identificadores
     : lista_identificadores ';' ID
     | ID
     ;
-                        
+
 sentencia_declarativa
-    : tipo lista_identificadores ','
-    | definicion_funcion ','
-    | definicion_clase ','
-    | implementacion ','
+    : tipo lista_identificadores ','    { $$.obj = new SyntacticTreeNode("Declaración"); }
+    | definicion_funcion ','            { $$.obj = new SyntacticTreeNode("Definición de función"); }
+    | definicion_clase ','              { $$.obj = new SyntacticTreeNode("Definición de clase"); }
+    | implementacion ','                { $$.obj = new SyntacticTreeNode("Implementación de métodos"); }
     ;
 
 sentencia_ejecutable
-    : ID op_asignacion_aumentada expr ','
-    | acceso_atributo op_asignacion_aumentada expr ','
-    | invocacion_funcion ','
-    | sentencia_if ','
-    | do_until ','
-    | PRINT CTE_STRING ','
-    | RETURN ','
+    : ID op_asignacion_aumentada expr ','               { $$.obj = new SyntacticTreeNode("Asignación"); }
+    | acceso_atributo op_asignacion_aumentada expr ','  { $$.obj = new SyntacticTreeNode("Asignación"); }
+    | invocacion_funcion ','                            { $$.obj = new SyntacticTreeNode("Invocación"); }
+    | sentencia_if ','                                  { $$.obj = new SyntacticTreeNode("Sentencia IF"); }
+    | do_until ','                                      { $$.obj = new SyntacticTreeNode("Sentencia DO UNTIL"); }
+    | PRINT CTE_STRING ','                              { $$.obj = new SyntacticTreeNode("Sentencia PRINT"); }
+    | RETURN ','                                        { $$.obj = new SyntacticTreeNode("Sentencia RETURN"); }
     ;
 
 lista_sentencias
-    : lista_sentencias sentencia_ejecutable
-    | lista_sentencias sentencia_declarativa
+    : lista_sentencias sentencia_ejecutable     { $$.obj = ((SyntacticTreeNode)$1.obj).addChild($2.obj); }
+    | lista_sentencias sentencia_declarativa    { $$.obj = ((SyntacticTreeNode)$1.obj).addChild($2.obj); }
     | sentencia_ejecutable
     | sentencia_declarativa
     ;
@@ -93,7 +94,7 @@ constante
     | CTE_LONG
         {
             if (!ConstantRange.isValidLONG($1.sval, false))
-                CompilerMessagePrinter.error("Los enteros con signo arrancan en 0, por lo tanto el rango es [0, 2147483647]");
+                CompilerMessagePrinter.error("El rango de UINT es [-2147483648, 2147483647]");
         }
     | '-' CTE_LONG
     ;
@@ -131,6 +132,8 @@ parametro_real
 definicion_funcion
     : VOID ID '(' parametro_formal ')' '{' lista_sentencias '}'
     | VOID ID '(' ')' '{' lista_sentencias '}'
+    | VOID ID '(' parametro_formal ')' '{' '}'
+    | VOID ID '(' ')' '{' '}'
     ;
 
 do_until
@@ -184,11 +187,6 @@ implementacion
     ;
 
 %%
-
-void addSyntacticStructure(int structure)
-{
-    Compilador.addSyntacticStructure(structure);
-}
 
 void yyerror(String msg)
 {

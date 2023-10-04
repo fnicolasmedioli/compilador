@@ -30,10 +30,9 @@ public class CompilerMessagePrinter {
 			System.out.println(Token.getTokenDescription(token));
 	}
 	
-	static public void printSyntaticStructures(List<Integer> structuresList)
+	static public void printSyntacticTree(SyntacticTreeNode root)
 	{
-		System.out.println("Estructuras sintacticas encontradas:");
-		for (int structure : structuresList)
-			System.out.println(Token.getTokenDescription(structure));
+		System.out.println("Estructuras sintácticas encontradas:");
+		root.print();
 	}
 }
