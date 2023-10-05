@@ -2,6 +2,8 @@ package compilador;
 
 import java.util.List;
 
+import syntacticTree.*;
+
 public class CompilerMessagePrinter {
 	
 	private static final String ANSI_YELLOW = "\u001B[33m";
@@ -30,9 +32,9 @@ public class CompilerMessagePrinter {
 			System.out.println(Token.getTokenDescription(token));
 	}
 	
-	static public void printSyntacticTree(SyntacticTreeNode root)
+	static public void printSyntacticTree(PrintableSyntacticTree root)
 	{
 		System.out.println("Estructuras sintácticas encontradas:");
-		root.print();
+		root.print(0);
 	}
 }

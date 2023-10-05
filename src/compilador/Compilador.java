@@ -1,10 +1,12 @@
 package compilador;
 
+import syntacticTree.*;
+
 public class Compilador {
 	
 	private static LexicalAnalyzer lexicalAnalyzer;
 	private static Parser parser;
-	private static SyntacticTreeNode syntacticTree;
+	private static PrintableSyntacticTree syntacticTree;
 
 	public static void main(String[] args)
 	{
@@ -33,7 +35,7 @@ public class Compilador {
         	parseSuccess = (parser.yyparse() == 0) ? true : false;
         } catch (Exception e) {
         	parseSuccess = false;
-        }      
+        }
         
         CompilerMessagePrinter.printTokenList(lexicalAnalyzer.getReadedTokensList());
         
@@ -60,7 +62,7 @@ public class Compilador {
 		return parser.getyylval();
 	}
 	
-	public static void setSyntacticTree(SyntacticTreeNode r)
+	public static void setSyntacticTree(PrintableSyntacticTree r)
 	{
 		Compilador.syntacticTree = r;
 	}
