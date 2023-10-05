@@ -66,4 +66,14 @@ public class Compilador {
 	{
 		Compilador.syntacticTree = r;
 	}
+	
+	public static void reportLexicalError(String msg)
+	{
+		CompilerMessagePrinter.error(msg);
+	}
+	
+	public static void reportSyntaxError(String msg)
+	{
+		CompilerMessagePrinter.error(msg);
+	}
 }

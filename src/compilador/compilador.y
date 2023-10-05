@@ -14,7 +14,7 @@ import syntacticTree.*;
 %%
 
 programa
-    : '{' lista_sentencias '}'  { Compilador.setSyntacticTree((IPrintableSyntacticTree)$2.obj); }
+    : '{' lista_sentencias '}'  { Compilador.setSyntacticTree((PrintableSyntacticTree)$2.obj); }
     | '{' '}'
     ;
 
@@ -61,8 +61,7 @@ sentencia_ejecutable
     ;
 
 lista_sentencias
-    : lista_sentencias sentencia_ejecutable
-        { $$.obj = ((SyntacticTreeList)$1.obj).add($2.obj); }
+    : lista_sentencias sentencia_ejecutable     { $$.obj = ((SyntacticTreeList)$1.obj).add($2.obj); }
     | lista_sentencias sentencia_declarativa    { $$.obj = ((SyntacticTreeList)$1.obj).add($2.obj); }
     | sentencia_ejecutable						{ $$.obj = new SyntacticTreeList($1.obj); }
     | sentencia_declarativa						{ $$.obj = new SyntacticTreeList($1.obj); }
@@ -121,7 +120,7 @@ constante
     | CTE_LONG
         {
             if (!ConstantRange.isValidLONG($1.sval, false))
-                CompilerMessagePrinter.error("El rango de UINT es [-2147483648, 2147483647]");
+                Compilador.reportLexicalError("El rango de UINT es [-2147483648, 2147483647]");
         }
     | '-' CTE_LONG
     ;
@@ -234,6 +233,8 @@ clase_lista_composicion
 implementacion
     : IMPL FOR ID ':' '{' clase_lista_metodos '}' { $$.obj = new SyntacticTreeNode("Implementación de metodos IMPL", $6.obj); }
     ;
+
+
 
 %%
 
