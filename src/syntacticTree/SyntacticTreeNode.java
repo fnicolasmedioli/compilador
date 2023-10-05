@@ -20,7 +20,8 @@ public class SyntacticTreeNode extends PrintableSyntacticTree {
 	@Override
 	public void print(int offset)
 	{
-		System.out.println(craftSpace(offset) + description);
+		if (description != null)
+			System.out.println(craftSpace(offset) + description);
 		if (child != null)
 			this.child.print(offset + 3);
 	}

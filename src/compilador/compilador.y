@@ -15,7 +15,7 @@ import syntacticTree.*;
 
 programa
     : '{' lista_sentencias '}'  { Compilador.setSyntacticTree((PrintableSyntacticTree)$2.obj); }
-    | '{' '}'
+    | '{' '}'   { Compilador.setSyntacticTree(new SyntacticTreeNode(null)); }
     ;
 
 comparador
@@ -233,8 +233,6 @@ clase_lista_composicion
 implementacion
     : IMPL FOR ID ':' '{' clase_lista_metodos '}' { $$.obj = new SyntacticTreeNode("Implementación de metodos IMPL", $6.obj); }
     ;
-
-
 
 %%
 
