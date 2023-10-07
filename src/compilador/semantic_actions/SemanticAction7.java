@@ -1,6 +1,5 @@
 package compilador.semantic_actions;
 
-import compilador.Compilador;
 import compilador.LexicalAnalyzerState;
 import compilador.SymbolTable;
 

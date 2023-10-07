@@ -1,7 +1,3 @@
-%{
-import syntacticTree.*;
-%}
-
 %token IF ELSE END_IF PRINT CLASS VOID ID
        LONG UINT DOUBLE STRING
        CTE_LONG CTE_UINT CTE_DOUBLE CTE_STRING
@@ -14,8 +10,8 @@ import syntacticTree.*;
 %%
 
 programa
-    : '{' lista_sentencias '}'  { Compilador.setSyntacticTree((PrintableSyntacticTree)$2.obj); }
-    | '{' '}'   { Compilador.setSyntacticTree(new SyntacticTreeNode(null)); }
+    : '{' lista_sentencias '}'
+    | '{' '}'
     ;
 
 comparador
@@ -44,32 +40,32 @@ lista_identificadores
     ;
 
 sentencia_declarativa
-    : tipo lista_identificadores ','    { $$.obj = new SyntacticTreeNode("Declaración variable/s"); }
-    | definicion_funcion ','
-    | definicion_clase ','
-    | implementacion ','
+    : tipo lista_identificadores ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Declaración de variables", ((TokenInfo)$1.obj).getLocation() )); }
+    | definicion_funcion ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Definición de función", ((TokenInfo)$1.obj).getLocation() )); }
+    | definicion_clase ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Definición de clase", ((TokenInfo)$1.obj).getLocation() )); }
+    | implementacion ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Implementación de método", ((TokenInfo)$1.obj).getLocation() )); }
     ;
 
 sentencia_ejecutable
-    : ID op_asignacion_aumentada expr ','               { $$.obj = new SyntacticTreeNode("Asignación"); }
-    | acceso_atributo op_asignacion_aumentada expr ','  { $$.obj = new SyntacticTreeNode("Asignación"); }
-    | invocacion_funcion ','                            { $$.obj = new SyntacticTreeNode("Invocación"); }
-    | sentencia_if ','
-    | do_until ','
-    | PRINT CTE_STRING ','                              { $$.obj = new SyntacticTreeNode("Sentencia PRINT"); }
-    | RETURN ','                                        { $$.obj = new SyntacticTreeNode("Sentencia RETURN"); }
+    : ID op_asignacion_aumentada expr ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Asignación a variable", ((TokenInfo)$1.obj).getLocation() )); }
+    | acceso_atributo op_asignacion_aumentada expr ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Asignación a atributo", ((TokenInfo)$1.obj).getLocation() )); }
+    | invocacion_funcion ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Invocación a función", ((TokenInfo)$1.obj).getLocation() )); }
+    | sentencia_if ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Sentencia IF", ((TokenInfo)$1.obj).getLocation() )); }
+    | do_until ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Estructura DO UNTIL", ((TokenInfo)$1.obj).getLocation() )); }
+    | PRINT CTE_STRING ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Sentencia PRINT", ((TokenInfo)$1.obj).getLocation() )); }
+    | RETURN ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Sentencia RETURN", ((TokenInfo)$1.obj).getLocation() )); }
     ;
 
 lista_sentencias
-    : lista_sentencias sentencia_ejecutable     { $$.obj = ((SyntacticTreeList)$1.obj).add($2.obj); }
-    | lista_sentencias sentencia_declarativa    { $$.obj = ((SyntacticTreeList)$1.obj).add($2.obj); }
-    | sentencia_ejecutable						{ $$.obj = new SyntacticTreeList($1.obj); }
-    | sentencia_declarativa						{ $$.obj = new SyntacticTreeList($1.obj); }
+    : lista_sentencias sentencia_ejecutable
+    | lista_sentencias sentencia_declarativa
+    | sentencia_ejecutable
+    | sentencia_declarativa
     ;
 
 lista_sentencias_ejecutables
-    : lista_sentencias_ejecutables sentencia_ejecutable     { $$.obj = ((SyntacticTreeList)$1.obj).add($2.obj); }
-    | sentencia_ejecutable                                  { $$.obj = new SyntacticTreeList().add($1.obj); }
+    : lista_sentencias_ejecutables sentencia_ejecutable
+    | sentencia_ejecutable
     ;
 
 invocacion_funcion
@@ -84,33 +80,11 @@ op_asignacion_aumentada
 
 sentencia_if
     : IF '(' condicion ')' sentencia_ejecutable END_IF
-        { $$.obj = new SyntacticTreeNode("Sentencia IF", $5.obj); }
     | IF '(' condicion ')' '{' lista_sentencias_ejecutables '}' END_IF
-        { $$.obj = new SyntacticTreeNode("Sentencia IF", $6.obj); }
     | IF '(' condicion ')' sentencia_ejecutable ELSE sentencia_ejecutable END_IF
-        { $$.obj = new SyntacticTreeList(
-                new SyntacticTreeNode("Sentencia IF", $5.obj),
-                new SyntacticTreeNode("Sentencia ELSE", $7.obj)
-          );
-        }
     | IF '(' condicion ')' sentencia_ejecutable ELSE '{' lista_sentencias_ejecutables '}' END_IF
-        { $$.obj = new SyntacticTreeList(
-                new SyntacticTreeNode("Sentencia IF", $5.obj),
-                new SyntacticTreeNode("Sentencia ELSE", $8.obj)
-          );
-        }
     | IF '(' condicion ')' '{' lista_sentencias_ejecutables '}' ELSE sentencia_ejecutable END_IF
-        { $$.obj = new SyntacticTreeList(
-                new SyntacticTreeNode("Sentencia IF", $6.obj),
-                new SyntacticTreeNode("Sentencia ELSE", $9.obj)
-          );
-        }
     | IF '(' condicion ')' '{' lista_sentencias_ejecutables '}' ELSE '{' lista_sentencias_ejecutables '}' END_IF
-        { $$.obj = new SyntacticTreeList(
-                new SyntacticTreeNode("Sentencia IF", $6.obj),
-                new SyntacticTreeNode("Sentencia ELSE", $10.obj)
-          );
-        }
     ;
 
 constante
@@ -119,7 +93,7 @@ constante
     | CTE_DOUBLE
     | CTE_LONG
         {
-            if (!ConstantRange.isValidLONG($1.sval, false))
+            if (!ConstantRange.isValidLONG(((TokenInfo)$1.obj).getLexeme(), false))
                 Compilador.reportLexicalError("El rango de UINT es [-2147483648, 2147483647]");
         }
     | '-' CTE_LONG
@@ -156,31 +130,23 @@ parametro_real
     ;
 
 definicion_funcion
-    : procedimiento { $$.obj = new SyntacticTreeNode("Definición función", $1.obj); }
+    : procedimiento
     ;
 
 procedimiento
-    : VOID ID '(' parametro_formal ')' '{' lista_sentencias '}' {
-            $$.obj = $7.obj;
-        }
-    | VOID ID '(' ')' '{' lista_sentencias '}'  {
-            $$.obj = $6.obj;
-        }
+    : VOID ID '(' parametro_formal ')' '{' lista_sentencias '}'
+    | VOID ID '(' ')' '{' lista_sentencias '}'
     | VOID ID '(' parametro_formal ')' '{' '}'
     | VOID ID '(' ')' '{' '}'
     ;
 
 do_until
-    : DO sentencia_ejecutable UNTIL '(' condicion ')' {
-            $$.obj = new SyntacticTreeNode("Sentencia DO UNTIL", $2.obj);
-        }
-    | DO '{' lista_sentencias_ejecutables '}' UNTIL '(' condicion ')' {
-            $$.obj = new SyntacticTreeNode("Sentencia DO UNTIL", $3.obj);
-        }
+    : DO sentencia_ejecutable UNTIL '(' condicion ')'
+    | DO '{' lista_sentencias_ejecutables '}' UNTIL '(' condicion ')'
     ;
 
 metodo
-    : procedimiento { $$.obj = new SyntacticTreeNode("Definición método", $1.obj); }
+    : procedimiento
     ;
 
 acceso_atributo
@@ -190,55 +156,45 @@ acceso_atributo
     ;
 
 definicion_clase
-    : CLASS ID '{' cuerpo_clase '}' { $$.obj = new SyntacticTreeNode("Definicion clase", $4.obj); }
-    | CLASS ID '{' '}' { $$.obj = new SyntacticTreeNode("Definicion clase"); }
+    : CLASS ID '{' cuerpo_clase '}'
+    | CLASS ID '{' '}'
     ;
 
 cuerpo_clase
     : clase_lista_atributos clase_lista_metodos clase_lista_composicion
-        { $$.obj = new SyntacticTreeList().add($1.obj).add($2.obj).add($3.obj); }
     | clase_lista_atributos clase_lista_metodos
-        { $$.obj = new SyntacticTreeList().add($1.obj).add($2.obj); }
     | clase_lista_atributos clase_lista_composicion
-        { $$.obj = new SyntacticTreeList().add($1.obj).add($2.obj); }
     | clase_lista_metodos clase_lista_composicion
-        { $$.obj = new SyntacticTreeList().add($1.obj).add($2.obj); }
     | clase_lista_atributos
-        { $$.obj = new SyntacticTreeList().add($1.obj); }
     | clase_lista_metodos
-        { $$.obj = new SyntacticTreeList().add($1.obj); }
     | clase_lista_composicion
-        { $$.obj = new SyntacticTreeList().add($1.obj); }
     ;
 
 clase_lista_atributos
     : clase_lista_atributos tipo lista_identificadores ','
-        { $$.obj = new SyntacticTreeNode("Definición de atributo/s"); }
     | tipo lista_identificadores ','
-        { $$.obj = new SyntacticTreeNode("Definición de atributo/s"); }
     | ID lista_identificadores ','
-        { $$.obj = new SyntacticTreeNode("Definición de atributo/s"); }
     ;
 
 clase_lista_metodos
-    : clase_lista_metodos metodo ',' { $$.obj = ((SyntacticTreeList)$1.obj).add($2.obj); }
-    | metodo ',' { $$.obj = new SyntacticTreeList().add($1.obj); }
+    : clase_lista_metodos metodo ','
+    | metodo ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Implementación de método dentro de clase", ((TokenInfo)$1.obj).getLocation() )); }
     ;
 
 clase_lista_composicion
-    : clase_lista_composicion ID ',' { $$.obj = ((SyntacticTreeList)$1.obj).add($2.obj); }
-    | ID ',' { $$.obj = new SyntacticTreeList().add($1.obj); }
+    : clase_lista_composicion ID ','
+    | ID ','
     ;
 
 implementacion
-    : IMPL FOR ID ':' '{' clase_lista_metodos '}' { $$.obj = new SyntacticTreeNode("Implementación de metodos IMPL", $6.obj); }
+    : IMPL FOR ID ':' '{' clase_lista_metodos '}' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Implementación de método fuera de clase", ((TokenInfo)$1.obj).getLocation() )); }
     ;
 
 %%
 
 void yyerror(String msg)
 {
-    CompilerMessagePrinter.error(msg);
+    // CompilerMessagePrinter.error(msg);
 }
 
 int yylex()
@@ -246,12 +202,7 @@ int yylex()
     return Compilador.yylex();
 }
 
-public void setyylval(String v)
+public void setyylval(Object v)
 {
     this.yylval = new ParserVal(v);
-}
-
-public String getyylval()
-{
-    return this.yylval.sval;
 }

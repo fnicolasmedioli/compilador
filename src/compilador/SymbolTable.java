@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 public class SymbolTable {
 
-	private HashMap<String, Token> table;
+	private HashMap<String, SymbolTableEntry> table;
 	
 	public SymbolTable()
 	{
@@ -12,7 +12,7 @@ public class SymbolTable {
 		loadPredefinedTable();
 	}
 	
-	public Token getTokenByLexeme(String lexeme)
+	public SymbolTableEntry getTokenByLexeme(String lexeme)
 	{
 		return table.get(lexeme);
 	}
@@ -24,65 +24,65 @@ public class SymbolTable {
 	
 	public void addIdentifier(String lexeme)
 	{
-		table.put(lexeme, new Token(Parser.ID, false));
+		table.put(lexeme, new SymbolTableEntry(Parser.ID, false));
 	}
 	
 	public void addConstantLONG(String lexeme)
 	{
-		table.put(lexeme, new Token(Parser.CTE_LONG, false));
+		table.put(lexeme, new SymbolTableEntry(Parser.CTE_LONG, false));
 	}
 	
 	public void addConstantUINT(String lexeme)
 	{
-		table.put(lexeme, new Token(Parser.CTE_UINT, false));
+		table.put(lexeme, new SymbolTableEntry(Parser.CTE_UINT, false));
 	}
 	
 	public void addConstantDOUBLE(String lexeme)
 	{
-		table.put(lexeme, new Token(Parser.CTE_DOUBLE, false));
+		table.put(lexeme, new SymbolTableEntry(Parser.CTE_DOUBLE, false));
 	}
 	
 	public void addStringLiteral(String lexeme)
 	{
-		table.put(lexeme, new Token(Parser.CTE_STRING, false));
+		table.put(lexeme, new SymbolTableEntry(Parser.CTE_STRING, false));
 	}
 	
 	private void loadPredefinedTable()
 	{
-		table.put("{", new Token((int)'{', true));
-		table.put("}", new Token((int)'}', true));
-		table.put("(", new Token((int)'(', true));
-		table.put(")", new Token((int)')', true));
-		table.put(";", new Token((int)';', true));
-		table.put(",", new Token((int)',', true));
-		table.put("+", new Token((int)'+', true));
-		table.put("-", new Token((int)'-', true));
-		table.put("/", new Token((int)'/', true));
-		table.put("=", new Token((int)'=', true));
-		table.put("<", new Token((int)'<', true));
-		table.put(">", new Token((int)'>', true));
-		table.put("*", new Token((int)'*', true));
-		table.put(".", new Token((int)'.', true));
-		table.put("IF", new Token(Parser.IF, true));
-		table.put("ELSE", new Token(Parser.ELSE, true));
-		table.put("END_IF", new Token(Parser.END_IF, true));
-		table.put("PRINT", new Token(Parser.PRINT, true));
-		table.put("CLASS", new Token(Parser.CLASS, true));
-		table.put("VOID", new Token(Parser.VOID, true));
-		table.put("LONG", new Token(Parser.LONG, true));
-		table.put("UINT", new Token(Parser.UINT, true));
-		table.put("DOUBLE", new Token(Parser.DOUBLE, true));
-		table.put(">=", new Token(Parser.CMP_GE, true));
-		table.put("<=", new Token(Parser.CMP_LE, true));
-		table.put("==", new Token(Parser.CMP_EQUAL, true));
-		table.put("!!", new Token(Parser.CMP_NOT_EQUAL, true));
-		table.put("-=", new Token(Parser.SUB_ASIGN, true));
-		table.put("DO", new Token(Parser.DO, true));
-		table.put("UNTIL", new Token(Parser.UNTIL, true));
-		table.put("IMPL", new Token(Parser.IMPL, true));
-		table.put("FOR", new Token(Parser.FOR, true));
-		table.put("RETURN", new Token(Parser.RETURN, true));
-		table.put(":", new Token((int)':', true));
-		table.put("TOD", new Token(Parser.TOD, true));
+		table.put("{", new SymbolTableEntry((int)'{', true));
+		table.put("}", new SymbolTableEntry((int)'}', true));
+		table.put("(", new SymbolTableEntry((int)'(', true));
+		table.put(")", new SymbolTableEntry((int)')', true));
+		table.put(";", new SymbolTableEntry((int)';', true));
+		table.put(",", new SymbolTableEntry((int)',', true));
+		table.put("+", new SymbolTableEntry((int)'+', true));
+		table.put("-", new SymbolTableEntry((int)'-', true));
+		table.put("/", new SymbolTableEntry((int)'/', true));
+		table.put("=", new SymbolTableEntry((int)'=', true));
+		table.put("<", new SymbolTableEntry((int)'<', true));
+		table.put(">", new SymbolTableEntry((int)'>', true));
+		table.put("*", new SymbolTableEntry((int)'*', true));
+		table.put(".", new SymbolTableEntry((int)'.', true));
+		table.put("IF", new SymbolTableEntry(Parser.IF, true));
+		table.put("ELSE", new SymbolTableEntry(Parser.ELSE, true));
+		table.put("END_IF", new SymbolTableEntry(Parser.END_IF, true));
+		table.put("PRINT", new SymbolTableEntry(Parser.PRINT, true));
+		table.put("CLASS", new SymbolTableEntry(Parser.CLASS, true));
+		table.put("VOID", new SymbolTableEntry(Parser.VOID, true));
+		table.put("LONG", new SymbolTableEntry(Parser.LONG, true));
+		table.put("UINT", new SymbolTableEntry(Parser.UINT, true));
+		table.put("DOUBLE", new SymbolTableEntry(Parser.DOUBLE, true));
+		table.put(">=", new SymbolTableEntry(Parser.CMP_GE, true));
+		table.put("<=", new SymbolTableEntry(Parser.CMP_LE, true));
+		table.put("==", new SymbolTableEntry(Parser.CMP_EQUAL, true));
+		table.put("!!", new SymbolTableEntry(Parser.CMP_NOT_EQUAL, true));
+		table.put("-=", new SymbolTableEntry(Parser.SUB_ASIGN, true));
+		table.put("DO", new SymbolTableEntry(Parser.DO, true));
+		table.put("UNTIL", new SymbolTableEntry(Parser.UNTIL, true));
+		table.put("IMPL", new SymbolTableEntry(Parser.IMPL, true));
+		table.put("FOR", new SymbolTableEntry(Parser.FOR, true));
+		table.put("RETURN", new SymbolTableEntry(Parser.RETURN, true));
+		table.put(":", new SymbolTableEntry((int)':', true));
+		table.put("TOD", new SymbolTableEntry(Parser.TOD, true));
 	}	
 }

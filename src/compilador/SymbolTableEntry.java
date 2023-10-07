@@ -2,14 +2,14 @@ package compilador;
 
 import java.util.HashMap;
 
-public class Token {
+public class SymbolTableEntry {
 
 	private int tokenID;
 	private boolean predefined;
 	
 	private static HashMap<Short, String> tokenDescriptionMap;
 	
-	public Token(int tokenID, boolean predefined) {
+	public SymbolTableEntry(int tokenID, boolean predefined) {
 		this.tokenID = tokenID;
 		this.predefined = predefined;
 	}

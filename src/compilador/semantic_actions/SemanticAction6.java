@@ -11,7 +11,14 @@ public class SemanticAction6 implements SemanticAction {
 	{
 		String lexeme = lexicalAnalyzerState.getCurrentLexeme();
 		lexicalAnalyzerState.setTokenToReturn(symbolTable.getTokenByLexeme(lexeme).getTokenID());
-		Compilador.setyylval(lexeme);
+		Compilador.setyylval(
+			new TokenInfo(
+				lexeme,
+				new TokenLocation(
+					lexicalAnalyzerState.getCurrentLine()
+				)
+			)
+		);
 		lexicalAnalyzerState.finishTokenReading();
 	}
 	

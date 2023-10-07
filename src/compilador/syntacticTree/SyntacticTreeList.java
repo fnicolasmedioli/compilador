@@ -1,4 +1,4 @@
-package syntacticTree;
+package compilador.syntacticTree;
 
 import java.util.LinkedList;
 

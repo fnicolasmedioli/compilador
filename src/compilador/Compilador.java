@@ -1,12 +1,12 @@
 package compilador;
 
-import syntacticTree.*;
+import java.util.PriorityQueue;
 
 public class Compilador {
 	
 	private static LexicalAnalyzer lexicalAnalyzer;
 	private static Parser parser;
-	private static PrintableSyntacticTree syntacticTree;
+	private static PriorityQueue<SyntacticStructureResult> syntacticStructuresFound;
 
 	public static void main(String[] args)
 	{
@@ -29,21 +29,26 @@ public class Compilador {
         }
 
         parser = new Parser();
+        syntacticStructuresFound = new PriorityQueue<>(
+        	new SyntacticStructureResultComparator()
+        );
         
         boolean parseSuccess = true;
         try {
         	parseSuccess = (parser.yyparse() == 0) ? true : false;
         } catch (Exception e) {
+        	System.out.println(e.getMessage());
         	parseSuccess = false;
         }
         
-        CompilerMessagePrinter.printTokenList(lexicalAnalyzer.getReadedTokensList());
-        
         if (parseSuccess)
-        {
-        	System.out.println();
-            CompilerMessagePrinter.printSyntacticTree(syntacticTree);
-        }
+        	CompilerMessagePrinter.printGreen("Parsing correcto");
+        else
+        	CompilerMessagePrinter.error("Error en el parsing");
+        
+        System.out.println();
+    	CompilerMessagePrinter.printTokenList(lexicalAnalyzer.getReadedTokensList());
+    	CompilerMessagePrinter.printFoundSyntacticalStrucutres(syntacticStructuresFound);
 	}
 	
 	public static int yylex()
@@ -52,19 +57,9 @@ public class Compilador {
 		return token;
 	}
 	
-	public static void setyylval(String v)
+	public static void setyylval(TokenInfo v)
 	{
 		parser.setyylval(v);
-	}
-	
-	public static String getyylval()
-	{
-		return parser.getyylval();
-	}
-	
-	public static void setSyntacticTree(PrintableSyntacticTree r)
-	{
-		Compilador.syntacticTree = r;
 	}
 	
 	public static void reportLexicalError(String msg)
@@ -75,5 +70,10 @@ public class Compilador {
 	public static void reportSyntaxError(String msg)
 	{
 		CompilerMessagePrinter.error(msg);
+	}
+	
+	public static void addFoundSyntacticStructure(SyntacticStructureResult s)
+	{
+		syntacticStructuresFound.add(s);
 	}
 }

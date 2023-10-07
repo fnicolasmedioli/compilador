@@ -1,7 +1,5 @@
 package compilador.semantic_actions;
 
-import compilador.Compilador;
-
 import compilador.*;
 
 public class SemanticAction5 implements SemanticAction {
@@ -27,14 +25,20 @@ public class SemanticAction5 implements SemanticAction {
 					"constante LONG fuera de rango: " + lexeme
 				);
 				// Return default value
-				symbolTable.addConstantLONG("0_l");
-				Compilador.setyylval("0_l");
+				Compilador.setyylval(new TokenInfo());
 				lexicalAnalyzerState.setTokenToReturn(Parser.CTE_LONG);
 			}
 			else
 			{
 				symbolTable.addConstantLONG(lexeme);
-				Compilador.setyylval(lexeme);
+				Compilador.setyylval(
+					new TokenInfo(
+						lexeme,
+						new TokenLocation(
+							lexicalAnalyzerState.getCurrentLine()
+						)
+					)
+				);
 				lexicalAnalyzerState.setTokenToReturn(Parser.CTE_LONG);
 			}			
 		}
@@ -51,14 +55,20 @@ public class SemanticAction5 implements SemanticAction {
 					"[Linea " + lexicalAnalyzerState.getCurrentLine() + "] " +
 					"constante UINT fuera de rango: " + lexeme
 				);
-				symbolTable.addConstantUINT("0_ui");
-				Compilador.setyylval("0_ui");
+				Compilador.setyylval(new TokenInfo());
 				lexicalAnalyzerState.setTokenToReturn(Parser.CTE_UINT);
 			}
 			else 
 			{
 				symbolTable.addConstantUINT(lexeme);
-				Compilador.setyylval(lexeme);
+				Compilador.setyylval(
+					new TokenInfo(
+						lexeme,
+						new TokenLocation(
+							lexicalAnalyzerState.getCurrentLine()
+						)
+					)
+				);
 				lexicalAnalyzerState.setTokenToReturn(Parser.CTE_UINT);	
 			}
 		}
@@ -72,14 +82,20 @@ public class SemanticAction5 implements SemanticAction {
 					"[Linea " + lexicalAnalyzerState.getCurrentLine() + "] " +
 					"constante DOUBLE fuera de rango: " + lexeme
 				);
-				symbolTable.addConstantDOUBLE("0.0");
-				Compilador.setyylval("0.0");
+				Compilador.setyylval(new TokenInfo());
 				lexicalAnalyzerState.setTokenToReturn(Parser.CTE_DOUBLE);
 			}
 			else
 			{
 				symbolTable.addConstantDOUBLE(lexeme);
-				Compilador.setyylval(lexeme);
+				Compilador.setyylval(
+					new TokenInfo(
+						lexeme,
+						new TokenLocation(
+							lexicalAnalyzerState.getCurrentLine()
+						)
+					)
+				);
 				lexicalAnalyzerState.setTokenToReturn(Parser.CTE_DOUBLE);	
 			}
 		}

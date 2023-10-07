@@ -1,4 +1,4 @@
-package syntacticTree;
+package compilador.syntacticTree;
 
 public class SyntacticTreeNode extends PrintableSyntacticTree {
 

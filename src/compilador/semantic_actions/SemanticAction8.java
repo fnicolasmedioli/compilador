@@ -15,8 +15,15 @@ public class SemanticAction8 implements SemanticAction {
 		// Quitar saltos de linea ?
 		
 		symbolTable.addStringLiteral(lexeme);
-		Token t = symbolTable.getTokenByLexeme(lexeme);
-		Compilador.setyylval(lexeme);
+		SymbolTableEntry t = symbolTable.getTokenByLexeme(lexeme);
+		Compilador.setyylval(
+			new TokenInfo(
+				lexeme,
+				new TokenLocation(
+					lexicalAnalyzerState.getCurrentLine()
+				)
+			)
+		);
 		lexicalAnalyzerState.setTokenToReturn(t.getTokenID());		
 		lexicalAnalyzerState.finishTokenReading();
 	}

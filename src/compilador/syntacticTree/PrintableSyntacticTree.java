@@ -1,4 +1,4 @@
-package syntacticTree;
+package compilador.syntacticTree;
 
 public abstract class PrintableSyntacticTree {
 

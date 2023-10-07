@@ -24,8 +24,16 @@ public class SemanticAction4 implements SemanticAction {
 		
 		if (symbolTable.contains(lexeme))
 		{
-			Token t = symbolTable.getTokenByLexeme(lexeme);
-			Compilador.setyylval(lexeme);
+			SymbolTableEntry t = symbolTable.getTokenByLexeme(lexeme);
+
+			Compilador.setyylval(
+				new TokenInfo(
+					lexeme,
+					new TokenLocation(
+						lexicalAnalyzerState.getCurrentLine()
+					)
+				)
+			);
 			lexicalAnalyzerState.setTokenToReturn(t.getTokenID());
 		}
 		else
@@ -47,8 +55,17 @@ public class SemanticAction4 implements SemanticAction {
 				}		
 			
 			symbolTable.addIdentifier(lexeme);
-			Token t = symbolTable.getTokenByLexeme(lexeme);
-			Compilador.setyylval(lexeme);
+			SymbolTableEntry t = symbolTable.getTokenByLexeme(lexeme);
+			
+			Compilador.setyylval(
+				new TokenInfo(
+					lexeme,
+					new TokenLocation(
+						lexicalAnalyzerState.getCurrentLine()
+					)
+				)
+			);
+			
 			lexicalAnalyzerState.setTokenToReturn(t.getTokenID());
 		}
 		
