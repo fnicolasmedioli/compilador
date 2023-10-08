@@ -17,56 +17,66 @@ public class SemanticAction4 implements SemanticAction {
 			String trunc = lexeme.substring(0, 20);
 			CompilerMessagePrinter.warning(
 				"[Linea " + lexicalAnalyzerState.getCurrentLine() + "] " +
-				"lexema truncado\n\t" + lexeme + " -> " + trunc
+				"Lexema truncado\n\t" + lexeme + " -> " + trunc
 			);
 			lexeme = trunc;
-		}		
+		}
 		
-		if (symbolTable.contains(lexeme))
+		Short predefinedToken = symbolTable.getPredefinedToken(lexeme);
+		boolean isPredefined = (predefinedToken != null) ? true : false;
+		
+		if (isPredefined)
 		{
-			SymbolTableEntry t = symbolTable.getTokenByLexeme(lexeme);
-
-			Compilador.setyylval(
-				new TokenInfo(
-					lexeme,
-					new TokenLocation(
-						lexicalAnalyzerState.getCurrentLine()
-					)
-				)
+			SymbolTableEntry newEntry = new SymbolTableEntry(
+				predefinedToken,
+				null,
+				new TokenLocation(lexicalAnalyzerState.getCurrentLine())
 			);
-			lexicalAnalyzerState.setTokenToReturn(t.getTokenID());
+			String entryKey = symbolTable.addNewEntry(newEntry);
+
+			Compilador.setyylval(entryKey);
+			lexicalAnalyzerState.setTokenToReturn(predefinedToken);
 		}
 		else
 		{
 			// ID must be lowercase, _, or digit
+			// and first char must be lowercase or _
 			
-			for (char c : lexeme.toCharArray())
-				if (
-					c != '_'
-					&& ((int)c < 48 || (int)c > 57)
-					&& ((int)c < 97 || (int)c > 122)
-				)
-				{
-					CompilerMessagePrinter.error(
-						"[Linea " + lexicalAnalyzerState.getCurrentLine() + "] " +
-						"los identificadores deben ser minusculas"
-					);
-					return;
-				}		
+			boolean validID = true;
 			
-			symbolTable.addIdentifier(lexeme);
-			SymbolTableEntry t = symbolTable.getTokenByLexeme(lexeme);
+			char firstChar = lexeme.charAt(0);
 			
-			Compilador.setyylval(
-				new TokenInfo(
-					lexeme,
-					new TokenLocation(
-						lexicalAnalyzerState.getCurrentLine()
+			if (
+				firstChar != '_'
+				&& ((int)firstChar < 97 || (int)firstChar > 122)
+			)
+				validID = false;
+			else
+				for (char c : lexeme.toCharArray())
+					if (
+						c != '_'
+						&& ((int)c < 48 || (int)c > 57)
+						&& ((int)c < 97 || (int)c > 122)
 					)
+					{
+						Compilador.reportLexicalError(
+							"[Linea " + lexicalAnalyzerState.getCurrentLine() + "] " +
+							"Identificador invalido: " + lexeme
+						);
+						validID = false;
+						break;
+					}
+			
+			String entryKey = symbolTable.addNewEntry(
+				new SymbolTableEntry(
+					Parser.ID,
+					(validID == true) ? lexeme : null,
+					new TokenLocation(lexicalAnalyzerState.getCurrentLine())
 				)
 			);
 			
-			lexicalAnalyzerState.setTokenToReturn(t.getTokenID());
+			Compilador.setyylval(entryKey);
+			lexicalAnalyzerState.setTokenToReturn(Parser.ID);
 		}
 		
 		lexicalAnalyzerState.finishTokenReading();

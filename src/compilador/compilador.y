@@ -40,20 +40,20 @@ lista_identificadores
     ;
 
 sentencia_declarativa
-    : tipo lista_identificadores ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Declaración de variables", ((TokenInfo)$1.obj).getLocation() )); }
-    | definicion_funcion ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Definición de función", ((TokenInfo)$1.obj).getLocation() )); }
-    | definicion_clase ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Definición de clase", ((TokenInfo)$1.obj).getLocation() )); }
-    | implementacion ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Implementación de método", ((TokenInfo)$1.obj).getLocation() )); }
+    : tipo lista_identificadores ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Declaración de variables", getSTEntry($1).getLocation() )); }
+    | definicion_funcion ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Definición de función", getSTEntry($1).getLocation() )); }
+    | definicion_clase ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Definición de clase", getSTEntry($1).getLocation() )); }
+    | implementacion ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Implementación de método", getSTEntry($1).getLocation() )); }
     ;
 
 sentencia_ejecutable
-    : ID op_asignacion_aumentada expr ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Asignación a variable", ((TokenInfo)$1.obj).getLocation() )); }
-    | acceso_atributo op_asignacion_aumentada expr ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Asignación a atributo", ((TokenInfo)$1.obj).getLocation() )); }
-    | invocacion_funcion ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Invocación a función", ((TokenInfo)$1.obj).getLocation() )); }
-    | sentencia_if ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Sentencia IF", ((TokenInfo)$1.obj).getLocation() )); }
-    | do_until ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Estructura DO UNTIL", ((TokenInfo)$1.obj).getLocation() )); }
-    | PRINT CTE_STRING ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Sentencia PRINT", ((TokenInfo)$1.obj).getLocation() )); }
-    | RETURN ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Sentencia RETURN", ((TokenInfo)$1.obj).getLocation() )); }
+    : ID op_asignacion_aumentada expr ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Asignación a variable", getSTEntry($1).getLocation() )); }
+    | acceso_atributo op_asignacion_aumentada expr ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Asignación a atributo", getSTEntry($1).getLocation() )); }
+    | invocacion_funcion ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Invocación a función", getSTEntry($1).getLocation() )); }
+    | sentencia_if ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Sentencia IF", getSTEntry($1).getLocation() )); }
+    | do_until ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Estructura DO UNTIL", getSTEntry($1).getLocation() )); }
+    | PRINT CTE_STRING ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Sentencia PRINT", getSTEntry($1).getLocation() )); }
+    | RETURN ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Sentencia RETURN", getSTEntry($1).getLocation() )); }
     ;
 
 lista_sentencias
@@ -93,16 +93,16 @@ constante
     | CTE_DOUBLE
     | CTE_LONG
         {
-            if (!ConstantRange.isValidLONG(((TokenInfo)$1.obj).getLexeme(), false))
+            if (!ConstantRange.isValidLONG(getSTEntry($1).getLexeme(), false))
                 Compilador.reportLexicalError("El rango de LONG es [-2147483648, 2147483647]");
         }
     | '-' CTE_LONG
         {
-            Compilador.getSymbolTable().replaceLexeme( ((TokenInfo)$2.obj).getLexeme(), "-" + ((TokenInfo)$2.obj).getLexeme() );
+            getSTEntry($2).addNegativeSign();
         }
     | '-' CTE_DOUBLE
         {
-            Compilador.getSymbolTable().replaceLexeme( ((TokenInfo)$2.obj).getLexeme(), "-" + ((TokenInfo)$2.obj).getLexeme() );
+            getSTEntry($2).addNegativeSign();
         }
     | '-' CTE_UINT
         {
@@ -189,7 +189,7 @@ clase_lista_atributos
 
 clase_lista_metodos
     : clase_lista_metodos metodo ','
-    | metodo ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Implementación de método dentro de clase", ((TokenInfo)$1.obj).getLocation() )); }
+    | metodo ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Implementación de método dentro de clase", getSTEntry($1).getLocation() )); }
     ;
 
 clase_lista_composicion
@@ -198,7 +198,7 @@ clase_lista_composicion
     ;
 
 implementacion
-    : IMPL FOR ID ':' '{' clase_lista_metodos '}' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Implementación de método fuera de clase", ((TokenInfo)$1.obj).getLocation() )); }
+    : IMPL FOR ID ':' '{' clase_lista_metodos '}' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Implementación de método fuera de clase", getSTEntry($1).getLocation() )); }
     ;
 
 %%
@@ -213,14 +213,12 @@ int yylex()
     return Compilador.yylex();
 }
 
-public void setyylval(Object v)
+public void setyylval(String symbolTableEntryKey)
 {
-    this.yylval = new ParserVal(v);
+    this.yylval = new ParserVal(symbolTableEntryKey);
 }
 
-/*
 public SymbolTableEntry getSTEntry(ParserVal o)
 {
-    
+    return Compilador.getSymbolTable().getEntry(o.sval);
 }
-*/

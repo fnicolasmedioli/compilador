@@ -18,7 +18,6 @@ public class SyntacticStructureResult {
 	@Override
 	public String toString()
 	{
-		return "Linea: " + location.getRow() + ", columna: "
-			+ location.getColumn() + ", estructura: " + description;
+		return "" + location + ", estructura: " + description;
 	}
 }

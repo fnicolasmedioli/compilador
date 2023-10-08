@@ -11,6 +11,8 @@ public class SemanticAction5 implements SemanticAction {
 	{		
 		String lexeme = lexicalAnalyzerState.getCurrentLexeme();
 		
+		boolean validRange = true;
+		
 		if (
 			lexeme.length() > 2 &&
 			lexeme.substring(lexeme.length() - 2).equals("_l")
@@ -20,27 +22,23 @@ public class SemanticAction5 implements SemanticAction {
 			
 			if (ConstantRange.isValidLONG(lexeme, true) == false)
 			{
-				CompilerMessagePrinter.error(
+				Compilador.reportLexicalError(
 					"[Linea " + lexicalAnalyzerState.getCurrentLine() + "] " +
 					"constante LONG fuera de rango: " + lexeme
 				);
-				// Return default value
-				Compilador.setyylval(new TokenInfo());
-				lexicalAnalyzerState.setTokenToReturn(Parser.CTE_LONG);
+				validRange = false;
 			}
-			else
-			{
-				symbolTable.addConstantLONG(lexeme);
-				Compilador.setyylval(
-					new TokenInfo(
-						lexeme,
-						new TokenLocation(
-							lexicalAnalyzerState.getCurrentLine()
-						)
+			
+			Compilador.setyylval(
+				symbolTable.addNewEntry(
+					new SymbolTableEntry(
+						Parser.CTE_LONG,
+						(validRange == true) ? lexeme : null,
+						new TokenLocation(lexicalAnalyzerState.getCurrentLine())
 					)
-				);
-				lexicalAnalyzerState.setTokenToReturn(Parser.CTE_LONG);
-			}			
+				)
+			);
+			lexicalAnalyzerState.setTokenToReturn(Parser.CTE_LONG);
 		}
 		else if (
 			lexeme.length() > 3 &&
@@ -51,26 +49,23 @@ public class SemanticAction5 implements SemanticAction {
 			
 			if (ConstantRange.isValidUINT(lexeme) == false)
 			{
-				CompilerMessagePrinter.error(
+				Compilador.reportLexicalError(
 					"[Linea " + lexicalAnalyzerState.getCurrentLine() + "] " +
 					"constante UINT fuera de rango: " + lexeme
 				);
-				Compilador.setyylval(new TokenInfo());
-				lexicalAnalyzerState.setTokenToReturn(Parser.CTE_UINT);
+				validRange = false;
 			}
-			else 
-			{
-				symbolTable.addConstantUINT(lexeme);
-				Compilador.setyylval(
-					new TokenInfo(
-						lexeme,
-						new TokenLocation(
-							lexicalAnalyzerState.getCurrentLine()
-						)
+			
+			Compilador.setyylval(
+				symbolTable.addNewEntry(
+					new SymbolTableEntry(
+						Parser.CTE_UINT,
+						(validRange == true) ? lexeme : null,
+						new TokenLocation(lexicalAnalyzerState.getCurrentLine())
 					)
-				);
-				lexicalAnalyzerState.setTokenToReturn(Parser.CTE_UINT);	
-			}
+				)
+			);
+			lexicalAnalyzerState.setTokenToReturn(Parser.CTE_UINT);
 		}
 		else
 		{
@@ -78,26 +73,23 @@ public class SemanticAction5 implements SemanticAction {
 			
 			if (ConstantRange.isValidDOUBLE(lexeme) == false)
 			{
-				CompilerMessagePrinter.error(
+				Compilador.reportLexicalError(
 					"[Linea " + lexicalAnalyzerState.getCurrentLine() + "] " +
 					"constante DOUBLE fuera de rango: " + lexeme
 				);
-				Compilador.setyylval(new TokenInfo());
-				lexicalAnalyzerState.setTokenToReturn(Parser.CTE_DOUBLE);
+				validRange = false;
 			}
-			else
-			{
-				symbolTable.addConstantDOUBLE(lexeme);
-				Compilador.setyylval(
-					new TokenInfo(
-						lexeme,
-						new TokenLocation(
-							lexicalAnalyzerState.getCurrentLine()
-						)
+
+			Compilador.setyylval(
+				symbolTable.addNewEntry(
+					new SymbolTableEntry(
+						Parser.CTE_DOUBLE,
+						(validRange == true) ? lexeme : null,
+						new TokenLocation(lexicalAnalyzerState.getCurrentLine())
 					)
-				);
-				lexicalAnalyzerState.setTokenToReturn(Parser.CTE_DOUBLE);	
-			}
+				)
+			);
+			lexicalAnalyzerState.setTokenToReturn(Parser.CTE_DOUBLE);
 		}
 
 		lexicalAnalyzerState.finishTokenReading();

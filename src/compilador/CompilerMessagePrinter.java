@@ -40,7 +40,7 @@ public class CompilerMessagePrinter {
 			System.out.println("No se leyeron tokens");
 
 		for (int token : tokenList)		
-			System.out.print(SymbolTableEntry.getTokenDescription(token) + " ");
+			System.out.print(token + " ");
 		System.out.println("\n");
 	}
 	

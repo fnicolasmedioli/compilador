@@ -10,16 +10,21 @@ public class SemanticAction6 implements SemanticAction {
 		SymbolTable symbolTable )
 	{
 		String lexeme = lexicalAnalyzerState.getCurrentLexeme();
-		lexicalAnalyzerState.setTokenToReturn(symbolTable.getTokenByLexeme(lexeme).getTokenID());
-		Compilador.setyylval(
-			new TokenInfo(
-				lexeme,
-				new TokenLocation(
-					lexicalAnalyzerState.getCurrentLine()
-				)
+		Short tokenID = symbolTable.getPredefinedToken(lexeme);
+		
+		if (tokenID == null)
+			Compilador.reportLexicalError("Error crítico en accion semántica 6, linea: " + lexicalAnalyzerState.getCurrentLine());
+		
+		Compilador.setyylval(symbolTable.addNewEntry(
+			new SymbolTableEntry(
+				tokenID,
+				null,
+				new TokenLocation(lexicalAnalyzerState.getCurrentLine())
 			)
-		);
+		));
+		
+		lexicalAnalyzerState.setTokenToReturn(tokenID);
+
 		lexicalAnalyzerState.finishTokenReading();
-	}
-	
+	}	
 }

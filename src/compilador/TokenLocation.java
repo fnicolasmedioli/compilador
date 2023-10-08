@@ -33,4 +33,10 @@ public class TokenLocation {
 
 		return (row > b.getRow() || (row == b.getRow() && column > b.getColumn()));
 	}
+	
+	@Override
+	public String toString()
+	{
+		return "Fila " + row;
+	}
 }

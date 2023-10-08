@@ -1,115 +1,100 @@
 package compilador;
 
 import java.util.HashMap;
+import java.util.UUID;
 
 public class SymbolTable {
 
 	private HashMap<String, SymbolTableEntry> table;
+	private HashMap<String, Short> predefinedTable;
 	
 	public SymbolTable()
 	{
 		table = new HashMap<>();
+		predefinedTable = new HashMap<>();
 		loadPredefinedTable();
 	}
 	
-	public SymbolTableEntry getTokenByLexeme(String lexeme)
+	private String generateUniqueEntryKey()
 	{
-		return table.get(lexeme);
+		String entryKey;
+
+		do
+		{
+			entryKey = UUID.randomUUID().toString().substring(0, 6);
+		} while (table.containsKey(entryKey));
+		
+		return entryKey;
 	}
 	
-	public void replaceLexeme(String oldLexeme, String newLexeme)
+	public String addNewEntry(SymbolTableEntry entry)
 	{
-		table.put(newLexeme, table.get(oldLexeme));
-		table.remove(oldLexeme);
+		String entryKey = generateUniqueEntryKey();
+		table.put(entryKey, entry);
+		return entryKey;
 	}
 	
-	public boolean contains(String lexeme)
+	public SymbolTableEntry getEntry(String entryKey)
 	{
-		return table.containsKey(lexeme);
+		return table.get(entryKey);
 	}
 	
-	public void addIdentifier(String lexeme)
+	public Short getPredefinedToken(String lexeme)
 	{
-		table.put(lexeme, new SymbolTableEntry(Parser.ID, false));
-	}
-	
-	public void addConstantLONG(String lexeme)
-	{
-		table.put(lexeme, new SymbolTableEntry(Parser.CTE_LONG, false));
-	}
-	
-	public void addConstantUINT(String lexeme)
-	{
-		table.put(lexeme, new SymbolTableEntry(Parser.CTE_UINT, false));
-	}
-	
-	public void addConstantDOUBLE(String lexeme)
-	{
-		table.put(lexeme, new SymbolTableEntry(Parser.CTE_DOUBLE, false));
-	}
-	
-	public void addStringLiteral(String lexeme)
-	{
-		table.put(lexeme, new SymbolTableEntry(Parser.CTE_STRING, false));
-	}
-	
-	private void loadPredefinedTable()
-	{
-		table.put("{", new SymbolTableEntry((int)'{', true));
-		table.put("}", new SymbolTableEntry((int)'}', true));
-		table.put("(", new SymbolTableEntry((int)'(', true));
-		table.put(")", new SymbolTableEntry((int)')', true));
-		table.put(";", new SymbolTableEntry((int)';', true));
-		table.put(",", new SymbolTableEntry((int)',', true));
-		table.put("+", new SymbolTableEntry((int)'+', true));
-		table.put("-", new SymbolTableEntry((int)'-', true));
-		table.put("/", new SymbolTableEntry((int)'/', true));
-		table.put("=", new SymbolTableEntry((int)'=', true));
-		table.put("<", new SymbolTableEntry((int)'<', true));
-		table.put(">", new SymbolTableEntry((int)'>', true));
-		table.put("*", new SymbolTableEntry((int)'*', true));
-		table.put(".", new SymbolTableEntry((int)'.', true));
-		table.put("IF", new SymbolTableEntry(Parser.IF, true));
-		table.put("ELSE", new SymbolTableEntry(Parser.ELSE, true));
-		table.put("END_IF", new SymbolTableEntry(Parser.END_IF, true));
-		table.put("PRINT", new SymbolTableEntry(Parser.PRINT, true));
-		table.put("CLASS", new SymbolTableEntry(Parser.CLASS, true));
-		table.put("VOID", new SymbolTableEntry(Parser.VOID, true));
-		table.put("LONG", new SymbolTableEntry(Parser.LONG, true));
-		table.put("UINT", new SymbolTableEntry(Parser.UINT, true));
-		table.put("DOUBLE", new SymbolTableEntry(Parser.DOUBLE, true));
-		table.put(">=", new SymbolTableEntry(Parser.CMP_GE, true));
-		table.put("<=", new SymbolTableEntry(Parser.CMP_LE, true));
-		table.put("==", new SymbolTableEntry(Parser.CMP_EQUAL, true));
-		table.put("!!", new SymbolTableEntry(Parser.CMP_NOT_EQUAL, true));
-		table.put("-=", new SymbolTableEntry(Parser.SUB_ASIGN, true));
-		table.put("DO", new SymbolTableEntry(Parser.DO, true));
-		table.put("UNTIL", new SymbolTableEntry(Parser.UNTIL, true));
-		table.put("IMPL", new SymbolTableEntry(Parser.IMPL, true));
-		table.put("FOR", new SymbolTableEntry(Parser.FOR, true));
-		table.put("RETURN", new SymbolTableEntry(Parser.RETURN, true));
-		table.put(":", new SymbolTableEntry((int)':', true));
-		table.put("TOD", new SymbolTableEntry(Parser.TOD, true));
+		return predefinedTable.get(lexeme);
 	}
 	
 	@Override
 	public String toString()
 	{
-		return toString(true);
+		StringBuilder sb = new StringBuilder();
+		for (String key : table.keySet())
+		{
+			sb.append("Clave: ");
+			sb.append(key);
+			sb.append(" | ");
+			sb.append(table.get(key));
+			sb.append("\n");
+		}
+		return sb.toString();
 	}
 	
-	public String toString(boolean showPredefined)
+	private void loadPredefinedTable()
 	{
-		String toPrint = "";
-		
-		for (String lexeme : table.keySet())
-		{
-			SymbolTableEntry entry = table.get(lexeme);
-			if (!entry.isPredefined() || entry.isPredefined() && showPredefined)
-			{
-				toPrint += "Lexema: '" + lexeme + "' TokenID: '" + entry.getTokenID() + "' \n";
-			}
-		}
-		return toPrint;
+        predefinedTable.put("{", (short)'{');
+        predefinedTable.put("}", (short)'}');
+        predefinedTable.put("(", (short)'(');
+        predefinedTable.put(")", (short)')');
+        predefinedTable.put(";", (short)';');
+        predefinedTable.put(",", (short)',');
+        predefinedTable.put("+", (short)'+');
+        predefinedTable.put("-", (short)'-');
+        predefinedTable.put("/", (short)'/');
+        predefinedTable.put("=", (short)'=');
+        predefinedTable.put("<", (short)'<');
+        predefinedTable.put(">", (short)'>');
+        predefinedTable.put("*", (short)'*');
+        predefinedTable.put(".", (short)'.');
+        predefinedTable.put(":", (short)':');
+        predefinedTable.put("IF", Parser.IF);
+        predefinedTable.put("ELSE", Parser.ELSE);
+        predefinedTable.put("END_IF", Parser.END_IF);
+        predefinedTable.put("PRINT", Parser.PRINT);
+        predefinedTable.put("CLASS", Parser.CLASS);
+        predefinedTable.put("VOID", Parser.VOID);
+        predefinedTable.put("LONG", Parser.LONG);
+        predefinedTable.put("UINT", Parser.UINT);
+        predefinedTable.put("DOUBLE", Parser.DOUBLE);
+        predefinedTable.put(">=", Parser.CMP_GE);
+        predefinedTable.put("<=", Parser.CMP_LE);
+        predefinedTable.put("==", Parser.CMP_EQUAL);
+        predefinedTable.put("!!", Parser.CMP_NOT_EQUAL);
+        predefinedTable.put("-=", Parser.SUB_ASIGN);
+        predefinedTable.put("DO", Parser.DO);
+        predefinedTable.put("UNTIL", Parser.UNTIL);
+        predefinedTable.put("IMPL", Parser.IMPL);
+        predefinedTable.put("FOR", Parser.FOR);
+        predefinedTable.put("RETURN", Parser.RETURN);        
+        predefinedTable.put("TOD", Parser.TOD);
 	}
 }

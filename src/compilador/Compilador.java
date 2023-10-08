@@ -58,9 +58,9 @@ public class Compilador {
 		return token;
 	}
 	
-	public static void setyylval(TokenInfo v)
+	public static void setyylval(String symbolTableEntryKey)
 	{
-		parser.setyylval(v);
+		parser.setyylval(symbolTableEntryKey);
 	}
 	
 	public static void reportLexicalError(String msg)
