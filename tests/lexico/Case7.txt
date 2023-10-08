@@ -1,0 +1,7 @@
+** Palabras reservadas escritas en minusculas y mayusculas.
+** Se espera que funcione BIEN
+{
+	do = 25_l,
+	return = %hola%,
+	string = %string%,
+}

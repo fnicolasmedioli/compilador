@@ -62,5 +62,12 @@ public class CompilerMessagePrinter {
 			SyntacticStructureResult h = syntacticStructuresFound.poll();
 			System.out.println(h);
 		}
+		System.out.println();
+	}
+	
+	static public void printSymbolTable(SymbolTable symbolTable)
+	{
+		System.out.println("Tabla de simbolos:");
+		System.out.print(symbolTable);
 	}
 }

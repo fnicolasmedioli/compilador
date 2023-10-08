@@ -1,0 +1,6 @@
+** Intento de incluir en el nombre de un identificador un caracter que no sea letra, digito o _.
+** Se espera que funcione MAL
+{
+	hol-a = 25_l,
+	variab*e = %hola%,
+}

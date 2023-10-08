@@ -94,9 +94,20 @@ constante
     | CTE_LONG
         {
             if (!ConstantRange.isValidLONG(((TokenInfo)$1.obj).getLexeme(), false))
-                Compilador.reportLexicalError("El rango de UINT es [-2147483648, 2147483647]");
+                Compilador.reportLexicalError("El rango de LONG es [-2147483648, 2147483647]");
         }
     | '-' CTE_LONG
+        {
+            Compilador.getSymbolTable().replaceLexeme( ((TokenInfo)$2.obj).getLexeme(), "-" + ((TokenInfo)$2.obj).getLexeme() );
+        }
+    | '-' CTE_DOUBLE
+        {
+            Compilador.getSymbolTable().replaceLexeme( ((TokenInfo)$2.obj).getLexeme(), "-" + ((TokenInfo)$2.obj).getLexeme() );
+        }
+    | '-' CTE_UINT
+        {
+            Compilador.reportLexicalError("Las constantes tipo UINT no pueden ser negativas");
+        }
     ;
 
 expr
@@ -206,3 +217,10 @@ public void setyylval(Object v)
 {
     this.yylval = new ParserVal(v);
 }
+
+/*
+public SymbolTableEntry getSTEntry(ParserVal o)
+{
+    
+}
+*/

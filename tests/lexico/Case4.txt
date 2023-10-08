@@ -1,0 +1,6 @@
+** Identificadores de menos y más de 25 caracteres.
+** Se espera que funcione BIEN (con warning)
+{
+	identificador_corto = 25_l,
+	identificador_muy_largo = 23_l,
+}

@@ -49,6 +49,7 @@ public class Compilador {
         System.out.println();
     	CompilerMessagePrinter.printTokenList(lexicalAnalyzer.getReadedTokensList());
     	CompilerMessagePrinter.printFoundSyntacticalStrucutres(syntacticStructuresFound);
+    	CompilerMessagePrinter.printSymbolTable(getSymbolTable());
 	}
 	
 	public static int yylex()
@@ -75,5 +76,10 @@ public class Compilador {
 	public static void addFoundSyntacticStructure(SyntacticStructureResult s)
 	{
 		syntacticStructuresFound.add(s);
+	}
+	
+	public static SymbolTable getSymbolTable()
+	{
+		return lexicalAnalyzer.getSymbolTable();
 	}
 }

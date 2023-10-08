@@ -107,4 +107,9 @@ public class LexicalAnalyzer {
     	return token;
     }
     
+    public SymbolTable getSymbolTable()
+    {
+    	return symbolTable;
+    }
+    
 }

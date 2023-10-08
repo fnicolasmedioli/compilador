@@ -1,0 +1,11 @@
+** Para numeros de punto flotante parte entera con y sin parte decimal, parte decimal con y sin parte entera, con y sin exponente, con exponente positivo y negativo.
+** Se espera que funcione BIEN
+{
+	variable = 2442.,
+	variable = 2442.523,
+	variable = .634,
+	variable = 2442.45d+24,
+	variable = 2442.45d-24,
+	variable = .45d-24,
+	variable = .45d+24,
+}

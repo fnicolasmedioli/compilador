@@ -152,7 +152,7 @@ public class TransitionMatrix {
         matrix.add(s19);
         
         HashMap<Character, Transition> s20 = new HashMap<>();
-        s20.put('\n', new Transition(FINAL_STATE, null));
+        s20.put('\n', new Transition(FINAL_STATE, List.of(9)));
         this.insertAllBut(s20, new Transition(20, null), '\n');
         matrix.add(s20);
         

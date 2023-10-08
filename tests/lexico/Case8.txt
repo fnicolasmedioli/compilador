@@ -1,0 +1,8 @@
+** Comentarios bien y mal escritos.
+** Se espera que funcione MAL
+{
+	** Comentario bien escrito de una linea
+	
+	** Comentario donde se 
+	pretende que sea multilinea **
+}

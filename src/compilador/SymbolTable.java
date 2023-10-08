@@ -17,6 +17,12 @@ public class SymbolTable {
 		return table.get(lexeme);
 	}
 	
+	public void replaceLexeme(String oldLexeme, String newLexeme)
+	{
+		table.put(newLexeme, table.get(oldLexeme));
+		table.remove(oldLexeme);
+	}
+	
 	public boolean contains(String lexeme)
 	{
 		return table.containsKey(lexeme);
@@ -84,5 +90,26 @@ public class SymbolTable {
 		table.put("RETURN", new SymbolTableEntry(Parser.RETURN, true));
 		table.put(":", new SymbolTableEntry((int)':', true));
 		table.put("TOD", new SymbolTableEntry(Parser.TOD, true));
-	}	
+	}
+	
+	@Override
+	public String toString()
+	{
+		return toString(true);
+	}
+	
+	public String toString(boolean showPredefined)
+	{
+		String toPrint = "";
+		
+		for (String lexeme : table.keySet())
+		{
+			SymbolTableEntry entry = table.get(lexeme);
+			if (!entry.isPredefined() || entry.isPredefined() && showPredefined)
+			{
+				toPrint += "Lexema: '" + lexeme + "' TokenID: '" + entry.getTokenID() + "' \n";
+			}
+		}
+		return toPrint;
+	}
 }
