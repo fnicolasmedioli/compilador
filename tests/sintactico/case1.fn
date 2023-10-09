@@ -1,0 +1,8 @@
+** Se espera que ande BIEN
+{
+    VOID saludar()
+    {
+        PRINT %hola%,
+    },
+    saludar(),
+}

@@ -1,0 +1,12 @@
+** Se espera que ande BIEN
+{
+    LONG acumulador; c,
+    acumulador = 0_l,
+    c = 10_l,
+
+    DO
+    {
+        acumulador -= c,
+        c -= 1_l,
+    } UNTIL (c < 0_l),
+}

@@ -86,9 +86,17 @@ public class LexicalAnalyzer {
         	
         	if (transition == null)
         	{
-        		CompilerMessagePrinter.error("lexico: caracter inesperado");
+				Compilador.reportLexicalError(
+					"Error en la linea: "
+					+ this.state.getCurrentLine()
+					+ " , token no reconocido '" + this.state.getCurrentLexeme() + "'"
+				);
         		this.state.incrementReadIndex();
-        		return 0;
+
+				this.state.setNewState(0);
+				this.state.resetLexeme();
+
+        		continue;
         	}
         	
         	this.state.setNewState(transition.getNewState());

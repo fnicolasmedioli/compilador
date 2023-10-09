@@ -40,7 +40,8 @@ lista_identificadores
     ;
 
 sentencia_declarativa
-    : tipo lista_identificadores ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Declaración de variables", getSTEntry($1).getLocation() )); }
+    : tipo lista_identificadores ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Declaración de variables primitivas", getSTEntry($1).getLocation() )); }
+    | ID lista_identificadores ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Declaración de variables tipo objeto", getSTEntry($1).getLocation() )); }
     | definicion_funcion ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Definición de función", getSTEntry($1).getLocation() )); }
     | definicion_clase ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Definición de clase", getSTEntry($1).getLocation() )); }
     | implementacion ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Implementación de método", getSTEntry($1).getLocation() )); }
@@ -49,6 +50,8 @@ sentencia_declarativa
 sentencia_ejecutable
     : ID op_asignacion_aumentada expr ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Asignación a variable", getSTEntry($1).getLocation() )); }
     | acceso_atributo op_asignacion_aumentada expr ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Asignación a atributo", getSTEntry($1).getLocation() )); }
+    | ID '.' invocacion_funcion ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Invocación a método", getSTEntry($1).getLocation() )); }
+    | acceso_atributo '.' invocacion_funcion ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Invocación a método", getSTEntry($1).getLocation() )); }
     | invocacion_funcion ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Invocación a función", getSTEntry($1).getLocation() )); }
     | sentencia_if ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Sentencia IF", getSTEntry($1).getLocation() )); }
     | do_until ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Estructura DO UNTIL", getSTEntry($1).getLocation() )); }
@@ -85,6 +88,7 @@ sentencia_if
     | IF '(' condicion ')' sentencia_ejecutable ELSE '{' lista_sentencias_ejecutables '}' END_IF
     | IF '(' condicion ')' '{' lista_sentencias_ejecutables '}' ELSE sentencia_ejecutable END_IF
     | IF '(' condicion ')' '{' lista_sentencias_ejecutables '}' ELSE '{' lista_sentencias_ejecutables '}' END_IF
+    | IF error END_IF ',' { Compilador.reportSyntaxError("Error en IF", getSTEntry($1).getLocation()); }
     ;
 
 constante
@@ -94,7 +98,7 @@ constante
     | CTE_LONG
         {
             if (!ConstantRange.isValidLONG(getSTEntry($1).getLexeme(), false))
-                Compilador.reportLexicalError("El rango de LONG es [-2147483648, 2147483647]");
+                Compilador.reportLexicalError("El rango de LONG es [-2147483648, 2147483647]", getSTEntry($1).getLocation());
         }
     | '-' CTE_LONG
         {
@@ -106,7 +110,7 @@ constante
         }
     | '-' CTE_UINT
         {
-            Compilador.reportLexicalError("Las constantes tipo UINT no pueden ser negativas");
+            Compilador.reportLexicalError("Las constantes tipo UINT no pueden ser negativas", getSTEntry($1).getLocation());
         }
     ;
 
@@ -149,6 +153,7 @@ procedimiento
     | VOID ID '(' ')' '{' lista_sentencias '}'
     | VOID ID '(' parametro_formal ')' '{' '}'
     | VOID ID '(' ')' '{' '}'
+    | VOID error '}' { Compilador.reportSyntaxError("Error en función/método", getSTEntry($1).getLocation()); }
     ;
 
 do_until

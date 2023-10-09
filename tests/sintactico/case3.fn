@@ -1,0 +1,21 @@
+** Se espera que ande BIEN
+{
+    LONG a; b,
+
+    a = 25_l,
+    b = 35_ui,
+
+    IF (a < b)
+    {
+        PRINT %a es menor que b%,
+    }
+    ELSE
+    {
+        IF (a > b)
+            PRINT %a es mayor que b%,
+        ELSE
+            PRINT %a es igual a b%,
+        END_IF,
+    }
+    END_IF,
+}

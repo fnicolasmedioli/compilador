@@ -1,0 +1,15 @@
+** Se espera que ande BIEN
+{
+    CLASS persona
+    {
+        STRING nombre,
+
+        VOID set_nombre(STRING nuevo_nombre)
+        {
+            nombre = nuevo_nombre,
+        },
+    },
+
+    persona p1,
+    p1.set_nombre(),
+}

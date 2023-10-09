@@ -1,0 +1,18 @@
+** Se espera que no funcione
+** No se pueden pasar dos parametros a funciones/metodos
+{
+    CLASS persona
+    {
+        STRING nombre,
+        LONG edad,
+
+        VOID set_datos(STRING nuevo_nombre, LONG nueva_edad)
+        {
+            nombre = nuevo_nombre,
+            edad = nueva_edad,
+        },
+    },
+
+    persona p1,
+    p1.set_nombre(),
+}

@@ -1,17 +1,17 @@
 package compilador;
 
 import java.util.HashMap;
+import java.util.Map.Entry;
 import java.util.UUID;
 
 public class SymbolTable {
 
 	private HashMap<String, SymbolTableEntry> table;
-	private HashMap<String, Short> predefinedTable;
+	private static HashMap<String, Short> predefinedTable;
 	
 	public SymbolTable()
 	{
 		table = new HashMap<>();
-		predefinedTable = new HashMap<>();
 		loadPredefinedTable();
 	}
 	
@@ -41,6 +41,8 @@ public class SymbolTable {
 	
 	public Short getPredefinedToken(String lexeme)
 	{
+		if (predefinedTable == null)
+			loadPredefinedTable();
 		return predefinedTable.get(lexeme);
 	}
 	
@@ -59,8 +61,9 @@ public class SymbolTable {
 		return sb.toString();
 	}
 	
-	private void loadPredefinedTable()
+	private static void loadPredefinedTable()
 	{
+		predefinedTable = new HashMap<>();
         predefinedTable.put("{", (short)'{');
         predefinedTable.put("}", (short)'}');
         predefinedTable.put("(", (short)'(');
@@ -96,5 +99,23 @@ public class SymbolTable {
         predefinedTable.put("FOR", Parser.FOR);
         predefinedTable.put("RETURN", Parser.RETURN);        
         predefinedTable.put("TOD", Parser.TOD);
+        predefinedTable.put("STRING", Parser.STRING);
+	}
+
+	public static String getTokenDescription(short token)
+	{
+		if (token == 0) return "Fin de archivo";
+		if (token < 256) return "'" + (char)token + "'";
+			
+		if (token == Parser.CTE_STRING) return "CTE_STRING";
+		if (token == Parser.CTE_LONG) return "CTE_DOUBLE";
+		if (token == Parser.CTE_UINT) return "CTE_UINT";
+		if (token == Parser.DOUBLE) return "CTE_DOUBLE";
+		if (token == Parser.ID) return "ID";
+
+		for (Entry<String, Short> entry : predefinedTable.entrySet())
+			if (entry.getValue() == token)
+				return entry.getKey();
+		return "TOKEN NO CONOCIDO";
 	}
 }

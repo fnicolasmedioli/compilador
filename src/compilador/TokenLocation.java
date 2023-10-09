@@ -37,6 +37,7 @@ public class TokenLocation {
 	@Override
 	public String toString()
 	{
-		return "Fila " + row;
+		if (column != null) return "Linea " + row + " Columna " + column; 
+		return "Linea " + row;
 	}
 }

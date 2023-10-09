@@ -10,7 +10,7 @@ public class TransitionMatrix {
     private static Vector<HashMap<Character, Transition>> matrix;
     
     private final static Character VALID_CHARS[] = {
-        '_', '{', '}', '(', ')', ';', ',', '*', '\s',
+        '_', '{', '}', '(', ')', ';', ',', '*', '\s', ':',
         '\t', '\n', '%', '.', '-', '+', '/', '=', '!',
         'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k',
         'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u',
@@ -185,7 +185,7 @@ public class TransitionMatrix {
      */
     private void insertCLN_(Map<Character, Transition> m, Transition transition)
     {
-        Character[] ar = { '{', '}', '(', ')', ';', ',', '*',
+        Character[] ar = { '{', '}', '(', ')', ';', ',', '*', ':',
             '\s', '\t', '\n', '%', '.', '-', '+', '/', '=', '!' };
         this.insertArray(m, transition, ar);
     }
@@ -198,7 +198,7 @@ public class TransitionMatrix {
     private void insertCNdD(Map<Character, Transition> m, Transition transition)
     {
         Character[] ar = { '_', '{', '}', '(', ')', ';', ',', '*',
-            '\s', '\t', '\n', '%', '.', '-', '+', '/', '=',
+            '\s', '\t', '\n', '%', '.', '-', '+', '/', '=', ':',
             '!', 'a', 'b', 'c', 'e', 'f', 'g', 'h', 'i', 'j',
             'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
             'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'E',

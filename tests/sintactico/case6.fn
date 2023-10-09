@@ -1,0 +1,12 @@
+** Se espera que funcione BIEN
+{
+    VOID exterior()
+    {
+        VOID interior(LONG p)
+        {
+            PRINT %hola%,
+        },
+        interior(5_l),
+    },
+    exterior(),
+}

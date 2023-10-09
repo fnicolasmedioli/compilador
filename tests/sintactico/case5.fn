@@ -1,0 +1,23 @@
+** Se espera que ande BIEN
+{
+    CLASS persona
+    {
+        STRING nombre,
+        LONG dni,
+    },
+
+    CLASS empleado
+    {
+        LONG id_empleado,
+
+        persona, ** Herencia por composicion
+    },
+
+    IMPL FOR empleado:
+    {
+        VOID enviar_encomienda()
+        {
+            PRINT %se envia encomienda%,
+        },
+    },
+}

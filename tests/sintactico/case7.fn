@@ -1,0 +1,16 @@
+** Se espera que no funcione
+** (53 no es una constante valida)
+{
+    LONG a,
+    a = 100_l,
+
+    IF (a < 53)
+    {
+        PRINT %error%,
+    }
+    ELSE
+    {
+        PRINT %error%,
+    }
+    END_IF,
+}

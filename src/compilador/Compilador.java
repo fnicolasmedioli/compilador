@@ -7,6 +7,7 @@ public class Compilador {
 	private static LexicalAnalyzer lexicalAnalyzer;
 	private static Parser parser;
 	private static PriorityQueue<SyntacticStructureResult> syntacticStructuresFound;
+	private static int errorCount;
 
 	public static void main(String[] args)
 	{
@@ -27,24 +28,27 @@ public class Compilador {
         	CompilerMessagePrinter.error("Error leyendo archivo fuente");
         	return;
         }
-
+        
+        errorCount = 0;
         parser = new Parser();
         syntacticStructuresFound = new PriorityQueue<>(
         	new SyntacticStructureResultComparator()
         );
         
-        boolean parseSuccess = true;
+        boolean yaccSuccess = true;
         try {
-        	parseSuccess = (parser.yyparse() == 0) ? true : false;
+        	yaccSuccess = (parser.yyparse() == 0) ? true : false;
         } catch (Exception e) {
         	System.out.println(e.getMessage());
-        	parseSuccess = false;
+        	yaccSuccess = false;
         }
         
-        if (parseSuccess)
+        System.out.println();
+
+        if (yaccSuccess && errorCount == 0)
         	CompilerMessagePrinter.printGreen("Parsing correcto");
         else
-        	CompilerMessagePrinter.error("Error en el parsing");
+        	CompilerMessagePrinter.error("Hubo errores en el parsing");
         
         System.out.println();
     	CompilerMessagePrinter.printTokenList(lexicalAnalyzer.getReadedTokensList());
@@ -65,12 +69,32 @@ public class Compilador {
 	
 	public static void reportLexicalError(String msg)
 	{
-		CompilerMessagePrinter.error(msg);
+		reportLexicalError(msg);
+	}
+	
+	public static void reportLexicalError(String msg, TokenLocation loc)
+	{
+		if (loc != null)
+			CompilerMessagePrinter.error("[Léxico: " + loc + "] " + msg);
+		else
+			CompilerMessagePrinter.error("[Léxico] " + msg);
+
+		errorCount++;
 	}
 	
 	public static void reportSyntaxError(String msg)
 	{
-		CompilerMessagePrinter.error(msg);
+		reportSyntaxError(msg);
+	}
+	
+	public static void reportSyntaxError(String msg, TokenLocation loc)
+	{
+		if (loc != null)
+			CompilerMessagePrinter.error("[Sintáctico: " + loc + "] " + msg);
+		else
+			CompilerMessagePrinter.error("[Sintáctico] " + msg);
+	
+		errorCount++;
 	}
 	
 	public static void addFoundSyntacticStructure(SyntacticStructureResult s)
