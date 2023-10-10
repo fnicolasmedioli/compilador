@@ -43,14 +43,16 @@ public class LexicalAnalyzer {
     
     public void loadSourceFile(String sourceFilePath) throws FileNotFoundException
     {
-    	this.sourceCode = "";
+    	StringBuilder sb = new StringBuilder();
         Scanner scanner = new Scanner(new File(sourceFilePath));
         while (scanner.hasNextLine())
         {
         	String line = scanner.nextLine();
-        	this.sourceCode += line + "\n";
+        	sb.append(line);
+        	sb.append("\n");
         }
         scanner.close();
+        this.sourceCode = sb.toString();
     }
     
     public boolean doRemainTokens()
@@ -85,12 +87,12 @@ public class LexicalAnalyzer {
             );
         	
         	if (transition == null)
-        	{
-				Compilador.reportLexicalError(
-					"Error en la linea: "
-					+ this.state.getCurrentLine()
-					+ " , token no reconocido '" + this.state.getCurrentLexeme() + "'"
-				);
+        	{        		
+        		Compilador.reportLexicalError(
+        			"Token no reconocido: '" + this.state.getCurrentLexeme() + "'",
+        			new TokenLocation(this.state.getCurrentLine())
+        		);
+        		
         		this.state.incrementReadIndex();
 
 				this.state.setNewState(0);

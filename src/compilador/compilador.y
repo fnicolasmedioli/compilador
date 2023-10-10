@@ -40,23 +40,28 @@ lista_identificadores
     ;
 
 sentencia_declarativa
-    : tipo lista_identificadores ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Declaración de variables primitivas", getSTEntry($1).getLocation() )); }
-    | ID lista_identificadores ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Declaración de variables tipo objeto", getSTEntry($1).getLocation() )); }
-    | definicion_funcion ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Definición de función", getSTEntry($1).getLocation() )); }
-    | definicion_clase ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Definición de clase", getSTEntry($1).getLocation() )); }
-    | implementacion ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Implementación de método", getSTEntry($1).getLocation() )); }
+    : tipo lista_identificadores ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Declaracion de variables primitivas", getSTEntry($1).getLocation() )); }
+    | ID lista_identificadores ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Declaracion de variables tipo objeto", getSTEntry($1).getLocation() )); }
+    | definicion_funcion ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Definicion de funcion", getSTEntry($1).getLocation() )); }
+    | definicion_clase ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Definicion de clase", getSTEntry($1).getLocation() )); }
+    | implementacion ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Implementacion de metodo", getSTEntry($1).getLocation() )); }
     ;
 
 sentencia_ejecutable
-    : ID op_asignacion_aumentada expr ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Asignación a variable", getSTEntry($1).getLocation() )); }
-    | acceso_atributo op_asignacion_aumentada expr ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Asignación a atributo", getSTEntry($1).getLocation() )); }
-    | ID '.' invocacion_funcion ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Invocación a método", getSTEntry($1).getLocation() )); }
-    | acceso_atributo '.' invocacion_funcion ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Invocación a método", getSTEntry($1).getLocation() )); }
-    | invocacion_funcion ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Invocación a función", getSTEntry($1).getLocation() )); }
+    : ID op_asignacion_aumentada expr ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Asignacion a variable", getSTEntry($1).getLocation() )); }
+    | acceso_atributo op_asignacion_aumentada expr ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Asignacion a atributo", getSTEntry($1).getLocation() )); }
+    | ID '.' invocacion_funcion ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Invocacion a metodo", getSTEntry($1).getLocation() )); }
+    | acceso_atributo '.' invocacion_funcion ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Invocacion a metodo", getSTEntry($1).getLocation() )); }
+    | invocacion_funcion ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Invocacion a funcion", getSTEntry($1).getLocation() )); }
     | sentencia_if ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Sentencia IF", getSTEntry($1).getLocation() )); }
     | do_until ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Estructura DO UNTIL", getSTEntry($1).getLocation() )); }
     | PRINT CTE_STRING ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Sentencia PRINT", getSTEntry($1).getLocation() )); }
     | RETURN ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Sentencia RETURN", getSTEntry($1).getLocation() )); }
+    | PRINT CTE_UINT ',' { Compilador.reportSyntaxError("No se puede imprimir un UINT", getSTEntry($1).getLocation()); }
+    | PRINT CTE_LONG ',' { Compilador.reportSyntaxError("No se puede imprimir un LONG", getSTEntry($1).getLocation()); }
+    | PRINT ID ',' { Compilador.reportSyntaxError("No se puede imprimir una variable", getSTEntry($1).getLocation()); }
+    | PRINT acceso_atributo ',' { Compilador.reportSyntaxError("No se puede imprimir un atributo", getSTEntry($1).getLocation()); }
+    | PRINT CTE_DOUBLE ',' { Compilador.reportSyntaxError("No se puede imprimir un DOUBLE", getSTEntry($1).getLocation()); }
     ;
 
 lista_sentencias
@@ -74,6 +79,7 @@ lista_sentencias_ejecutables
 invocacion_funcion
     : ID '(' ')'
     | ID '(' parametro_real ')'
+    | ID '(' error ')' { Compilador.reportSyntaxError("Error en invocacion a metodo", getSTEntry($1).getLocation()); }
     ;
 
 op_asignacion_aumentada
@@ -153,7 +159,7 @@ procedimiento
     | VOID ID '(' ')' '{' lista_sentencias '}'
     | VOID ID '(' parametro_formal ')' '{' '}'
     | VOID ID '(' ')' '{' '}'
-    | VOID error '}' { Compilador.reportSyntaxError("Error en función/método", getSTEntry($1).getLocation()); }
+    | VOID error '}' { Compilador.reportSyntaxError("Error en funcion/metodo", getSTEntry($1).getLocation()); }
     ;
 
 do_until
@@ -184,6 +190,7 @@ cuerpo_clase
     | clase_lista_atributos
     | clase_lista_metodos
     | clase_lista_composicion
+    | error { Compilador.reportSyntaxError("Error en cuerpo de clase", getSTEntry($1).getLocation()); }
     ;
 
 clase_lista_atributos
@@ -194,7 +201,7 @@ clase_lista_atributos
 
 clase_lista_metodos
     : clase_lista_metodos metodo ','
-    | metodo ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Implementación de método dentro de clase", getSTEntry($1).getLocation() )); }
+    | metodo ',' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Implementacion de metodo dentro de clase", getSTEntry($1).getLocation() )); }
     ;
 
 clase_lista_composicion
@@ -203,7 +210,8 @@ clase_lista_composicion
     ;
 
 implementacion
-    : IMPL FOR ID ':' '{' clase_lista_metodos '}' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Implementación de método fuera de clase", getSTEntry($1).getLocation() )); }
+    : IMPL FOR ID ':' '{' clase_lista_metodos '}' { Compilador.addFoundSyntacticStructure(new SyntacticStructureResult("Implementacion de metodo fuera de clase", getSTEntry($1).getLocation() )); }
+    | IMPL error '}' { Compilador.reportSyntaxError("Error en implementación dsitribuida", getSTEntry($1).getLocation()); }
     ;
 
 %%

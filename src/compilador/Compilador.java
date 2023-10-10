@@ -3,7 +3,7 @@ package compilador;
 import java.util.PriorityQueue;
 
 public class Compilador {
-	
+
 	private static LexicalAnalyzer lexicalAnalyzer;
 	private static Parser parser;
 	private static PriorityQueue<SyntacticStructureResult> syntacticStructuresFound;
@@ -35,16 +35,15 @@ public class Compilador {
         	new SyntacticStructureResultComparator()
         );
         
-        boolean yaccSuccess = true;
+        boolean yaccSuccess = false;
+
         try {
         	yaccSuccess = (parser.yyparse() == 0) ? true : false;
         } catch (Exception e) {
         	System.out.println(e.getMessage());
-        	yaccSuccess = false;
         }
-        
-        System.out.println();
 
+        System.out.println();
         if (yaccSuccess && errorCount == 0)
         	CompilerMessagePrinter.printGreen("Parsing correcto");
         else
@@ -75,9 +74,9 @@ public class Compilador {
 	public static void reportLexicalError(String msg, TokenLocation loc)
 	{
 		if (loc != null)
-			CompilerMessagePrinter.error("[Léxico: " + loc + "] " + msg);
+			CompilerMessagePrinter.error("[Lexico: " + loc + "] " + msg);
 		else
-			CompilerMessagePrinter.error("[Léxico] " + msg);
+			CompilerMessagePrinter.error("[Lexico] " + msg);
 
 		errorCount++;
 	}
@@ -90,9 +89,9 @@ public class Compilador {
 	public static void reportSyntaxError(String msg, TokenLocation loc)
 	{
 		if (loc != null)
-			CompilerMessagePrinter.error("[Sintáctico: " + loc + "] " + msg);
+			CompilerMessagePrinter.error("[Sintactico: " + loc + "] " + msg);
 		else
-			CompilerMessagePrinter.error("[Sintáctico] " + msg);
+			CompilerMessagePrinter.error("[Sintactico] " + msg);
 	
 		errorCount++;
 	}

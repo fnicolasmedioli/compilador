@@ -45,8 +45,8 @@ public class SymbolTableEntry {
 	public String toString()
 	{
 		if (lexeme != null)
-			return "TokenID: " + tokenID + "\tUbicación: " + location + "\tLexema: '" + lexeme + "'";
+			return "TokenID: " + tokenID + "\tUbicacion: " + location + "\tLexema: '" + lexeme + "'";
 		else
-			return "TokenID: " + tokenID + "\tUbicación: " + location;
+			return "TokenID: " + tokenID + "\tUbicacion: " + location;
 	}
 }

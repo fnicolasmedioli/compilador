@@ -1,6 +1,7 @@
 package compilador;
 
 import java.util.List;
+import java.util.LinkedList;
 
 public class Transition {
 	
@@ -13,7 +14,7 @@ public class Transition {
 		if (semanticActionList != null)
 			this.semanticActionList = semanticActionList;
 		else
-			this.semanticActionList = List.of();
+			this.semanticActionList = new LinkedList<>();
 	}
 	
 	public Integer getNewState()

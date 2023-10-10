@@ -116,6 +116,7 @@ public class SymbolTable {
 		for (Entry<String, Short> entry : predefinedTable.entrySet())
 			if (entry.getValue() == token)
 				return entry.getKey();
+
 		return "TOKEN NO CONOCIDO";
 	}
 }

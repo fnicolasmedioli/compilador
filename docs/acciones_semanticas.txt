@@ -1,36 +1,36 @@
-Acción semántica 1:
-- Devolver a la entrada el último carácter leído
+Accion semantica 1:
+- Devolver a la entrada el ultimo caracter leido
 
-Acción semántica 2:
-- Inicializar string vacío
-- Agregar carácter al string
+Accion semantica 2:
+- Inicializar string vacio
+- Agregar caracter al string
 
-Acción semántica 3:
-- Agregar carácter al string (en caso de que sea diferente de salto de linea)
+Accion semantica 3:
+- Agregar caracter al string (en caso de que sea diferente de salto de linea)
 
-Acción semántica 4:
+Accion semantica 4:
 - Buscar en la TS
-  Si está,
+  Si esta,
     Si es PR, devolver la Palabra Reservada
     Si no, Devolver ID + Punt TS
-  Si no está,
+  Si no esta,
     Alta en la TS
     Devolver ID + Punt TS
 
-Acción semántica 5:
+Accion semantica 5:
 - Verificar rango de la constante
 - Alta en la TS
 - Devolver CTE + Punt TS
 
-Acción semántica 6:
+Accion semantica 6:
 - Devolver token predefinido
 
-Acción semántica 7:
-- Inicializar string vacío
+Accion semantica 7:
+- Inicializar string vacio
 
-Acción semántica 8:
+Accion semantica 8:
 - Agregar string a la tabla
 - Retornarla
 
-Acción semántica 9:
+Accion semantica 9:
 - Incrementa el contador de lineas

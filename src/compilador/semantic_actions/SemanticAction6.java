@@ -13,7 +13,7 @@ public class SemanticAction6 implements SemanticAction {
 		Short tokenID = symbolTable.getPredefinedToken(lexeme);
 		
 		if (tokenID == null)
-			Compilador.reportLexicalError("Error crítico en accion semántica 6, linea: " + lexicalAnalyzerState.getCurrentLine());
+			Compilador.reportLexicalError("Error critico en accion semantica 6, linea: " + lexicalAnalyzerState.getCurrentLine());
 		
 		Compilador.setyylval(symbolTable.addNewEntry(
 			new SymbolTableEntry(

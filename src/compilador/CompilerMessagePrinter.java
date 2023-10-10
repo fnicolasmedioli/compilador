@@ -46,16 +46,16 @@ public class CompilerMessagePrinter {
 	
 	static public void printSyntacticTree(PrintableSyntacticTree root)
 	{
-		System.out.println("Estructuras sintácticas encontradas:");
+		System.out.println("Estructuras sintacticas encontradas:");
 		root.print(0);
 	}
 	
 	static public void printFoundSyntacticalStrucutres(PriorityQueue<SyntacticStructureResult> syntacticStructuresFound)
 	{
 		if (syntacticStructuresFound.isEmpty() == true)
-			System.out.println("No se encontraron estructuras sintácticas");
+			System.out.println("No se encontraron estructuras sintacticas");
 		else
-			System.out.println("Estructuras sintácticas encontradas:");
+			System.out.println("Estructuras sintacticas encontradas:");
 		
 		while (syntacticStructuresFound.isEmpty() == false)
 		{
