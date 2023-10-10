@@ -23,8 +23,8 @@ public class SemanticAction5 implements SemanticAction {
 			if (ConstantRange.isValidLONG(lexeme, true) == false)
 			{
 				Compilador.reportLexicalError(
-					"[Linea " + lexicalAnalyzerState.getCurrentLine() + "] " +
-					"constante LONG fuera de rango: " + lexeme
+					"Constante LONG fuera de rango: " + lexeme,
+					new TokenLocation(lexicalAnalyzerState.getCurrentLine())
 				);
 				validRange = false;
 			}
@@ -50,8 +50,8 @@ public class SemanticAction5 implements SemanticAction {
 			if (ConstantRange.isValidUINT(lexeme) == false)
 			{
 				Compilador.reportLexicalError(
-					"[Linea " + lexicalAnalyzerState.getCurrentLine() + "] " +
-					"constante UINT fuera de rango: " + lexeme
+					"Constante UINT fuera de rango: " + lexeme,
+					new TokenLocation(lexicalAnalyzerState.getCurrentLine())
 				);
 				validRange = false;
 			}
@@ -74,8 +74,8 @@ public class SemanticAction5 implements SemanticAction {
 			if (ConstantRange.isValidDOUBLE(lexeme) == false)
 			{
 				Compilador.reportLexicalError(
-					"[Linea " + lexicalAnalyzerState.getCurrentLine() + "] " +
-					"constante DOUBLE fuera de rango: " + lexeme
+					"Constante DOUBLE fuera de rango: " + lexeme,
+					new TokenLocation(lexicalAnalyzerState.getCurrentLine())
 				);
 				validRange = false;
 			}

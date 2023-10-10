@@ -87,9 +87,9 @@ public class LexicalAnalyzer {
             );
         	
         	if (transition == null)
-        	{        		
+        	{
         		Compilador.reportLexicalError(
-        			"Token no reconocido: '" + this.state.getCurrentLexeme() + "'",
+        			"Caracter no reconocido: '" + sourceCode.charAt(this.state.getReadIndex()) + "'",
         			new TokenLocation(this.state.getCurrentLine())
         		);
         		

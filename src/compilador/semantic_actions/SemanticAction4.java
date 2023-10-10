@@ -60,8 +60,8 @@ public class SemanticAction4 implements SemanticAction {
 					)
 					{
 						Compilador.reportLexicalError(
-							"[Linea " + lexicalAnalyzerState.getCurrentLine() + "] " +
-							"Identificador invalido: " + lexeme
+							"Identificador invalido: " + lexeme,
+							new TokenLocation(lexicalAnalyzerState.getCurrentLine())
 						);
 						validID = false;
 						break;
