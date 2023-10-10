@@ -68,7 +68,7 @@ public class Compilador {
 	
 	public static void reportLexicalError(String msg)
 	{
-		reportLexicalError(msg);
+		reportLexicalError(msg, null);
 	}
 	
 	public static void reportLexicalError(String msg, TokenLocation loc)
