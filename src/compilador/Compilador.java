@@ -83,7 +83,7 @@ public class Compilador {
 	
 	public static void reportSyntaxError(String msg)
 	{
-		reportSyntaxError(msg);
+		reportSyntaxError(msg, null);
 	}
 	
 	public static void reportSyntaxError(String msg, TokenLocation loc)
