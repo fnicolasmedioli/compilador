@@ -4,6 +4,7 @@ public class Terceto <Tipo1, Tipo2>{
     private String operation;
     private Tipo1 o1;
     private Tipo2 o2;
+    private String type;
 
     public Terceto(){
 
@@ -15,6 +16,13 @@ public class Terceto <Tipo1, Tipo2>{
         this.o2=o2;    
     }
 
+    public void setType(String t){
+        this.type = t;
+    }
+
+    public String getType(){
+        return this.type;
+    }
     public String getOperation(){
         return this.operation;
     }
