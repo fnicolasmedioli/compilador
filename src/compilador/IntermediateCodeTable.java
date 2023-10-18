@@ -1,14 +1,14 @@
 package compilador;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 
 public class IntermediateCodeTable{
     //Lista donde cada nodo es un terceto
-    private List<Terceto> listTercetos;
+    private Vector<Terceto> listTercetos;
 
     public void arrTercetos(){
-        this.listTercetos = new ArrayList<>();
+        this.listTercetos = new Vector<>();
     }
 
     public void addTerceto(Terceto t){
