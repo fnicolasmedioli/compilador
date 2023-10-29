@@ -108,7 +108,7 @@ public class SymbolTable {
 		if (token < 256) return "'" + (char)token + "'";
 			
 		if (token == Parser.CTE_STRING) return "CTE_STRING";
-		if (token == Parser.CTE_LONG) return "CTE_DOUBLE";
+		if (token == Parser.CTE_LONG) return "CTE_LONG";
 		if (token == Parser.CTE_UINT) return "CTE_UINT";
 		if (token == Parser.DOUBLE) return "CTE_DOUBLE";
 		if (token == Parser.ID) return "ID";
