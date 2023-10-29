@@ -1,3 +1,9 @@
+%{
+ 
+import java.util.LinkedList;
+
+%}
+
 %token IF ELSE END_IF PRINT CLASS VOID ID
        LONG UINT DOUBLE STRING
        CTE_LONG CTE_UINT CTE_DOUBLE CTE_STRING
@@ -154,11 +160,22 @@ definicion_funcion
     : procedimiento
     ;
 
+id_ambito
+    : ID { setCurrentID(getSTEntry($1).getLexeme()); }
+    ;
+
+procedimiento_a
+    :  '{' { addToCurrentScope(getCurrentID()); }
+    ;
+
+procedimiento_b
+    : lista_sentencias '}' { removeScope(); }
+    | '}' { removeScope(); }
+    ;
+
 procedimiento
-    : VOID ID '(' parametro_formal ')' '{' lista_sentencias '}'
-    | VOID ID '(' ')' '{' lista_sentencias '}'
-    | VOID ID '(' parametro_formal ')' '{' '}'
-    | VOID ID '(' ')' '{' '}'
+    : VOID id_ambito '(' parametro_formal ')' procedimiento_a procedimiento_b
+    | VOID id_ambito '(' ')' procedimiento_a  procedimiento_b
     | VOID error '}' { Compilador.reportSyntaxError("Error en funcion/metodo", getSTEntry($1).getLocation()); }
     ;
 
@@ -234,4 +251,40 @@ public void setyylval(String symbolTableEntryKey)
 public SymbolTableEntry getSTEntry(ParserVal o)
 {
     return Compilador.getSymbolTable().getEntry(o.sval);
+}
+
+static String _currentID = "";
+static LinkedList<String> _currentScope = new LinkedList<>();
+
+private void addToCurrentScope(String s)
+{
+    if (_currentScope == null)
+        _currentScope = new LinkedList<>();
+
+    _currentScope.add(s);
+}
+
+private String getCurrentScopeStr()
+{
+    String scope = "global";
+
+    for (String subscope : _currentScope)
+        scope += ":" + subscope;
+    
+    return scope;
+}
+
+private void removeScope()
+{
+    _currentScope.pop();
+}
+
+private String getCurrentID()
+{
+    return _currentID;
+}
+
+private void setCurrentID(String id)
+{
+    _currentID = id;
 }
