@@ -22,64 +22,70 @@ public class SemanticAction4 implements SemanticAction {
 			lexeme = trunc;
 		}
 		
-		Short predefinedToken = symbolTable.getPredefinedToken(lexeme);
-		boolean isPredefined = (predefinedToken != null) ? true : false;
+		SymbolTableEntry stEntry = symbolTable.getEntry(lexeme);
 		
-		if (isPredefined)
+		if (stEntry != null && stEntry.isPredefined())
 		{
-			SymbolTableEntry newEntry = new SymbolTableEntry(
-				predefinedToken,
-				null,
+			Compilador.setyylval(new LocatedSymbolTableEntry(
+				stEntry,
 				new TokenLocation(lexicalAnalyzerState.getCurrentLine())
-			);
-			String entryKey = symbolTable.addNewEntry(newEntry);
-
-			Compilador.setyylval(entryKey);
-			lexicalAnalyzerState.setTokenToReturn(predefinedToken);
+			));
+			lexicalAnalyzerState.setTokenToReturn(stEntry.getTokenID());
 		}
 		else
 		{
-			// ID must be lowercase, _, or digit
-			// and first char must be lowercase or _
-			
-			boolean validID = true;
-			
-			char firstChar = lexeme.charAt(0);
-			
-			if (
-				firstChar != '_'
-				&& ((int)firstChar < 97 || (int)firstChar > 122)
-			)
-				validID = false;
-			else
-				for (char c : lexeme.toCharArray())
-					if (
-						c != '_'
-						&& ((int)c < 48 || (int)c > 57)
-						&& ((int)c < 97 || (int)c > 122)
-					)
-					{
-						Compilador.reportLexicalError(
-							"Identificador invalido: " + lexeme,
-							new TokenLocation(lexicalAnalyzerState.getCurrentLine())
-						);
-						validID = false;
-						break;
-					}
-			
-			String entryKey = symbolTable.addNewEntry(
-				new SymbolTableEntry(
-					Parser.ID,
-					(validID == true) ? lexeme : null,
+			if (stEntry != null)
+			{
+				Compilador.setyylval(new LocatedSymbolTableEntry(
+					stEntry,
 					new TokenLocation(lexicalAnalyzerState.getCurrentLine())
+				));
+			}
+			else
+			{
+				// Check if ID is valid (only first occurrence)
+				// ID chars must be lowercase, _, or digit
+				// and first char must be lowercase or _
+				
+				boolean validID = true;
+				
+				char firstChar = lexeme.charAt(0);
+				
+				if (
+					firstChar != '_'
+					&& ((int)firstChar < 97 || (int)firstChar > 122)
 				)
-			);
-			
-			Compilador.setyylval(entryKey);
+					validID = false;
+				else
+					for (char c : lexeme.toCharArray())
+						if (
+							c != '_'
+							&& ((int)c < 48 || (int)c > 57)
+							&& ((int)c < 97 || (int)c > 122)
+						)
+						{
+							Compilador.reportLexicalError(
+								"Identificador invalido: " + lexeme,
+								new TokenLocation(lexicalAnalyzerState.getCurrentLine())
+							);
+							validID = false;
+							break;
+						}
+				
+				// Add to symbol table even if invalid
+				
+				SymbolTableEntry entry = symbolTable.addNewEntry(new SymbolTableEntry(
+					Parser.ID,
+					lexeme
+				));
+				
+				Compilador.setyylval(new LocatedSymbolTableEntry(
+					entry,
+					new TokenLocation(lexicalAnalyzerState.getCurrentLine())
+				));
+			}
 			lexicalAnalyzerState.setTokenToReturn(Parser.ID);
-		}
-		
+		}		
 		lexicalAnalyzerState.finishTokenReading();
 	}
-	
 }

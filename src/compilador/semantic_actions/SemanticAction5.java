@@ -11,6 +11,21 @@ public class SemanticAction5 implements SemanticAction {
 	{		
 		String lexeme = lexicalAnalyzerState.getCurrentLexeme();
 		
+		SymbolTableEntry stEntry = symbolTable.getEntry(lexeme);
+		
+		if (stEntry != null)
+		{
+			Compilador.setyylval(new LocatedSymbolTableEntry(
+				stEntry,
+				new TokenLocation(lexicalAnalyzerState.getCurrentLine())
+			));
+			lexicalAnalyzerState.setTokenToReturn(stEntry.getTokenID());
+			lexicalAnalyzerState.finishTokenReading();
+			return;
+		}
+		
+		// Constant not in table, add it
+		
 		boolean validRange = true;
 		
 		if (
@@ -30,13 +45,13 @@ public class SemanticAction5 implements SemanticAction {
 			}
 			
 			Compilador.setyylval(
-				symbolTable.addNewEntry(
-					new SymbolTableEntry(
+				new LocatedSymbolTableEntry(
+					symbolTable.addNewEntry(new SymbolTableEntry(
 						Parser.CTE_LONG,
-						(validRange == true) ? lexeme : null,
-						new TokenLocation(lexicalAnalyzerState.getCurrentLine())
-					)
-				)
+						(validRange == true) ? lexeme : null
+					)),
+					new TokenLocation(lexicalAnalyzerState.getCurrentLine())
+				)				
 			);
 			lexicalAnalyzerState.setTokenToReturn(Parser.CTE_LONG);
 		}
@@ -57,13 +72,13 @@ public class SemanticAction5 implements SemanticAction {
 			}
 			
 			Compilador.setyylval(
-				symbolTable.addNewEntry(
-					new SymbolTableEntry(
+				new LocatedSymbolTableEntry(
+					symbolTable.addNewEntry(new SymbolTableEntry(
 						Parser.CTE_UINT,
-						(validRange == true) ? lexeme : null,
-						new TokenLocation(lexicalAnalyzerState.getCurrentLine())
-					)
-				)
+						(validRange == true) ? lexeme : null
+					)),
+					new TokenLocation(lexicalAnalyzerState.getCurrentLine())
+				)				
 			);
 			lexicalAnalyzerState.setTokenToReturn(Parser.CTE_UINT);
 		}
@@ -81,13 +96,13 @@ public class SemanticAction5 implements SemanticAction {
 			}
 
 			Compilador.setyylval(
-				symbolTable.addNewEntry(
-					new SymbolTableEntry(
+				new LocatedSymbolTableEntry(
+					symbolTable.addNewEntry(new SymbolTableEntry(
 						Parser.CTE_DOUBLE,
-						(validRange == true) ? lexeme : null,
-						new TokenLocation(lexicalAnalyzerState.getCurrentLine())
-					)
-				)
+						(validRange == true) ? lexeme : null
+					)),
+					new TokenLocation(lexicalAnalyzerState.getCurrentLine())
+				)				
 			);
 			lexicalAnalyzerState.setTokenToReturn(Parser.CTE_DOUBLE);
 		}

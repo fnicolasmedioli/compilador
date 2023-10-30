@@ -2,12 +2,10 @@ package compilador;
 
 import java.util.HashMap;
 import java.util.Map.Entry;
-import java.util.UUID;
 
 public class SymbolTable {
 
 	private HashMap<String, SymbolTableEntry> table;
-	private static HashMap<String, Short> predefinedTable;
 	
 	public SymbolTable()
 	{
@@ -15,23 +13,11 @@ public class SymbolTable {
 		loadPredefinedTable();
 	}
 	
-	private String generateUniqueEntryKey()
+	public SymbolTableEntry addNewEntry(SymbolTableEntry entry)
 	{
-		String entryKey;
-
-		do
-		{
-			entryKey = UUID.randomUUID().toString().substring(0, 6);
-		} while (table.containsKey(entryKey));
-		
-		return entryKey;
-	}
-	
-	public String addNewEntry(SymbolTableEntry entry)
-	{
-		String entryKey = generateUniqueEntryKey();
+		String entryKey = entry.getLexeme();
 		table.put(entryKey, entry);
-		return entryKey;
+		return entry;
 	}
 	
 	public SymbolTableEntry getEntry(String entryKey)
@@ -39,11 +25,14 @@ public class SymbolTable {
 		return table.get(entryKey);
 	}
 	
-	public Short getPredefinedToken(String lexeme)
+	public boolean isPredefined(String lexeme)
 	{
-		if (predefinedTable == null)
-			loadPredefinedTable();
-		return predefinedTable.get(lexeme);
+		SymbolTableEntry entry = table.get(lexeme);
+		
+		if (entry == null || entry.isPredefined() == false)
+			return false;
+	
+		return true;
 	}
 	
 	@Override
@@ -61,48 +50,48 @@ public class SymbolTable {
 		return sb.toString();
 	}
 	
-	private static void loadPredefinedTable()
+	private void loadPredefinedTable()
 	{
-		predefinedTable = new HashMap<>();
-        predefinedTable.put("{", (short)'{');
-        predefinedTable.put("}", (short)'}');
-        predefinedTable.put("(", (short)'(');
-        predefinedTable.put(")", (short)')');
-        predefinedTable.put(";", (short)';');
-        predefinedTable.put(",", (short)',');
-        predefinedTable.put("+", (short)'+');
-        predefinedTable.put("-", (short)'-');
-        predefinedTable.put("/", (short)'/');
-        predefinedTable.put("=", (short)'=');
-        predefinedTable.put("<", (short)'<');
-        predefinedTable.put(">", (short)'>');
-        predefinedTable.put("*", (short)'*');
-        predefinedTable.put(".", (short)'.');
-        predefinedTable.put(":", (short)':');
-        predefinedTable.put("IF", Parser.IF);
-        predefinedTable.put("ELSE", Parser.ELSE);
-        predefinedTable.put("END_IF", Parser.END_IF);
-        predefinedTable.put("PRINT", Parser.PRINT);
-        predefinedTable.put("CLASS", Parser.CLASS);
-        predefinedTable.put("VOID", Parser.VOID);
-        predefinedTable.put("LONG", Parser.LONG);
-        predefinedTable.put("UINT", Parser.UINT);
-        predefinedTable.put("DOUBLE", Parser.DOUBLE);
-        predefinedTable.put(">=", Parser.CMP_GE);
-        predefinedTable.put("<=", Parser.CMP_LE);
-        predefinedTable.put("==", Parser.CMP_EQUAL);
-        predefinedTable.put("!!", Parser.CMP_NOT_EQUAL);
-        predefinedTable.put("-=", Parser.SUB_ASIGN);
-        predefinedTable.put("DO", Parser.DO);
-        predefinedTable.put("UNTIL", Parser.UNTIL);
-        predefinedTable.put("IMPL", Parser.IMPL);
-        predefinedTable.put("FOR", Parser.FOR);
-        predefinedTable.put("RETURN", Parser.RETURN);        
-        predefinedTable.put("TOD", Parser.TOD);
-        predefinedTable.put("STRING", Parser.STRING);
+		table = new HashMap<>();
+		table.put("{", new SymbolTableEntry('{', true));
+		table.put("}", new SymbolTableEntry('}', true));
+		table.put("(", new SymbolTableEntry('(', true));
+		table.put(")", new SymbolTableEntry(')', true));
+		table.put(";", new SymbolTableEntry(';', true));
+		table.put(",", new SymbolTableEntry(',', true));
+		table.put("+", new SymbolTableEntry('+', true));
+		table.put("-", new SymbolTableEntry('-', true));
+		table.put("/", new SymbolTableEntry('/', true));
+		table.put("=", new SymbolTableEntry('=', true));
+		table.put("<", new SymbolTableEntry('<', true));
+		table.put(">", new SymbolTableEntry('>', true));
+		table.put("*", new SymbolTableEntry('*', true));
+		table.put(".", new SymbolTableEntry('.', true));
+		table.put(":", new SymbolTableEntry(':', true));
+		table.put("IF", new SymbolTableEntry(Parser.IF, true));
+		table.put("ELSE", new SymbolTableEntry(Parser.ELSE, true));
+		table.put("END_IF", new SymbolTableEntry(Parser.END_IF, true));
+		table.put("PRINT", new SymbolTableEntry(Parser.PRINT, true));
+		table.put("CLASS", new SymbolTableEntry(Parser.CLASS, true));
+		table.put("VOID", new SymbolTableEntry(Parser.VOID, true));
+		table.put("LONG", new SymbolTableEntry(Parser.LONG, true));
+		table.put("UINT", new SymbolTableEntry(Parser.UINT, true));
+		table.put("DOUBLE", new SymbolTableEntry(Parser.DOUBLE, true));
+		table.put(">=", new SymbolTableEntry(Parser.CMP_GE, true));
+		table.put("<=", new SymbolTableEntry(Parser.CMP_LE, true));
+		table.put("==", new SymbolTableEntry(Parser.CMP_EQUAL, true));
+		table.put("!!", new SymbolTableEntry(Parser.CMP_NOT_EQUAL, true));
+		table.put("-=", new SymbolTableEntry(Parser.SUB_ASIGN, true));
+		table.put("DO", new SymbolTableEntry(Parser.DO, true));
+		table.put("UNTIL", new SymbolTableEntry(Parser.UNTIL, true));
+		table.put("IMPL", new SymbolTableEntry(Parser.IMPL));
+		table.put("FOR", new SymbolTableEntry(Parser.FOR));
+		table.put("RETURN", new SymbolTableEntry(Parser.RETURN));        
+		table.put("TOD", new SymbolTableEntry(Parser.TOD));
+		table.put("STRING", new SymbolTableEntry(Parser.STRING));
 	}
 
-	public static String getTokenDescription(short token)
+	public String getTokenDescription(short token)
 	{
 		if (token == 0) return "Fin de archivo";
 		if (token < 256) return "'" + (char)token + "'";
@@ -113,8 +102,8 @@ public class SymbolTable {
 		if (token == Parser.DOUBLE) return "CTE_DOUBLE";
 		if (token == Parser.ID) return "ID";
 
-		for (Entry<String, Short> entry : predefinedTable.entrySet())
-			if (entry.getValue() == token)
+		for (Entry<String, SymbolTableEntry> entry : table.entrySet())
+			if (entry.getValue().getTokenID() == token)
 				return entry.getKey();
 
 		return "TOKEN NO CONOCIDO";

@@ -4,22 +4,23 @@ public class SymbolTableEntry {
 
 	private int tokenID;
 	private String lexeme;
-	private TokenLocation location;
+	private boolean predefined;
 	
 	public SymbolTableEntry(int tokenID) {
 		this.tokenID = tokenID;
+		this.predefined = false;
 	}
 	
 	public SymbolTableEntry(int tokenID, String lexeme) {
 		this.tokenID = tokenID;
 		this.lexeme = lexeme;
+		this.predefined = false;
 	}
 	
-	public SymbolTableEntry(int tokenID, String lexeme, TokenLocation location) {
+	public SymbolTableEntry(int tokenID, boolean predefined) {
 		this.tokenID = tokenID;
-		this.lexeme = lexeme;
-		this.location = location;
-	}
+		this.predefined = predefined;
+	}	
 	
 	public int getTokenID()
 	{
@@ -31,22 +32,22 @@ public class SymbolTableEntry {
 		lexeme = "-" + lexeme;
 	}
 	
-	public TokenLocation getLocation()
-	{
-		return location;
-	}
-	
 	public String getLexeme()
 	{
 		return lexeme;
+	}
+	
+	public boolean isPredefined()
+	{
+		return this.predefined;
 	}
 	
 	@Override
 	public String toString()
 	{
 		if (lexeme != null)
-			return "TokenID: " + tokenID + "\tUbicacion: " + location + "\tLexema: '" + lexeme + "'";
+			return "TokenID: " + tokenID + "\tLexema: '" + lexeme + "'";
 		else
-			return "TokenID: " + tokenID + "\tUbicacion: " + location;
+			return "TokenID: " + tokenID;
 	}
 }
