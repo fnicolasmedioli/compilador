@@ -86,6 +86,20 @@ public class Compilador {
 		reportSyntaxError(msg, null);
 	}
 	
+	public static void reportSemanticError(String msg)
+	{
+		reportSemanticError(msg, null);
+	}
+	
+	public static void reportSemanticError(String msg, TokenLocation loc)
+	{
+		if (loc != null)
+			CompilerMessagePrinter.error("[Semantico: " + loc + "] " + msg);
+		else
+			CompilerMessagePrinter.error("[Semantico] " + msg);
+		errorCount++;
+	}
+	
 	public static void reportSyntaxError(String msg, TokenLocation loc)
 	{
 		if (loc != null)

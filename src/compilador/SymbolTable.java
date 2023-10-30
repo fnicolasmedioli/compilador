@@ -20,6 +20,12 @@ public class SymbolTable {
 		return entry;
 	}
 	
+	public SymbolTableEntry addNewEntry(SymbolTableEntry entry, String key)
+	{
+		table.put(key, entry);
+		return entry;
+	}
+	
 	public SymbolTableEntry getEntry(String entryKey)
 	{
 		return table.get(entryKey);
@@ -108,4 +114,5 @@ public class SymbolTable {
 
 		return "TOKEN NO CONOCIDO";
 	}
+	
 }
