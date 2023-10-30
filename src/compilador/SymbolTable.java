@@ -84,11 +84,11 @@ public class SymbolTable {
 		table.put("-=", new SymbolTableEntry(Parser.SUB_ASIGN, true));
 		table.put("DO", new SymbolTableEntry(Parser.DO, true));
 		table.put("UNTIL", new SymbolTableEntry(Parser.UNTIL, true));
-		table.put("IMPL", new SymbolTableEntry(Parser.IMPL));
-		table.put("FOR", new SymbolTableEntry(Parser.FOR));
-		table.put("RETURN", new SymbolTableEntry(Parser.RETURN));        
-		table.put("TOD", new SymbolTableEntry(Parser.TOD));
-		table.put("STRING", new SymbolTableEntry(Parser.STRING));
+		table.put("IMPL", new SymbolTableEntry(Parser.IMPL, true));
+		table.put("FOR", new SymbolTableEntry(Parser.FOR, true));
+		table.put("RETURN", new SymbolTableEntry(Parser.RETURN, true));        
+		table.put("TOD", new SymbolTableEntry(Parser.TOD, true));
+		table.put("STRING", new SymbolTableEntry(Parser.STRING, true));
 	}
 
 	public String getTokenDescription(short token)
