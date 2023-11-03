@@ -1,5 +1,0 @@
-package compilador.CompatibilityTable;
-
-public class SumCompatibilityTable extends TypeCompatibilityTable {
-    
-}

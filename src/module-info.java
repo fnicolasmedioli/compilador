@@ -4,5 +4,5 @@
 /**
  * 
  */
-interface compilador {
+interface compiler {
 }

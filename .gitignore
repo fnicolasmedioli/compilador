@@ -1,5 +1,5 @@
-src/compilador/Parser.java
-src/compilador/ParserVal.java
+src/compiler/Parser.java
+src/compiler/ParserVal.java
 
 ### IntelliJ IDEA ###
 out/
