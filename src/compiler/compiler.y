@@ -60,7 +60,7 @@ sentencia_declarativa
                 new SyntacticStructureResult("Declaracion de variables primitivas", getTokenLocation($1))
             );
 
-            semanticHelper.declarePrimitivesIfPossible($2, getCurrentScopeStr());
+            semanticHelper.declarePrimitiveList($2, getCurrentScopeStr(), getSTEntry($1));
         }
     | ID lista_identificadores ','
         {
@@ -68,7 +68,7 @@ sentencia_declarativa
                 new SyntacticStructureResult("Declaracion de variables tipo objeto", getTokenLocation($1))
             );
 
-            semanticHelper.declareObjectsIfPossible($2, getCurrentScopeStr(), (LocatedSymbolTableEntry)$1.obj);
+            semanticHelper.declareObjectList($2, getCurrentScopeStr(), (LocatedSymbolTableEntry)$1.obj);
         }
     | definicion_funcion ','
         {
@@ -314,7 +314,13 @@ acceso_atributo
 
 definicion_clase
     : CLASS ID '{' cuerpo_clase '}'
+        {
+            semanticHelper.declareClass(getCurrentScopeStr(), (LocatedSymbolTableEntry)$2.obj);
+        }
     | CLASS ID '{' '}'
+        {
+            semanticHelper.declareClass(getCurrentScopeStr(), (LocatedSymbolTableEntry)$2.obj);
+        }
     ;
 
 cuerpo_clase

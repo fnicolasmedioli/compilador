@@ -1,23 +1,32 @@
 package compiler;
 
 import java.util.LinkedList;
+import java.util.HashMap;
 
 public class SemanticHelper {
 
 	private final Compiler compiler;
+	private final SymbolTable symbolTable;
+
+	private final static HashMap<Integer, DataType> tokenIDtoDataType;
+
+	static {
+		tokenIDtoDataType = new HashMap<>();
+		tokenIDtoDataType.put((int)Parser.DOUBLE, DataType.DOUBLE);
+		tokenIDtoDataType.put((int)Parser.STRING, DataType.STRING);
+		tokenIDtoDataType.put((int)Parser.UINT, DataType.UINT);
+		tokenIDtoDataType.put((int)Parser.LONG, DataType.LONG);
+	}
 
 	public SemanticHelper(Compiler compiler)
 	{
 		this.compiler = compiler;
+		this.symbolTable = compiler.getSymbolTable();
 	}
 	
 	private boolean alreadyDeclaredInScope(String id, String scope)
 	{
-		SymbolTable symbolTable = compiler.getSymbolTable();
-		
-		if (symbolTable.getEntry(id + ":" + scope) != null)
-			return true;
-		return false;
+		return symbolTable.getEntry(id + ":" + scope) != null;
 	}
 	
 	private String removeScopeLevel(String s)
@@ -34,10 +43,8 @@ public class SemanticHelper {
 	 * @param scope
 	 * @return
 	 */
-	public SymbolTableEntry getEntryByScope(String id, String scope)
+	private SymbolTableEntry getEntryByScope(String id, String scope)
 	{
-		SymbolTable symbolTable = compiler.getSymbolTable();
-		
 		String idscope = id + ":" + scope;
 		
 		while (true)
@@ -46,7 +53,7 @@ public class SemanticHelper {
 			
 			if (stEntry != null) return stEntry;
 			
-			if (idscope.length() < 6 || idscope.substring(idscope.length() - 6).equals("global"))
+			if (idscope.length() < 6 || idscope.endsWith("global"))
 				return null;
 			
 			idscope = removeScopeLevel(idscope);
@@ -55,12 +62,17 @@ public class SemanticHelper {
 				return null;
 		}
 	}
-	
-	public void declarePrimitivesIfPossible(ParserVal list, String scope)
+
+	/**
+	 * Add for each ID of the list, an entry in the symbol table
+	 * as ID:[scope] with attributes, if possible.
+	 * @param list Must be a list of LocatedSymbolTableEntry, wrapped into a ParserVal
+	 * @param scope Scope to declare the vars in
+	 * @param dataType
+	 */
+	private void declareIDList(ParserVal list, String scope, DataType dataType)
 	{
-		SymbolTable symbolTable = compiler.getSymbolTable();
-		
-		for (LocatedSymbolTableEntry e: ((LinkedList<LocatedSymbolTableEntry>)(list).obj))
+		for (LocatedSymbolTableEntry e: (LinkedList<LocatedSymbolTableEntry>)(list.obj))
 			if (alreadyDeclaredInScope(e.getSTEntry().getLexeme(), scope))
 				compiler.reportSemanticError(
 					"Identificador ya definido en el ambito local: " + e.getSTEntry().getLexeme(),
@@ -68,18 +80,30 @@ public class SemanticHelper {
 				);
 			else
 				symbolTable.addNewEntry(
-                    new SymbolTableEntry(
-                        Parser.ID,
-                        e.getSTEntry().getLexeme()
-                    ),
-                    e.getSTEntry().getLexeme() + ":" + scope
-                );
+					new SymbolTableEntry(
+						Parser.ID,
+						e.getSTEntry().getLexeme()
+					),
+					e.getSTEntry().getLexeme() + ":" + scope
+				)
+				.setAttrib(AttribKey.ID_TYPE, IDType.VAR_ATTRIB)
+				.setAttrib(AttribKey.DATA_TYPE, dataType);
+	}
+
+	public void declarePrimitiveList(ParserVal list, String scope, SymbolTableEntry dataTypeEntry)
+	{
+		DataType dataType = tokenIDtoDataType.get(dataTypeEntry.getTokenID());
+		if (dataType == null)
+		{
+			System.out.println("Error critico!");
+			return;
+		}
+		declareIDList(list, scope, dataType);
 	}
 	
-	public void declareObjectsIfPossible(ParserVal list, String scope, LocatedSymbolTableEntry classTokenData)
+	public void declareObjectList(ParserVal list, String scope, LocatedSymbolTableEntry classTokenData)
 	{
-		SymbolTable symbolTable = compiler.getSymbolTable();
-		
+		// Find symbol table entry for class ID if reachable
 		SymbolTableEntry classEntry = getEntryByScope(classTokenData.getSTEntry().getLexeme(), scope);
 		
 		if (classEntry == null)
@@ -93,7 +117,26 @@ public class SemanticHelper {
 		
 		/* Aca se deberia chequar si realmente es una clase o un id de una variable, por ejemplo */
 		
-		declarePrimitivesIfPossible(list, scope);
+		declareIDList(list, scope, DataType.OBJECT);
 	}
 
+	public void declareClass(String scope, LocatedSymbolTableEntry classTokenData)
+	{
+		SymbolTableEntry classEntry = getEntryByScope(classTokenData.getSTEntry().getLexeme(), scope);
+
+		if (alreadyDeclaredInScope(classTokenData.getSTEntry().getLexeme(), scope))
+			compiler.reportSemanticError(
+				"Clase ya definida en el ambito local: " + classTokenData.getSTEntry().getLexeme(),
+					classTokenData.getLocation()
+			);
+		else
+			symbolTable.addNewEntry(
+				new SymbolTableEntry(
+					Parser.ID,
+					classTokenData.getSTEntry().getLexeme()
+				),
+			classTokenData.getSTEntry().getLexeme() + ":" + scope
+			)
+			.setAttrib(AttribKey.ID_TYPE, IDType.CLASSNAME);
+	}
 }

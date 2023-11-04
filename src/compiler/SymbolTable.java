@@ -40,11 +40,14 @@ public class SymbolTable {
 	
 		return true;
 	}
-	
+
 	@Override
 	public String toString()
 	{
 		StringBuilder sb = new StringBuilder();
+
+		// sb.append(String.format("| %-15s | %s | %15s |%n\n", "feqfbewqhfewjfewfjew", "Token ID", "Lexema"));
+
 		for (String key : table.keySet())
 		{
 			sb.append("Clave: ");
