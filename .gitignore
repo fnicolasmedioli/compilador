@@ -1,3 +1,6 @@
+src/compiler/Parser.java
+src/compiler/ParserVal.java
+
 ### IntelliJ IDEA ###
 out/
 !**/src/main/**/out/
