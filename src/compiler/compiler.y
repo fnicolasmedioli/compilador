@@ -43,12 +43,26 @@ tipo_basico
 lista_identificadores
     : lista_identificadores ';' ID
         {
-            ((LinkedList<LocatedSymbolTableEntry>)($1.obj)).add((LocatedSymbolTableEntry)$3.obj);            
+            ((LinkedList<LocatedSymbolTableEntry>)($1.obj)).add((LocatedSymbolTableEntry)$3.obj);
         }
     | ID
         {
             LinkedList<LocatedSymbolTableEntry> lista = new LinkedList<>();
             lista.add((LocatedSymbolTableEntry)$1.obj);
+            $$ = new ParserVal(lista);
+        }
+    ;
+
+acceso_atributo
+    : acceso_atributo '.' ID
+        {
+            ((LinkedList<LocatedSymbolTableEntry>)($1.obj)).add((LocatedSymbolTableEntry)$3.obj);
+        }
+    | ID '.' ID
+        {
+            LinkedList<LocatedSymbolTableEntry> lista = new LinkedList<>();
+            lista.add((LocatedSymbolTableEntry)$1.obj);
+            lista.add((LocatedSymbolTableEntry)$3.obj);
             $$ = new ParserVal(lista);
         }
     ;
@@ -68,19 +82,19 @@ sentencia_declarativa
     : declaracion_variable
         {
             compiler.addFoundSyntacticStructure(
-                new SyntacticStructureResult("Declaracion de variables", getTokenLocation($1))
+                new SyntacticStructureResult("Declaración de variable/s", getTokenLocation($1))
             );
         }
     | definicion_funcion ','
         {
             compiler.addFoundSyntacticStructure(
-                new SyntacticStructureResult("Definicion de funcion", getTokenLocation($1))
+                new SyntacticStructureResult("Definición de función", getTokenLocation($1))
             );
         }
     | definicion_clase ','
         {
             compiler.addFoundSyntacticStructure(
-                new SyntacticStructureResult("Definicion de clase", getTokenLocation($1))
+                new SyntacticStructureResult("Definición de clase", getTokenLocation($1))
             );
         }
     | implementacion ','
@@ -95,38 +109,168 @@ sentencia_ejecutable
     : ID op_asignacion_aumentada expr ','
         {
             compiler.addFoundSyntacticStructure(
-                new SyntacticStructureResult("Asignacion a variable", getTokenLocation($1))
+                new SyntacticStructureResult("Asignación a variable", getTokenLocation($1))
             );
 
-            SymbolTableEntry classEntry = semanticHelper.getEntryByScope(getSTEntry($1).getLexeme(), getCurrentScopeStr());
-            if (classEntry == null)
-                compiler.reportSemanticError("Variable no encontrada", getTokenLocation($1));
-            else if (classEntry.getAttrib(AttribKey.ID_TYPE) != IDType.VAR_ATTRIB)
-                compiler.reportSemanticError("El identificador no es una variable", getTokenLocation($1));
+            String varLexeme = getSTEntry($1).getLexeme();
+            SymbolTableEntry varEntry = semanticHelper.getEntryByScope(varLexeme, getCurrentScopeStr());
+
+            if (varEntry == null)
+            {
+                compiler.reportSemanticError("Variable no encontrada: " + varLexeme, getTokenLocation($1));
+                break;
+            }
+
+            if (varEntry.getAttrib(AttribKey.ID_TYPE) != IDType.VAR_ATTRIB)
+            {
+                compiler.reportSemanticError(String.format("El identificador '%s' no es una variable", varLexeme), getTokenLocation($1));
+                break;
+            }                
         }
     | acceso_atributo op_asignacion_aumentada expr ','
         {
+            LinkedList<LocatedSymbolTableEntry> tokenListData = (LinkedList<LocatedSymbolTableEntry>)($1.obj);
+
             compiler.addFoundSyntacticStructure(
-                new SyntacticStructureResult("Asignacion a atributo", getTokenLocation($1))
-            );
+                new SyntacticStructureResult("Asignación a atributo", tokenListData.getFirst().getLocation())
+            );            
+
+            LocatedSymbolTableEntry[] tokenListArray = tokenListData.toArray(new LocatedSymbolTableEntry[tokenListData.size()]);
+
+            // La primera debe ser una variable
+
+            String varLexeme = tokenListData.getFirst().getSTEntry().getLexeme();
+            String varEntryKey = semanticHelper.getEntryKeyByScope(varLexeme, getCurrentScopeStr());
+            SymbolTableEntry varEntry = symbolTable.getEntry(varEntryKey);
+
+            if (varEntry == null)
+            {
+                compiler.reportSemanticError("Variable no encontrada: " + varLexeme, tokenListData.getFirst().getLocation());
+                break;
+            }
+
+            if (varEntry.getAttrib(AttribKey.ID_TYPE) != IDType.VAR_ATTRIB)
+            {
+                compiler.reportSemanticError(String.format("El identificador '%s' no es una variable", varLexeme), tokenListData.getFirst().getLocation());
+                break;
+            }
+            
+            if (varEntry.getAttrib(AttribKey.DATA_TYPE) != DataType.OBJECT)
+            {
+                compiler.reportSemanticError(String.format("La variable '%s' no es de tipo objeto", varLexeme), getTokenLocation($1));
+                break;
+            }
+
+            String lastClassEntryKey = (String)varEntry.getAttrib(AttribKey.INSTANCE_OF);
+            String lastClassLexeme = symbolTable.getEntry(lastClassEntryKey).getLexeme();
+
+            // Chequar para el resto de la cadena de atributos, si estan definidos en la clase, su tipo, etc
+
+            for (int i = 1; i < tokenListArray.length; i++)
+            {
+                boolean lastAttrib = i + 1 == tokenListArray.length;
+
+                String attribLexeme = tokenListArray[i].getSTEntry().getLexeme();
+                String attribScope = semanticHelper.invertScope(lastClassEntryKey);
+
+                // Existe en la clase ???
+
+                SymbolTableEntry attribEntry = symbolTable.getEntry(attribLexeme + ":" + attribScope);
+
+                if (attribEntry == null)
+                {
+                    compiler.reportSemanticError(String.format("El atributo '%s' no esta definido para la clase '%s'", attribLexeme, lastClassLexeme), tokenListArray[i].getLocation());
+                    break;
+                }
+
+                if (attribEntry.getAttrib(AttribKey.ID_TYPE) != IDType.VAR_ATTRIB)
+                {
+                    compiler.reportSemanticError(String.format("El identificador '%s' no es un atributo", attribLexeme), tokenListArray[i].getLocation());
+                    break;
+                }
+
+                if (!lastAttrib && attribEntry.getAttrib(AttribKey.DATA_TYPE) != DataType.OBJECT)
+                {
+                    compiler.reportSemanticError(String.format("El atributo '%s' no es de tipo objeto", attribLexeme), tokenListArray[i].getLocation());
+                    break;
+                }
+
+                if (!lastAttrib)
+                {
+                    lastClassEntryKey = (String)attribEntry.getAttrib(AttribKey.INSTANCE_OF);
+                    lastClassLexeme = symbolTable.getEntry(lastClassEntryKey).getLexeme();
+                }
+
+            }
         }
     | ID '.' invocacion_funcion ','
         {
             compiler.addFoundSyntacticStructure(
-                new SyntacticStructureResult("Invocacion a metodo", getTokenLocation($1))
+                new SyntacticStructureResult("Invocación a método", getTokenLocation($1))
             );
+
+            String varLexeme = getSTEntry($1).getLexeme();
+            String methodLexeme = getSTEntry($3).getLexeme();
+            
+            String varEntryKey = semanticHelper.getEntryKeyByScope(varLexeme, getCurrentScopeStr());
+
+            if (varEntryKey == null)
+            {
+                compiler.reportSemanticError("Variable no encontrada: " + varLexeme, getTokenLocation($1));
+                break;
+            }
+            
+            SymbolTableEntry varEntry = symbolTable.getEntry(varEntryKey);
+            
+            if (varEntry.getAttrib(AttribKey.ID_TYPE) != IDType.VAR_ATTRIB)
+            {
+                compiler.reportSemanticError(String.format("El identificador '%s' no es una variable", varLexeme), getTokenLocation($1));
+                break;
+            }
+            
+            if (varEntry.getAttrib(AttribKey.DATA_TYPE) != DataType.OBJECT)
+            {
+                compiler.reportSemanticError(String.format("La variable '%s' no es de tipo objeto", varLexeme), getTokenLocation($1));
+                break;
+            }
+
+            String classEntryKey = (String)varEntry.getAttrib(AttribKey.INSTANCE_OF);
+            String classLexeme = symbolTable.getEntry(classEntryKey).getLexeme();
+            String methodEntryKey = methodLexeme + ":" + semanticHelper.removeLexemeFromKey(classEntryKey) + ":" + classLexeme;
+            SymbolTableEntry methodEntry = symbolTable.getEntry(methodEntryKey);
+
+            if (methodEntry == null)
+            {
+                compiler.reportSemanticError(String.format("El método '%s' no está definido para la clase '%s'", methodLexeme, classLexeme), getTokenLocation($3));
+                break;
+            }
+
+            if (methodEntry.getAttrib(AttribKey.ID_TYPE) != IDType.FUNC_METHOD)
+            {
+                compiler.reportSemanticError(String.format("El identificador '%s' no es un método en la clase '%s'", methodLexeme, classLexeme), getTokenLocation($3));
+                break;
+            }
         }
     | acceso_atributo '.' invocacion_funcion ','
         {
             compiler.addFoundSyntacticStructure(
-                new SyntacticStructureResult("Invocacion a metodo", getTokenLocation($1))
+                new SyntacticStructureResult("Invocación a método", getTokenLocation($1))
             );
         }
     | invocacion_funcion ','
         {
             compiler.addFoundSyntacticStructure(
-                new SyntacticStructureResult("Invocacion a funcion", getTokenLocation($1))
+                new SyntacticStructureResult("Invocación a función", getTokenLocation($1))
             );
+
+            String functionLexeme = getSTEntry($1).getLexeme();
+            SymbolTableEntry functionEntry = semanticHelper.getEntryByScope(functionLexeme, getCurrentScopeStr());
+
+            if (functionEntry == null)
+            {
+                compiler.reportSemanticError(String.format("La función '%s' no es alcanzable", functionLexeme), getTokenLocation($1));
+                break;
+            }
         }
     | sentencia_if ','
         {
@@ -174,7 +318,13 @@ lista_sentencias_ejecutables
 
 invocacion_funcion
     : ID '(' ')'
+        {
+            // Chequar que coincidan los argumentos
+        }
     | ID '(' parametro_real ')'
+        {
+            // Chequar que coincidan los argumentos
+        }
     | ID '(' error ')'
         {
             compiler.reportSyntaxError("Error en invocacion a metodo", getTokenLocation($1));
@@ -244,20 +394,19 @@ factor
         {
             // Chequear alcance y tipo de ID
 
-            SymbolTableEntry referredSTEntry = semanticHelper.getEntryByScope(getSTEntry($1).getLexeme(), getCurrentScopeStr());
+            String varLexeme = getSTEntry($1).getLexeme();
+            SymbolTableEntry varEntry = semanticHelper.getEntryByScope(varLexeme, getCurrentScopeStr());
 
-            if (referredSTEntry == null)
+            if (varEntry == null)
             {
-                compiler.reportSemanticError("Variable/atributo no alcanzable", getTokenLocation($1));
+                compiler.reportSemanticError("Variable no alcanzable", getTokenLocation($1));
+                break;
             }
-            else
+
+            if (varEntry.getAttrib(AttribKey.ID_TYPE) != IDType.VAR_ATTRIB)
             {
-                if (referredSTEntry.getAttrib(AttribKey.ID_TYPE) != IDType.VAR_ATTRIB)
-                    compiler.reportSemanticError("El identificador " + referredSTEntry.getLexeme() + "no es de tipo var/attribute", getTokenLocation($1));
-                else
-                {
-                    /* Todo ok */
-                }
+                compiler.reportSemanticError("El identificador " + varEntry.getLexeme() + "no es de tipo var/attribute", getTokenLocation($1));
+                break;
             }
         }
     | constante
@@ -295,50 +444,54 @@ cerrar_scope
 procedimiento
     : VOID id_ambito '(' tipo_basico ID ')' abrir_scope lista_sentencias cerrar_scope
         {
-            String idLexeme = getSTEntry($2).getLexeme();
+            String funcLexeme = getSTEntry($2).getLexeme();
 
-            if (semanticHelper.alreadyDeclaredInScope(idLexeme, getCurrentScopeStr()))
-                compiler.reportSemanticError("Identificador ya declarado en el ámbito local", getTokenLocation($2));
-            else
+            if (semanticHelper.alreadyDeclaredInScope(funcLexeme, getCurrentScopeStr()))
             {
-                semanticHelper.declareFunction(getCurrentScopeStr(), $2.obj);
-
-                String scopeAdentro = getCurrentScopeStr() + ":" + getSTEntry($2).getLexeme();
-                semanticHelper.declareArg(scopeAdentro, $5.obj, $4.obj);
+                compiler.reportSemanticError("Identificador ya declarado en el ámbito local", getTokenLocation($2));
+                break;
             }
+
+            semanticHelper.declareFunction(getCurrentScopeStr(), $2.obj);
+
+            String scopeAdentro = getCurrentScopeStr() + ":" + getSTEntry($2).getLexeme();
+            semanticHelper.declareArg(scopeAdentro, $5.obj, $4.obj);
         }
     | VOID id_ambito '(' ')' abrir_scope lista_sentencias cerrar_scope
         {
-            String idLexeme = getSTEntry($2).getLexeme();
+            String funcLexeme = getSTEntry($2).getLexeme();
 
-            if (semanticHelper.alreadyDeclaredInScope(idLexeme, getCurrentScopeStr()))
-                compiler.reportSemanticError("Identificador ya declarado en el ámbito local", getTokenLocation($2));
-            else
+            if (semanticHelper.alreadyDeclaredInScope(funcLexeme, getCurrentScopeStr()))
             {
-                semanticHelper.declareFunction(getCurrentScopeStr(), $2.obj);
+                compiler.reportSemanticError("Identificador ya declarado en el ámbito local", getTokenLocation($2));
+                break;
             }
+
+            semanticHelper.declareFunction(getCurrentScopeStr(), $2.obj);
         }
     | VOID id_ambito '(' tipo_basico ID ')' abrir_scope cerrar_scope
         {
-            String idLexeme = getSTEntry($2).getLexeme();
+            String funcLexeme = getSTEntry($2).getLexeme();
 
-            if (semanticHelper.alreadyDeclaredInScope(idLexeme, getCurrentScopeStr()))
-                compiler.reportSemanticError("Identificador ya declarado en el ámbito local", getTokenLocation($2));
-            else
+            if (semanticHelper.alreadyDeclaredInScope(funcLexeme, getCurrentScopeStr()))
             {
-                semanticHelper.declareFunction(getCurrentScopeStr(), $2.obj);
+                compiler.reportSemanticError("Identificador ya declarado en el ámbito local", getTokenLocation($2));
+                break;
             }
+
+            semanticHelper.declareFunction(getCurrentScopeStr(), $2.obj);
         }
     | VOID id_ambito '(' ')' abrir_scope cerrar_scope
         {
-            String idLexeme = getSTEntry($2).getLexeme();
+            String funcLexeme = getSTEntry($2).getLexeme();
 
-            if (semanticHelper.alreadyDeclaredInScope(idLexeme, getCurrentScopeStr()))
-                compiler.reportSemanticError("Identificador ya declarado en el ámbito local", getTokenLocation($2));
-            else
+            if (semanticHelper.alreadyDeclaredInScope(funcLexeme, getCurrentScopeStr()))
             {
-                semanticHelper.declareFunction(getCurrentScopeStr(), $2.obj);
+                compiler.reportSemanticError("Identificador ya declarado en el ámbito local", getTokenLocation($2));
+                break;
             }
+
+            semanticHelper.declareFunction(getCurrentScopeStr(), $2.obj);
         }
     | VOID error '}'
         {
@@ -355,10 +508,7 @@ metodo
     : procedimiento
     ;
 
-acceso_atributo
-    : ID '.' ID
-    | acceso_atributo '.' ID
-    ;
+
 
 definicion_clase
     : CLASS id_ambito abrir_scope cuerpo_clase cerrar_scope
@@ -434,7 +584,7 @@ id_implementacion
         {
             // Chequear alcance y tipo de ID
 
-            String entryKey = semanticHelper.getKeyByScope(getSTEntry($1).getLexeme(), getCurrentScopeStr());
+            String entryKey = semanticHelper.getEntryKeyByScope(getSTEntry($1).getLexeme(), getCurrentScopeStr());
 
             SymbolTableEntry referredSTEntry = (entryKey != null) ? symbolTable.getEntry(entryKey) : null;
 

@@ -1,7 +1,5 @@
 package compiler;
 
-import com.sun.org.apache.bcel.internal.generic.FSUB;
-
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.HashMap;
@@ -67,7 +65,7 @@ public class SemanticHelper {
 		}
 	}
 
-	public String getKeyByScope(String id, String scope)
+	public String getEntryKeyByScope(String id, String scope)
 	{
 		String idscope = id + ":" + scope;
 
@@ -90,12 +88,26 @@ public class SemanticHelper {
 
 	/**
 	 * Elimina el lexema del idscope
-	 * Ejemplo: saludar:global:persona -> global:persona
+	 * Funcionamiento: saludar:global:persona -> global:persona
 	 */
 	public String removeLexemeFromKey(String key)
 	{
 		int index = key.indexOf(":global");
 		return key.substring(index + 1);
+	}
+
+	/**
+	 * Útil cuando se require generar el scope para métodos, a partir del key de la clase
+	 * Ejemplo:
+	 *   Clave clase: persona:global
+	 *   La clave del método sería: nombre_metodo:global:persona
+	 * @param classScope
+	 * @return
+	 */
+	public String invertScope(String classScope)
+	{
+		int i = classScope.indexOf(":global");
+		return classScope.substring(i+1) + ":" + classScope.substring(0, i);
 	}
 
 	/**
@@ -105,8 +117,10 @@ public class SemanticHelper {
 	 * @param scope Scope to declare the vars in
 	 * @param dataType
 	 */
-	private void declareIDList(ParserVal list, String scope, DataType dataType)
+	private LinkedList<SymbolTableEntry> declareIDList(ParserVal list, String scope, DataType dataType)
 	{
+		LinkedList<SymbolTableEntry> entries = new LinkedList<>();
+
 		for (LocatedSymbolTableEntry e: (LinkedList<LocatedSymbolTableEntry>)(list.obj))
 			if (alreadyDeclaredInScope(e.getSTEntry().getLexeme(), scope))
 				compiler.reportSemanticError(
@@ -114,15 +128,18 @@ public class SemanticHelper {
 					e.getLocation()
 				);
 			else
-				symbolTable.addNewEntry(
-					new SymbolTableEntry(
-						Parser.ID,
-						e.getSTEntry().getLexeme()
-					),
-					e.getSTEntry().getLexeme() + ":" + scope
-				)
-				.setAttrib(AttribKey.ID_TYPE, IDType.VAR_ATTRIB)
-				.setAttrib(AttribKey.DATA_TYPE, dataType);
+				entries.push(
+					symbolTable.addNewEntry(
+						new SymbolTableEntry(
+							Parser.ID,
+							e.getSTEntry().getLexeme()
+						),
+						e.getSTEntry().getLexeme() + ":" + scope
+					)
+					.setAttrib(AttribKey.ID_TYPE, IDType.VAR_ATTRIB)
+					.setAttrib(AttribKey.DATA_TYPE, dataType)
+				);
+		return entries;
 	}
 
 	public void declarePrimitiveList(ParserVal list, String scope, SymbolTableEntry dataTypeEntry)
@@ -139,9 +156,9 @@ public class SemanticHelper {
 	public void declareObjectList(ParserVal list, String scope, LocatedSymbolTableEntry classTokenData)
 	{
 		// Find symbol table entry for class ID if reachable
-		SymbolTableEntry classEntry = getEntryByScope(classTokenData.getSTEntry().getLexeme(), scope);
+		String classEntryKey = getEntryKeyByScope(classTokenData.getSTEntry().getLexeme(), scope);
 		
-		if (classEntry == null)
+		if (classEntryKey == null)
 		{
 			compiler.reportSemanticError(
 				"Tipo de dato no definido: " + classTokenData.getSTEntry().getLexeme(),
@@ -149,10 +166,16 @@ public class SemanticHelper {
 			);
 			return;
 		}
+
+		SymbolTableEntry classEntry = symbolTable.getEntry(classEntryKey);
 		
 		/* Aca se deberia chequar si realmente es una clase o un id de una variable, por ejemplo */
 		
-		declareIDList(list, scope, DataType.OBJECT);
+		LinkedList<SymbolTableEntry> declaredEntries = declareIDList(list, scope, DataType.OBJECT);
+
+		for (SymbolTableEntry entry : declaredEntries)
+			entry.setAttrib(AttribKey.INSTANCE_OF, classEntryKey);
+
 	}
 
 	public void declareClass(String scope, LocatedSymbolTableEntry classTokenData)
