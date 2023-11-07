@@ -30,6 +30,7 @@ public class Compiler {
 			yaccSuccess = parser.yyparse() == 0;
 		} catch (Exception e) {
 			yaccSuccess = false;
+			messagePrinter.error("Error en yyparse()");
 			System.out.println(e.getMessage());
 		}
 

@@ -53,22 +53,23 @@ lista_identificadores
         }
     ;
 
-sentencia_declarativa
+declaracion_variable
     : tipo_basico lista_identificadores ','
         {
-            compiler.addFoundSyntacticStructure(
-                new SyntacticStructureResult("Declaracion de variables primitivas", getTokenLocation($1))
-            );
-
             semanticHelper.declarePrimitiveList($2, getCurrentScopeStr(), getSTEntry($1));
         }
     | ID lista_identificadores ','
         {
-            compiler.addFoundSyntacticStructure(
-                new SyntacticStructureResult("Declaracion de variables tipo objeto", getTokenLocation($1))
-            );
-
             semanticHelper.declareObjectList($2, getCurrentScopeStr(), (LocatedSymbolTableEntry)$1.obj);
+        }
+    ;
+
+sentencia_declarativa
+    : declaracion_variable
+        {
+            compiler.addFoundSyntacticStructure(
+                new SyntacticStructureResult("Declaracion de variables", getTokenLocation($1))
+            );
         }
     | definicion_funcion ','
         {
@@ -85,7 +86,7 @@ sentencia_declarativa
     | implementacion ','
         {
             compiler.addFoundSyntacticStructure(
-                new SyntacticStructureResult("Implementacion de metodo", getTokenLocation($1))
+                new SyntacticStructureResult("Sentencia IMPL", getTokenLocation($1))
             );
         }
     ;
@@ -248,11 +249,26 @@ term
         
 factor
     : ID
-    | constante
-    ;
+        {
+            // Chequear alcance y tipo de ID
 
-parametro_formal
-    : tipo_basico ID
+            SymbolTableEntry referredSTEntry = semanticHelper.getEntryByScope(getSTEntry($1).getLexeme(), getCurrentScopeStr());
+
+            if (referredSTEntry == null)
+            {
+                compiler.reportSemanticError("Variable/atributo no alcanzable", getTokenLocation($1));
+            }
+            else
+            {
+                if (referredSTEntry.getAttrib(AttribKey.ID_TYPE) != IDType.VAR_ATTRIB)
+                    compiler.reportSemanticError("El identificador " + referredSTEntry.getLexeme() + "no es de tipo var/attribute", getTokenLocation($1));
+                else
+                {
+                    /* Todo ok */
+                }
+            }
+        }
+    | constante
     ;
 
 parametro_real
@@ -270,27 +286,68 @@ id_ambito
         }
     ;
 
-procedimiento_abrir_scope
+abrir_scope
     :  '{'
         {
             addToCurrentScope(getCurrentID());
         }
     ;
 
-procedimiento_cerrar_scope
-    : lista_sentencias '}'
-        {
-            removeScope();
-        }
-    | '}'
+cerrar_scope
+    :  '}'
         {
             removeScope();
         }
     ;
 
 procedimiento
-    : VOID id_ambito '(' parametro_formal ')' procedimiento_abrir_scope procedimiento_cerrar_scope
-    | VOID id_ambito '(' ')' procedimiento_abrir_scope  procedimiento_cerrar_scope
+    : VOID id_ambito '(' tipo_basico ID ')' abrir_scope lista_sentencias cerrar_scope
+        {
+            String idLexeme = getSTEntry($2).getLexeme();
+
+            if (semanticHelper.alreadyDeclaredInScope(idLexeme, getCurrentScopeStr()))
+                compiler.reportSemanticError("Identificador ya declarado en el ámbito local", getTokenLocation($2));
+            else
+            {
+                semanticHelper.declareFunction(getCurrentScopeStr(), $2.obj);
+
+                String scopeAdentro = getCurrentScopeStr() + ":" + getSTEntry($2).getLexeme();
+                semanticHelper.declareArg(scopeAdentro, $5.obj, $4.obj);
+            }
+        }
+    | VOID id_ambito '(' ')' abrir_scope lista_sentencias cerrar_scope
+        {
+            String idLexeme = getSTEntry($2).getLexeme();
+
+            if (semanticHelper.alreadyDeclaredInScope(idLexeme, getCurrentScopeStr()))
+                compiler.reportSemanticError("Identificador ya declarado en el ámbito local", getTokenLocation($2));
+            else
+            {
+                semanticHelper.declareFunction(getCurrentScopeStr(), $2.obj);
+            }
+        }
+    | VOID id_ambito '(' tipo_basico ID ')' abrir_scope cerrar_scope
+        {
+            String idLexeme = getSTEntry($2).getLexeme();
+
+            if (semanticHelper.alreadyDeclaredInScope(idLexeme, getCurrentScopeStr()))
+                compiler.reportSemanticError("Identificador ya declarado en el ámbito local", getTokenLocation($2));
+            else
+            {
+                semanticHelper.declareFunction(getCurrentScopeStr(), $2.obj);
+            }
+        }
+    | VOID id_ambito '(' ')' abrir_scope cerrar_scope
+        {
+            String idLexeme = getSTEntry($2).getLexeme();
+
+            if (semanticHelper.alreadyDeclaredInScope(idLexeme, getCurrentScopeStr()))
+                compiler.reportSemanticError("Identificador ya declarado en el ámbito local", getTokenLocation($2));
+            else
+            {
+                semanticHelper.declareFunction(getCurrentScopeStr(), $2.obj);
+            }
+        }
     | VOID error '}'
         {
             compiler.reportSyntaxError("Error en funcion/metodo", getTokenLocation($1));
@@ -313,61 +370,131 @@ acceso_atributo
     ;
 
 definicion_clase
-    : CLASS ID '{' cuerpo_clase '}'
+    : CLASS id_ambito abrir_scope cuerpo_clase cerrar_scope
         {
             semanticHelper.declareClass(getCurrentScopeStr(), (LocatedSymbolTableEntry)$2.obj);
         }
-    | CLASS ID '{' '}'
+    | CLASS id_ambito abrir_scope cerrar_scope
         {
             semanticHelper.declareClass(getCurrentScopeStr(), (LocatedSymbolTableEntry)$2.obj);
         }
     ;
 
 cuerpo_clase
-    : clase_lista_atributos clase_lista_metodos clase_lista_composicion
-    | clase_lista_atributos clase_lista_metodos
-    | clase_lista_atributos clase_lista_composicion
-    | clase_lista_metodos clase_lista_composicion
-    | clase_lista_atributos
-    | clase_lista_metodos
-    | clase_lista_composicion
-    | error
+    : cuerpo_clase declaracion_variable
         {
-            compiler.reportSyntaxError("Error en cuerpo de clase", getTokenLocation($1));
+            compiler.addFoundSyntacticStructure(
+                new SyntacticStructureResult("Declaracion de atributo", getTokenLocation($2))
+            );
         }
-    ;
-
-clase_lista_atributos
-    : clase_lista_atributos tipo_basico lista_identificadores ','
-    | tipo_basico lista_identificadores ','
-    | ID lista_identificadores ','
-    ;
-
-clase_lista_metodos
-    : clase_lista_metodos metodo ','
+    | declaracion_variable
+        {
+            compiler.addFoundSyntacticStructure(
+                new SyntacticStructureResult("Declaracion de atributo", getTokenLocation($1))
+            );
+        }
+    | cuerpo_clase metodo ','
+        {
+            compiler.addFoundSyntacticStructure(
+                new SyntacticStructureResult("Implementacion de metodo dentro de clase", getTokenLocation($2))
+            );
+        }
     | metodo ','
         {
             compiler.addFoundSyntacticStructure(
                 new SyntacticStructureResult("Implementacion de metodo dentro de clase", getTokenLocation($1))
             );
         }
+    | cuerpo_clase ID ','
+        {
+            compiler.addFoundSyntacticStructure(
+                new SyntacticStructureResult("Herencia por composicion", getTokenLocation($2))
+            );
+
+            semanticHelper.declareComposition(getCurrentScopeStr(), $2.obj);
+        }
+    | ID ','
+        {
+            compiler.addFoundSyntacticStructure(
+                new SyntacticStructureResult("Herencia por composicion", getTokenLocation($1))
+            );
+
+            semanticHelper.declareComposition(getCurrentScopeStr(), $2.obj);
+        }
     ;
 
-clase_lista_composicion
-    : clase_lista_composicion ID ','
-    | ID ','
+implementacion_metodos
+    : implementacion_metodos metodo ','
+        {
+            compiler.addFoundSyntacticStructure(
+                new SyntacticStructureResult("Método distribuido", getTokenLocation($2))
+            );
+        }
+    | metodo ','
+        {
+            compiler.addFoundSyntacticStructure(
+                new SyntacticStructureResult("Método distribuido", getTokenLocation($1))
+            );
+        }
+    ;
+
+id_implementacion
+    : ID
+        {
+            // Chequear alcance y tipo de ID
+
+            String entryKey = semanticHelper.getKeyByScope(getSTEntry($1).getLexeme(), getCurrentScopeStr());
+
+            SymbolTableEntry referredSTEntry = (entryKey != null) ? symbolTable.getEntry(entryKey) : null;
+
+            if (referredSTEntry == null)
+            {
+                compiler.reportSemanticError("No se encuentra la clase: " + getSTEntry($1).getLexeme(), getTokenLocation($1));
+            }
+            else
+            {
+                if (referredSTEntry.getAttrib(AttribKey.ID_TYPE) != IDType.CLASSNAME)
+                    compiler.reportSemanticError("El identificador " + referredSTEntry.getLexeme() + "no es de tipo CLASE", getTokenLocation($1));
+                else
+                {
+                    String referredClassScope = semanticHelper.removeLexemeFromKey(entryKey);
+
+                    /*
+                        El scope del metodo sera el scope de la clase + la clase en si misma
+                    */
+
+                    String methodScope = referredClassScope + ":" + getSTEntry($1).getLexeme();
+
+                    this.implementationMethodScope = methodScope;
+                }
+            }
+        }
+    ;
+
+
+implementacion_abrir_scope
+    : '{'
+        {
+            // Guardar el current scope
+            this.scopeCopy = (LinkedList<String>)(this._currentScope.clone());
+            // Reemplazar por el scope de la clase referenciada
+            this._currentScope = semanticHelper.scopeStrToList(this.implementationMethodScope);
+        }
+    ;
+
+implementacion_cerrar_scope
+    : '}'
+        {
+            // Recuperar el scope antes del IMPL
+            this._currentScope = this.scopeCopy;
+        }
     ;
 
 implementacion
-    : IMPL FOR ID ':' '{' clase_lista_metodos '}'
-        {
-            compiler.addFoundSyntacticStructure(
-                new SyntacticStructureResult("Implementacion de metodo fuera de clase", getTokenLocation($1))
-            );
-        }
+    : IMPL FOR id_implementacion ':' implementacion_abrir_scope implementacion_metodos implementacion_cerrar_scope
     | IMPL error '}'
         {
-            compiler.reportSyntaxError("Error en implementación dsitribuida", getTokenLocation($1));
+            compiler.reportSyntaxError("Error en implementación distribuida", getTokenLocation($1));
         }
     ;
 
@@ -375,7 +502,7 @@ implementacion
 
 void yyerror(String msg)
 {
-    // CompilerMessagePrinter.error(msg);
+    System.out.println("ERROR! " + msg);
 }
 
 int yylex()
@@ -400,10 +527,12 @@ public TokenLocation getTokenLocation(ParserVal o)
 
 private void addToCurrentScope(String s)
 {
-    if (_currentScope == null)
-        _currentScope = new LinkedList<>();
-
     _currentScope.add(s);
+}
+
+private void removeScope()
+{
+    _currentScope.removeLast();
 }
 
 private String getCurrentScopeStr()
@@ -414,11 +543,6 @@ private String getCurrentScopeStr()
         scope += ":" + subscope;
     
     return scope;
-}
-
-private void removeScope()
-{
-    _currentScope.pop();
 }
 
 private String getCurrentID()
@@ -435,6 +559,9 @@ String _currentID;
 LinkedList<String> _currentScope;
 Compiler compiler;
 SemanticHelper semanticHelper;
+SymbolTable symbolTable;
+String implementationMethodScope;
+LinkedList<String> scopeCopy;
 
 public Parser(Compiler compiler)
 {
@@ -442,5 +569,6 @@ public Parser(Compiler compiler)
     this._currentID = "";
     this._currentScope = new LinkedList<>();
     this.semanticHelper = new SemanticHelper(compiler);
+    this.symbolTable = compiler.getSymbolTable();
     yydebug = false;
 }

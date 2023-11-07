@@ -1,5 +1,8 @@
 package compiler;
 
+import com.sun.org.apache.bcel.internal.generic.FSUB;
+
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.HashMap;
 
@@ -24,7 +27,7 @@ public class SemanticHelper {
 		this.symbolTable = compiler.getSymbolTable();
 	}
 	
-	private boolean alreadyDeclaredInScope(String id, String scope)
+	public boolean alreadyDeclaredInScope(String id, String scope)
 	{
 		return symbolTable.getEntry(id + ":" + scope) != null;
 	}
@@ -43,7 +46,7 @@ public class SemanticHelper {
 	 * @param scope
 	 * @return
 	 */
-	private SymbolTableEntry getEntryByScope(String id, String scope)
+	public SymbolTableEntry getEntryByScope(String id, String scope)
 	{
 		String idscope = id + ":" + scope;
 		
@@ -51,9 +54,10 @@ public class SemanticHelper {
 		{			
 			SymbolTableEntry stEntry = symbolTable.getEntry(idscope);
 			
-			if (stEntry != null) return stEntry;
+			if (stEntry != null)
+				return stEntry;
 			
-			if (idscope.length() < 6 || idscope.endsWith("global"))
+			if (idscope.length() < 7 || idscope.endsWith(":global"))
 				return null;
 			
 			idscope = removeScopeLevel(idscope);
@@ -61,6 +65,37 @@ public class SemanticHelper {
 			if (idscope == null)
 				return null;
 		}
+	}
+
+	public String getKeyByScope(String id, String scope)
+	{
+		String idscope = id + ":" + scope;
+
+		while (true)
+		{
+			SymbolTableEntry stEntry = symbolTable.getEntry(idscope);
+
+			if (stEntry != null)
+				return idscope;
+
+			if (idscope.length() < 7 || idscope.endsWith(":global"))
+				return null;
+
+			idscope = removeScopeLevel(idscope);
+
+			if (idscope == null)
+				return null;
+		}
+	}
+
+	/**
+	 * Elimina el lexema del idscope
+	 * Ejemplo: saludar:global:persona -> global:persona
+	 */
+	public String removeLexemeFromKey(String key)
+	{
+		int index = key.indexOf(":global");
+		return key.substring(index + 1);
 	}
 
 	/**
@@ -138,5 +173,87 @@ public class SemanticHelper {
 			classTokenData.getSTEntry().getLexeme() + ":" + scope
 			)
 			.setAttrib(AttribKey.ID_TYPE, IDType.CLASSNAME);
+	}
+
+	public void declareArg(String scope, Object _argNameTokenData, Object _dataTypeTokenData)
+	{
+		LocatedSymbolTableEntry argNameTokenData = (LocatedSymbolTableEntry)_argNameTokenData;
+		LocatedSymbolTableEntry dataTypeTokenData = (LocatedSymbolTableEntry)_dataTypeTokenData;
+
+		DataType dataType = tokenIDtoDataType.get(dataTypeTokenData.getSTEntry().getTokenID());
+		if (dataType == null)
+		{
+			System.out.println("Error critico!");
+			return;
+		}
+
+		symbolTable.addNewEntry(
+			new SymbolTableEntry(
+				Parser.ID,
+				argNameTokenData.getSTEntry().getLexeme()
+			),
+		argNameTokenData.getSTEntry().getLexeme() + ":" + scope
+		)
+		.setAttrib(AttribKey.ID_TYPE, IDType.ARGNAME)
+		.setAttrib(AttribKey.DATA_TYPE, dataType);
+	}
+
+	public void declareFunction(String scope, Object _idTokenData)
+	{
+		LocatedSymbolTableEntry idTokenData = (LocatedSymbolTableEntry)_idTokenData;
+
+		symbolTable.addNewEntry(
+			new SymbolTableEntry(
+				Parser.ID,
+				idTokenData.getSTEntry().getLexeme()
+			),
+		idTokenData.getSTEntry().getLexeme() + ":" + scope
+		)
+		.setAttrib(AttribKey.ID_TYPE, IDType.FUNC_METHOD);
+	}
+
+	public void declareComposition(String scope, Object _idTokenData)
+	{
+		LocatedSymbolTableEntry idTokenData = (LocatedSymbolTableEntry)_idTokenData;
+
+		if (alreadyDeclaredInScope(idTokenData.getSTEntry().getLexeme(), scope))
+		{
+			compiler.reportSemanticError("Herencia por composicion duplicada");
+			return;
+		}
+
+		/* Ver si el ID referido por la composicion, existe */
+
+		SymbolTableEntry classEntry = getEntryByScope(idTokenData.getSTEntry().getLexeme(), scope);
+
+		if (classEntry == null)
+		{
+			compiler.reportSemanticError("La clase referenciada por la composicion no existe", idTokenData.getLocation());
+			return;
+		}
+
+		/* Ver si el ID es una clase */
+
+		if (classEntry.getAttrib(AttribKey.ID_TYPE) != IDType.CLASSNAME)
+		{
+			compiler.reportSemanticError("El ID de la composicion no hace referencia a una clase", idTokenData.getLocation());
+			return;
+		}
+
+		symbolTable.addNewEntry(
+			new SymbolTableEntry(
+				Parser.ID,
+				idTokenData.getSTEntry().getLexeme()
+			),
+			idTokenData.getSTEntry().getLexeme() + ":" + scope
+		)
+		.setAttrib(AttribKey.ID_TYPE, IDType.COMPOSITION);
+	}
+
+	public LinkedList<String> scopeStrToList(String scopeStr)
+	{
+		LinkedList<String> list = new LinkedList<>();
+        Collections.addAll(list, scopeStr.substring("global:".length()).split(":"));
+		return list;
 	}
 }
