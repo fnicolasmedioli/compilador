@@ -97,6 +97,12 @@ sentencia_ejecutable
             compiler.addFoundSyntacticStructure(
                 new SyntacticStructureResult("Asignacion a variable", getTokenLocation($1))
             );
+
+            SymbolTableEntry classEntry = semanticHelper.getEntryByScope(getSTEntry($1).getLexeme(), getCurrentScopeStr());
+            if (classEntry == null)
+                compiler.reportSemanticError("Variable no encontrada", getTokenLocation($1));
+            else if (classEntry.getAttrib(AttribKey.ID_TYPE) != IDType.VAR_ATTRIB)
+                compiler.reportSemanticError("El identificador no es una variable", getTokenLocation($1));
         }
     | acceso_atributo op_asignacion_aumentada expr ','
         {
@@ -134,7 +140,7 @@ sentencia_ejecutable
                 new SyntacticStructureResult("Estructura DO UNTIL", getTokenLocation($1))
             );
         }
-    | PRINT CTE_STRING ','
+    | PRINT imprimible ','
         {
             compiler.addFoundSyntacticStructure(
                 new SyntacticStructureResult("Sentencia PRINT", getTokenLocation($1))
@@ -146,26 +152,12 @@ sentencia_ejecutable
                 new SyntacticStructureResult("Sentencia RETURN", getTokenLocation($1))
             );
         }
-    | PRINT CTE_UINT ','
-        {
-            compiler.reportSyntaxError("No se puede imprimir un UINT", getTokenLocation($1));
-        }
-    | PRINT CTE_LONG ','
-        {
-            compiler.reportSyntaxError("No se puede imprimir un LONG", getTokenLocation($1));
-        }
-    | PRINT ID ','
-        {
-            compiler.reportSyntaxError("No se puede imprimir una variable", getTokenLocation($1));
-        }
-    | PRINT acceso_atributo ','
-        {
-            compiler.reportSyntaxError("No se puede imprimir un atributo", getTokenLocation($1));
-        }
-    | PRINT CTE_DOUBLE ','
-        {
-            compiler.reportSyntaxError("No se puede imprimir un DOUBLE", getTokenLocation($1));
-        }
+    ;
+
+imprimible
+    : CTE_STRING
+    | CTE_UINT
+    | CTE_LONG
     ;
 
 lista_sentencias
@@ -366,7 +358,6 @@ metodo
 acceso_atributo
     : ID '.' ID
     | acceso_atributo '.' ID
-    | acceso_atributo '.' invocacion_funcion
     ;
 
 definicion_clase

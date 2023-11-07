@@ -33,7 +33,7 @@ public class SemanticAction5 implements SemanticAction {
 		
 		if (
 			lexeme.length() > 2 &&
-			lexeme.substring(lexeme.length() - 2).equals("_l")
+			lexeme.endsWith("_l")
 		)
 		{
 			// Check LONG
@@ -51,8 +51,9 @@ public class SemanticAction5 implements SemanticAction {
 				new LocatedSymbolTableEntry(
 					symbolTable.addNewEntry(new SymbolTableEntry(
 						Parser.CTE_LONG,
-						(validRange == true) ? lexeme : null
-					)),
+						validRange ? lexeme : null
+					)
+					.setAttrib(AttribKey.DATA_TYPE, DataType.LONG)),
 					new TokenLocation(lexicalAnalyzerState.getCurrentLine())
 				)				
 			);
@@ -60,7 +61,7 @@ public class SemanticAction5 implements SemanticAction {
 		}
 		else if (
 			lexeme.length() > 3 &&
-			lexeme.substring(lexeme.length() - 3).equals("_ui")
+			lexeme.endsWith("_ui")
 		)
 		{
 			// Check UINT
@@ -78,10 +79,11 @@ public class SemanticAction5 implements SemanticAction {
 				new LocatedSymbolTableEntry(
 					symbolTable.addNewEntry(new SymbolTableEntry(
 						Parser.CTE_UINT,
-						(validRange == true) ? lexeme : null
-					)),
+						validRange ? lexeme : null
+					)
+					.setAttrib(AttribKey.DATA_TYPE, DataType.UINT)),
 					new TokenLocation(lexicalAnalyzerState.getCurrentLine())
-				)				
+				)
 			);
 			lexicalAnalyzerState.setTokenToReturn(Parser.CTE_UINT);
 		}
@@ -102,8 +104,9 @@ public class SemanticAction5 implements SemanticAction {
 				new LocatedSymbolTableEntry(
 					symbolTable.addNewEntry(new SymbolTableEntry(
 						Parser.CTE_DOUBLE,
-						(validRange == true) ? lexeme : null
-					)),
+						validRange ? lexeme : null
+					)
+					.setAttrib(AttribKey.DATA_TYPE, DataType.DOUBLE)),
 					new TokenLocation(lexicalAnalyzerState.getCurrentLine())
 				)				
 			);
@@ -112,5 +115,4 @@ public class SemanticAction5 implements SemanticAction {
 
 		lexicalAnalyzerState.finishTokenReading();
 	}
-	
 }

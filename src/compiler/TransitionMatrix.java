@@ -157,7 +157,7 @@ public class TransitionMatrix {
         matrix.add(s20);
         
         HashMap<Character, Transition> s21 = new HashMap<>();
-        s21.put('%', new Transition(FINAL_STATE, Arrays.asList(8, 9)));
+        s21.put('%', new Transition(FINAL_STATE, Arrays.asList(8)));
         this.insertAllBut(s21, new Transition(21, Arrays.asList(3)), '%');
         matrix.add(s21);
         

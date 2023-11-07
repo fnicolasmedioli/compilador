@@ -43,8 +43,8 @@ public class Compiler {
 
 		System.out.println();
 		messagePrinter.printTokenList();
-		messagePrinter.printFoundSyntacticalStrucutres(syntacticStructuresFound);
-		messagePrinter.printSymbolTable(getSymbolTable());
+		CompilerMessagePrinter.printFoundSyntacticalStrucutres(syntacticStructuresFound);
+		CompilerMessagePrinter.printSymbolTable(getSymbolTable());
 	}
 	
 	public int yylex()
@@ -57,11 +57,6 @@ public class Compiler {
 		parser.setyylval(tokenData);
 	}
 	
-	public void reportLexicalError(String msg)
-	{
-		reportLexicalError(msg, null);
-	}
-	
 	public void reportLexicalError(String msg, TokenLocation loc)
 	{
 		if (loc != null)
@@ -72,22 +67,13 @@ public class Compiler {
 		errorCount++;
 	}
 	
-	public void reportSyntaxError(String msg)
-	{
-		reportSyntaxError(msg, null);
-	}
-	
-	public void reportSemanticError(String msg)
-	{
-		reportSemanticError(msg, null);
-	}
-	
 	public void reportSemanticError(String msg, TokenLocation loc)
 	{
 		if (loc != null)
 			messagePrinter.error("[Semantico: " + loc + "] " + msg);
 		else
 			messagePrinter.error("[Semantico] " + msg);
+
 		errorCount++;
 	}
 	

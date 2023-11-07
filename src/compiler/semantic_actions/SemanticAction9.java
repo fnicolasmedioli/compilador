@@ -9,9 +9,7 @@ public class SemanticAction9 implements SemanticAction {
 	public void run(
 		LexicalAnalyzerState lexicalAnalyzerState,
 		Compiler compiler
-	)
-	{
+	) {
 		lexicalAnalyzerState.incrementCurrentLine();
 	}
-	
 }

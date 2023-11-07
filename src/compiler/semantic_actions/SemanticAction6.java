@@ -17,7 +17,7 @@ public class SemanticAction6 implements SemanticAction {
 		SymbolTableEntry stEntry = symbolTable.getEntry(lexeme);
 		
 		if (stEntry.isPredefined() == false)
-			compiler.reportLexicalError("Error critico en accion semantica 6, linea: " + lexicalAnalyzerState.getCurrentLine());
+			compiler.reportLexicalError("Error critico en accion semantica 6", new TokenLocation(lexicalAnalyzerState.getCurrentLine()));
 
 		compiler.setyylval(
 			new LocatedSymbolTableEntry(

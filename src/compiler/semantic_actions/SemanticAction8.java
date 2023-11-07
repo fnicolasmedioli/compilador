@@ -32,7 +32,8 @@ public class SemanticAction8 implements SemanticAction {
 					symbolTable.addNewEntry(new SymbolTableEntry(
 						Parser.CTE_STRING,
 						lexeme
-					)),
+					)
+					.setAttrib(AttribKey.DATA_TYPE, DataType.STRING)),
 					new TokenLocation(lexicalAnalyzerState.getCurrentLine())
 				)
 			);

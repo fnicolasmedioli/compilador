@@ -218,7 +218,7 @@ public class SemanticHelper {
 
 		if (alreadyDeclaredInScope(idTokenData.getSTEntry().getLexeme(), scope))
 		{
-			compiler.reportSemanticError("Herencia por composicion duplicada");
+			compiler.reportSemanticError("Herencia por composicion duplicada", idTokenData.getLocation());
 			return;
 		}
 
