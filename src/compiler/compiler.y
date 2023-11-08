@@ -253,9 +253,93 @@ sentencia_ejecutable
         }
     | acceso_atributo '.' invocacion_funcion ','
         {
+            LinkedList<LocatedSymbolTableEntry> tokenListData = (LinkedList<LocatedSymbolTableEntry>)($1.obj);
+
             compiler.addFoundSyntacticStructure(
-                new SyntacticStructureResult("Invocación a método", getTokenLocation($1))
+                new SyntacticStructureResult("Invocación a método", tokenListData.getFirst().getLocation())
             );
+
+            LocatedSymbolTableEntry[] tokenListArray = tokenListData.toArray(new LocatedSymbolTableEntry[tokenListData.size()]);
+
+            // La primera debe ser una variable
+
+            String varLexeme = tokenListData.getFirst().getSTEntry().getLexeme();
+            String varEntryKey = semanticHelper.getEntryKeyByScope(varLexeme, getCurrentScopeStr());
+            SymbolTableEntry varEntry = symbolTable.getEntry(varEntryKey);
+
+            if (varEntry == null)
+            {
+                compiler.reportSemanticError("Variable no encontrada: " + varLexeme, tokenListData.getFirst().getLocation());
+                break;
+            }
+
+            if (varEntry.getAttrib(AttribKey.ID_TYPE) != IDType.VAR_ATTRIB)
+            {
+                compiler.reportSemanticError(String.format("El identificador '%s' no es una variable", varLexeme), tokenListData.getFirst().getLocation());
+                break;
+            }
+            
+            if (varEntry.getAttrib(AttribKey.DATA_TYPE) != DataType.OBJECT)
+            {
+                compiler.reportSemanticError(String.format("La variable '%s' no es de tipo objeto", varLexeme), getTokenLocation($1));
+                break;
+            }
+
+            String lastClassEntryKey = (String)varEntry.getAttrib(AttribKey.INSTANCE_OF);
+            String lastClassLexeme = symbolTable.getEntry(lastClassEntryKey).getLexeme();
+
+            // Todos los atributos deben ser objetos
+
+            for (int i = 1; i < tokenListArray.length; i++)
+            {
+
+                String attribLexeme = tokenListArray[i].getSTEntry().getLexeme();
+                String attribScope = semanticHelper.invertScope(lastClassEntryKey);
+
+                SymbolTableEntry attribEntry = symbolTable.getEntry(attribLexeme + ":" + attribScope);
+
+                if (attribEntry == null)
+                {
+                    compiler.reportSemanticError(String.format("El atributo '%s' no esta definido para la clase '%s'", attribLexeme, lastClassLexeme), tokenListArray[i].getLocation());
+                    break;
+                }
+
+                if (attribEntry.getAttrib(AttribKey.ID_TYPE) != IDType.VAR_ATTRIB)
+                {
+                    compiler.reportSemanticError(String.format("El identificador '%s' no es un atributo", attribLexeme), tokenListArray[i].getLocation());
+                    break;
+                }
+
+                if (attribEntry.getAttrib(AttribKey.DATA_TYPE) != DataType.OBJECT)
+                {
+                    compiler.reportSemanticError(String.format("El atributo '%s' no es de tipo objeto", attribLexeme), tokenListArray[i].getLocation());
+                    break;
+                }
+
+                lastClassEntryKey = (String)attribEntry.getAttrib(AttribKey.INSTANCE_OF);
+                lastClassLexeme = symbolTable.getEntry(lastClassEntryKey).getLexeme();
+            }
+
+            // Chequear que el método esté en la clase
+
+            String methodLexeme = getSTEntry($3).getLexeme();
+            String methodEntryKey = methodLexeme + ":" + semanticHelper.invertScope(lastClassEntryKey);
+            SymbolTableEntry methodEntry = symbolTable.getEntry(methodEntryKey);
+
+            if (methodEntry == null)
+            {
+                compiler.reportSemanticError(String.format("No se encuentra el método '%s' en la clase '%s'", methodLexeme, lastClassLexeme), getTokenLocation($3));
+                break;
+            }
+
+            if (methodEntry.getAttrib(AttribKey.ID_TYPE) != IDType.FUNC_METHOD)
+            {
+                compiler.reportSemanticError(String.format("'%s' no es ejecutable ya que no es un método", methodLexeme), getTokenLocation($3));
+                break;
+            }
+
+            // Chequear que coincidan los parámetros
+
         }
     | invocacion_funcion ','
         {
@@ -507,8 +591,6 @@ do_until
 metodo
     : procedimiento
     ;
-
-
 
 definicion_clase
     : CLASS id_ambito abrir_scope cuerpo_clase cerrar_scope
