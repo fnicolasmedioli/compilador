@@ -45,6 +45,8 @@ public class Compiler {
 		messagePrinter.printTokenList();
 		CompilerMessagePrinter.printFoundSyntacticalStrucutres(syntacticStructuresFound);
 		CompilerMessagePrinter.printSymbolTable(getSymbolTable());
+
+		System.out.println(parser.getListOfTriplets());
 	}
 	
 	public int yylex()

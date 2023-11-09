@@ -467,14 +467,37 @@ expr
 
 basic_expr
     : expr '+' term
+        {
+            Triplet t = new Triplet("+", (TripletOperand)$1.obj, (TripletOperand)$3.obj);
+            int tripletIndex = listOfTriplets.addTriplet(t);
+            $$ = new ParserVal(new TripletOperand(tripletIndex));
+        }
     | expr '-' term
+        {
+            Triplet t = new Triplet("-", (TripletOperand)$1.obj, (TripletOperand)$3.obj);
+            int tripletIndex = listOfTriplets.addTriplet(t);
+            $$ = new ParserVal(new TripletOperand(tripletIndex));
+        }
     | term
     ;
 
 term
     : term '*' factor
+        {
+            Triplet t = new Triplet("*", (TripletOperand)$1.obj, (TripletOperand)$3.obj);
+            int tripletIndex = listOfTriplets.addTriplet(t);
+            $$ = new ParserVal(new TripletOperand(tripletIndex));
+        }
     | term '/' factor
+        {
+            Triplet t = new Triplet("/", (TripletOperand)$1.obj, (TripletOperand)$3.obj);
+            int tripletIndex = listOfTriplets.addTriplet(t);
+            $$ = new ParserVal(new TripletOperand(tripletIndex));
+        }
     | factor
+        {
+            $$ = new ParserVal((TripletOperand)$1.obj);
+        }
     ;
         
 factor
@@ -496,8 +519,13 @@ factor
                 compiler.reportSemanticError("El identificador " + varEntry.getLexeme() + "no es de tipo var/attribute", getTokenLocation($1));
                 break;
             }
+
+            $$ = new ParserVal(new TripletOperand(varEntry));
         }
     | constante
+        {
+            $$ = new ParserVal(new TripletOperand(getSTEntry($1)));
+        }
     ;
 
 definicion_funcion
@@ -778,6 +806,11 @@ private void setCurrentID(String id)
     _currentID = id;
 }
 
+public ListOfTriplets getListOfTriplets()
+{
+    return listOfTriplets;
+}
+
 String _currentID;
 LinkedList<String> _currentScope;
 Compiler compiler;
@@ -785,6 +818,7 @@ SemanticHelper semanticHelper;
 SymbolTable symbolTable;
 String implementationMethodScope;
 LinkedList<String> scopeCopy;
+ListOfTriplets listOfTriplets;
 
 public Parser(Compiler compiler)
 {
@@ -793,5 +827,7 @@ public Parser(Compiler compiler)
     this._currentScope = new LinkedList<>();
     this.semanticHelper = new SemanticHelper(compiler);
     this.symbolTable = compiler.getSymbolTable();
+    this.listOfTriplets = new ListOfTriplets();
+
     yydebug = false;
 }
