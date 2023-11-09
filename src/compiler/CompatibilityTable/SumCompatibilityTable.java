@@ -1,37 +1,52 @@
 package compiler.CompatibilityTable;
 
-public class SumCompatibilityTable extends TypeCompatibilityTable {
-    
-    SumCompatibilityTable(){
-        super();
-        this.table[1][1] = "integer";
-        this.table[1][2] = "long";
-        this.table[1][3] = "float";
-        this.table[1][4] = "double";
-        this.table[1][5] = "";
+import compiler.*;
 
-        this.table[2][1] = "long";
-        this.table[2][2] = "long";
-        this.table[2][3] = "float";
-        this.table[2][4] = "double";
-        this.table[2][5] = "";
+public class SumCompatibilityTable {
 
-        this.table[3][1] = "float";
-        this.table[3][2] = "float";
-        this.table[3][3] = "float";
-        this.table[3][4] = "double";
-        this.table[3][5] = "";
+    private static DataType[][] matrix;
 
-        this.table[4][1] = "double";
-        this.table[4][2] = "double";
-        this.table[4][3] = "double";
-        this.table[4][4] = "double";
-        this.table[4][5] = "";
+    private static final int _uint = DataType.UINT.ordinal();
+    private static final int _long = DataType.LONG.ordinal();
+    private static final int _string = DataType.STRING.ordinal();
+    private static final int _double = DataType.DOUBLE.ordinal();
+    private static final int _object = DataType.OBJECT.ordinal();
 
-        this.table[5][1] = "";
-        this.table[5][2] = "";
-        this.table[5][3] = "";
-        this.table[5][4] = "";
-        this.table[5][5] = "";
+    private static synchronized void initializeMatrix()
+    {
+        int dataTypesQuantity = DataType.values().length;
+        matrix = new DataType[dataTypesQuantity][dataTypesQuantity];
+
+        setSymmetric(_uint, _uint, DataType.UINT);
+        matrix[_uint][_long] = DataType.LONG;
+        // matrix[_uint][_double] = DataType.DOUBLE;
+
+        setSymmetric(_long, _long, DataType.LONG);
+        // matrix[_long][_double] = DataType.DOUBLE;
+
+        setSymmetric(_string, _string, DataType.STRING);
+
+        setSymmetric(_double, _double, DataType.DOUBLE);
+        // DOUBLE to UINT/LONG ??
+    }
+
+    public DataType calcDataType(DataType a, DataType b)
+    {
+        return matrix[a.ordinal()][b.ordinal()];
+    }
+
+    private static synchronized void setSymmetric(int a, int b, DataType d)
+    {
+        matrix[a][b] = d;
+        matrix[b][a] = d;
+    }
+
+    SumCompatibilityTable()
+    {
+        synchronized (SumCompatibilityTable.class)
+        {
+            if (matrix == null)
+                initializeMatrix();
+        }
     }
 }

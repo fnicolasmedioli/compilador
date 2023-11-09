@@ -1,6 +1,7 @@
 %{
  
 import java.util.LinkedList;
+import compiler.semantic.*;
 
 %}
 
@@ -340,6 +341,9 @@ sentencia_ejecutable
 
             // Chequear que coincidan los parámetros
 
+            
+
+
         }
     | invocacion_funcion ','
         {
@@ -405,7 +409,7 @@ invocacion_funcion
         {
             // Chequar que coincidan los argumentos
         }
-    | ID '(' parametro_real ')'
+    | ID '(' expr ')'
         {
             // Chequar que coincidan los argumentos
         }
@@ -496,10 +500,6 @@ factor
     | constante
     ;
 
-parametro_real
-    : expr
-    ;
-
 definicion_funcion
     : procedimiento
     ;
@@ -536,7 +536,7 @@ procedimiento
                 break;
             }
 
-            semanticHelper.declareFunction(getCurrentScopeStr(), $2.obj);
+            semanticHelper.declareFunction(getCurrentScopeStr(), $2.obj, $4.obj);
 
             String scopeAdentro = getCurrentScopeStr() + ":" + getSTEntry($2).getLexeme();
             semanticHelper.declareArg(scopeAdentro, $5.obj, $4.obj);
@@ -563,7 +563,7 @@ procedimiento
                 break;
             }
 
-            semanticHelper.declareFunction(getCurrentScopeStr(), $2.obj);
+            semanticHelper.declareFunction(getCurrentScopeStr(), $2.obj, $4.obj);
         }
     | VOID id_ambito '(' ')' abrir_scope cerrar_scope
         {

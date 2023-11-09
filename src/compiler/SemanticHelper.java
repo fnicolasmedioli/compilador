@@ -17,6 +17,11 @@ public class SemanticHelper {
 		tokenIDtoDataType.put((int)Parser.STRING, DataType.STRING);
 		tokenIDtoDataType.put((int)Parser.UINT, DataType.UINT);
 		tokenIDtoDataType.put((int)Parser.LONG, DataType.LONG);
+
+		tokenIDtoDataType.put((int)Parser.CTE_DOUBLE, DataType.LONG);
+		tokenIDtoDataType.put((int)Parser.CTE_STRING, DataType.LONG);
+		tokenIDtoDataType.put((int)Parser.CTE_UINT, DataType.LONG);
+		tokenIDtoDataType.put((int)Parser.CTE_LONG, DataType.LONG);
 	}
 
 	public SemanticHelper(Compiler compiler)
@@ -221,11 +226,11 @@ public class SemanticHelper {
 		.setAttrib(AttribKey.DATA_TYPE, dataType);
 	}
 
-	public void declareFunction(String scope, Object _idTokenData)
+	public SymbolTableEntry declareFunction(String scope, Object _idTokenData)
 	{
 		LocatedSymbolTableEntry idTokenData = (LocatedSymbolTableEntry)_idTokenData;
 
-		symbolTable.addNewEntry(
+		return symbolTable.addNewEntry(
 			new SymbolTableEntry(
 				Parser.ID,
 				idTokenData.getSTEntry().getLexeme()
@@ -233,6 +238,12 @@ public class SemanticHelper {
 		idTokenData.getSTEntry().getLexeme() + ":" + scope
 		)
 		.setAttrib(AttribKey.ID_TYPE, IDType.FUNC_METHOD);
+	}
+
+	public SymbolTableEntry declareFunction(String scope, Object _idTokenData, Object argToken)
+	{
+		DataType argDataType = tokenIDtoDataType.get( ((LocatedSymbolTableEntry)argToken).getSTEntry().getTokenID() );
+		return declareFunction(scope, _idTokenData).setAttrib(AttribKey.ARG_TYPE, argDataType);
 	}
 
 	public void declareComposition(String scope, Object _idTokenData)

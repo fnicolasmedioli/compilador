@@ -4,7 +4,8 @@ public enum AttribKey {
 
     ID_TYPE("Tipo de identificador"),
     DATA_TYPE("Tipo de dato"),
-    INSTANCE_OF("Instancia de clase");
+    INSTANCE_OF("Instancia de clase"),
+    ARG_TYPE("Tipo de argumento");
 
     private final String str;
     AttribKey(String str)

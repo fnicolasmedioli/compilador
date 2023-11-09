@@ -1,38 +1,42 @@
 package compiler.CompatibilityTable;
 
-public class MulCompatibilityTable extends TypeCompatibilityTable{
+import compiler.*;
 
-    public MulCompatibilityTable(){
-        super();
+public class MulCompatibilityTable {
 
-        this.table[1][1] = "long";
-        this.table[1][2] = "long";
-        this.table[1][3] = "float";
-        this.table[1][4] = "double";
-        this.table[1][5] = "";
+    private static DataType[][] matrix;
 
-        this.table[2][1] = "long";
-        this.table[2][2] = "long";
-        this.table[2][3] = "double";
-        this.table[2][4] = "double";
-        this.table[2][5] = "";
+    private static final int _uint = DataType.UINT.ordinal();
+    private static final int _long = DataType.LONG.ordinal();
+    private static final int _string = DataType.STRING.ordinal();
+    private static final int _double = DataType.DOUBLE.ordinal();
+    private static final int _object = DataType.OBJECT.ordinal();
 
-        this.table[3][1] = "float";
-        this.table[3][2] = "double";
-        this.table[3][3] = "double";
-        this.table[3][4] = "double";
-        this.table[3][5] = "";
+    private static synchronized void initializeMatrix()
+    {
+        int dataTypesQuantity = DataType.values().length;
+        matrix = new DataType[dataTypesQuantity][dataTypesQuantity];
 
-        this.table[4][1] = "double";
-        this.table[4][2] = "double";
-        this.table[4][3] = "double";
-        this.table[4][4] = "double";
-        this.table[4][5] = "";
 
-        this.table[5][1] = "";
-        this.table[5][2] = "";
-        this.table[5][3] = "";
-        this.table[5][4] = "";
-        this.table[5][5] = "";
+    }
+
+    public DataType calcDataType(DataType a, DataType b)
+    {
+        return matrix[a.ordinal()][b.ordinal()];
+    }
+
+    private static synchronized void setSymmetric(int a, int b, DataType d)
+    {
+        matrix[a][b] = d;
+        matrix[b][a] = d;
+    }
+
+    MulCompatibilityTable()
+    {
+        synchronized (MulCompatibilityTable.class)
+        {
+            if (matrix == null)
+                initializeMatrix();
+        }
     }
 }
