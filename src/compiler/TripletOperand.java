@@ -31,4 +31,13 @@ public class TripletOperand {
         else
             return "Triplet: " + index;
     }
+
+    
+    public Integer getIndex() {
+        return index;
+    }
+
+    public SymbolTableEntry getstEntry(){
+        return this.stEntry;
+    }
 }

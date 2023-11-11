@@ -2,7 +2,7 @@ package compiler.CompatibilityTable;
 
 import compiler.*;
 
-public class MulCompatibilityTable {
+public class MulCompatibilityTable implements ICompatibilityTable{
 
     private static DataType[][] matrix;
 
@@ -17,7 +17,21 @@ public class MulCompatibilityTable {
         int dataTypesQuantity = DataType.values().length;
         matrix = new DataType[dataTypesQuantity][dataTypesQuantity];
 
+        setSymmetric(_uint, _uint, DataType.UINT);
 
+        setSymmetric(_uint, _long, DataType.LONG);
+        // matrix[_uint][_double] = DataType.DOUBLE;
+
+        setSymmetric(_long, _long, DataType.LONG);
+        // matrix[_long][_double] = DataType.DOUBLE;
+
+        setSymmetric(_double, _double, DataType.DOUBLE);
+
+        setSymmetric(_double, _long, DataType.DOUBLE);
+
+        setSymmetric(_double, _uint, DataType.DOUBLE);
+
+        
     }
 
     public DataType calcDataType(DataType a, DataType b)
@@ -31,7 +45,7 @@ public class MulCompatibilityTable {
         matrix[b][a] = d;
     }
 
-    MulCompatibilityTable()
+    public MulCompatibilityTable()
     {
         synchronized (MulCompatibilityTable.class)
         {

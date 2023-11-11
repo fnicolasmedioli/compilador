@@ -1,9 +1,8 @@
 package compiler.CompatibilityTable;
 
-import compiler.*;
+import compiler.DataType;
 
-public class SumCompatibilityTable implements ICompatibilityTable {
-
+public class DivCompatibilityTable implements ICompatibilityTable{
     private static DataType[][] matrix;
 
     private static final int _uint = DataType.UINT.ordinal();
@@ -17,18 +16,19 @@ public class SumCompatibilityTable implements ICompatibilityTable {
         int dataTypesQuantity = DataType.values().length;
         matrix = new DataType[dataTypesQuantity][dataTypesQuantity];
 
-        setSymmetric(_uint, _uint, DataType.UINT);
-        matrix[_uint][_long] = DataType.LONG;
+        setSymmetric(_uint, _uint, DataType.DOUBLE);
+
+        setSymmetric(_uint, _long, DataType.DOUBLE);
         // matrix[_uint][_double] = DataType.DOUBLE;
 
-        setSymmetric(_long, _long, DataType.LONG);
+        setSymmetric(_long, _long, DataType.DOUBLE);
         // matrix[_long][_double] = DataType.DOUBLE;
 
-        setSymmetric(_string, _string, DataType.STRING);
-
         setSymmetric(_double, _double, DataType.DOUBLE);
-        // DOUBLE to UINT/LONG ??
-        setSymmetric(_uint, _double, DataType.DOUBLE);
+
+        setSymmetric(_double, _long, DataType.DOUBLE);
+
+        setSymmetric(_double, _uint, DataType.DOUBLE);
 
     }
 
@@ -43,9 +43,9 @@ public class SumCompatibilityTable implements ICompatibilityTable {
         matrix[b][a] = d;
     }
 
-    public SumCompatibilityTable()
+    public DivCompatibilityTable()
     {
-        synchronized (SumCompatibilityTable.class)
+        synchronized (DivCompatibilityTable.class)
         {
             if (matrix == null)
                 initializeMatrix();

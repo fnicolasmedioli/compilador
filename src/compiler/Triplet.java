@@ -4,7 +4,7 @@ public class Triplet {
     private final String operation;
     private final TripletOperand o1;
     private final TripletOperand o2;
-    private final DataType type;
+    private DataType type;
 
     public Triplet(String operation, TripletOperand o1, TripletOperand o2) {
         this.operation = operation;
@@ -38,6 +38,13 @@ public class Triplet {
     @Override
     public String toString()
     {
-        return String.format("Triplet: %s [%s] [%s]", operation, getOperand1(), getOperand2());
+        return String.format("Triplet: %s [%s] [%s] [%s]", operation, getOperand1(), getOperand2(), type);
     }
+
+    public void setDataType(DataType dataType){
+        this.type = dataType;
+    }
+
 }
+
+

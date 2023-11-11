@@ -2,6 +2,7 @@
  
 import java.util.LinkedList;
 import compiler.semantic.*;
+import compiler.CompatibilityTable.*;
 
 %}
 
@@ -126,7 +127,39 @@ sentencia_ejecutable
             {
                 compiler.reportSemanticError(String.format("El identificador '%s' no es una variable", varLexeme), getTokenLocation($1));
                 break;
-            }                
+            }
+
+            // HELP NICO DEL FUTURO el -= hay que tenerlo en cuenta (el facu del presente no sabe por que)
+
+            DataType leftDataType = (DataType)varEntry.getAttrib(AttribKey.DATA_TYPE);
+
+            TripletOperand rightTripletOperand = (TripletOperand)$3.obj;
+
+            // DataType rightDataType = (DataType)varEntry.getAttrib(AttribKey.DATA_TYPE);
+            DataType rightDataType;
+
+            if (rightTripletOperand.isFinal()) {
+                rightDataType = (DataType)(rightTripletOperand.getstEntry().getAttrib(AttribKey.DATA_TYPE));
+            }else {
+                rightDataType = listOfTriplets.getTriplet(rightTripletOperand.getIndex()).getType();
+            }
+
+
+            if (leftDataType != rightDataType){
+                compiler.reportSemanticError("asignacion de datos invalida diferentes tipos de datos ", getTokenLocation($2));
+                break;
+            }
+
+            
+            TripletOperand leftTripletOperand = new TripletOperand(varEntry);
+
+            Triplet t = new Triplet("=", leftTripletOperand, rightTripletOperand, rightDataType);
+
+            listOfTriplets.addTriplet(t);
+
+            //  = new ParserVal(new TripletOperand(t));
+
+
         }
     | acceso_atributo op_asignacion_aumentada expr ','
         {
@@ -468,13 +501,23 @@ expr
 basic_expr
     : expr '+' term
         {
-            Triplet t = new Triplet("+", (TripletOperand)$1.obj, (TripletOperand)$3.obj);
+
+            TripletOperand operand1 = (TripletOperand)$1.obj;
+            TripletOperand operand2 = (TripletOperand)$3.obj;
+
+            Triplet t = semanticHelper.getTriplet(operand1, operand2, "+", listOfTriplets, sumCompatibilityTable);
+
             int tripletIndex = listOfTriplets.addTriplet(t);
             $$ = new ParserVal(new TripletOperand(tripletIndex));
+
         }
     | expr '-' term
         {
-            Triplet t = new Triplet("-", (TripletOperand)$1.obj, (TripletOperand)$3.obj);
+            TripletOperand operand1 = (TripletOperand)$1.obj;
+            TripletOperand operand2 = (TripletOperand)$3.obj;
+
+            Triplet t = semanticHelper.getTriplet(operand1, operand2, "-", listOfTriplets, sumCompatibilityTable);
+
             int tripletIndex = listOfTriplets.addTriplet(t);
             $$ = new ParserVal(new TripletOperand(tripletIndex));
         }
@@ -484,13 +527,21 @@ basic_expr
 term
     : term '*' factor
         {
-            Triplet t = new Triplet("*", (TripletOperand)$1.obj, (TripletOperand)$3.obj);
+            TripletOperand operand1 = (TripletOperand)$1.obj;
+            TripletOperand operand2 = (TripletOperand)$3.obj;
+
+            Triplet t = semanticHelper.getTriplet(operand1, operand2, "*", listOfTriplets, mulCompatibilityTable);
+
             int tripletIndex = listOfTriplets.addTriplet(t);
             $$ = new ParserVal(new TripletOperand(tripletIndex));
         }
     | term '/' factor
         {
-            Triplet t = new Triplet("/", (TripletOperand)$1.obj, (TripletOperand)$3.obj);
+            TripletOperand operand1 = (TripletOperand)$1.obj;
+            TripletOperand operand2 = (TripletOperand)$3.obj;
+
+            Triplet t = semanticHelper.getTriplet(operand1, operand2, "/", listOfTriplets, divCompatibilityTable);
+
             int tripletIndex = listOfTriplets.addTriplet(t);
             $$ = new ParserVal(new TripletOperand(tripletIndex));
         }
@@ -819,6 +870,9 @@ SymbolTable symbolTable;
 String implementationMethodScope;
 LinkedList<String> scopeCopy;
 ListOfTriplets listOfTriplets;
+SumCompatibilityTable sumCompatibilityTable;
+MulCompatibilityTable mulCompatibilityTable;
+DivCompatibilityTable divCompatibilityTable;
 
 public Parser(Compiler compiler)
 {
@@ -828,6 +882,8 @@ public Parser(Compiler compiler)
     this.semanticHelper = new SemanticHelper(compiler);
     this.symbolTable = compiler.getSymbolTable();
     this.listOfTriplets = new ListOfTriplets();
-
+    this.sumCompatibilityTable = new SumCompatibilityTable();
+    this.mulCompatibilityTable = new MulCompatibilityTable();
+    this.divCompatibilityTable = new DivCompatibilityTable();   
     yydebug = false;
 }

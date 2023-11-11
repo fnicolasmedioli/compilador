@@ -2,13 +2,15 @@ package compiler;
 
 import java.util.Collections;
 import java.util.LinkedList;
+
+import compiler.CompatibilityTable.ICompatibilityTable;
+
 import java.util.HashMap;
 
 public class SemanticHelper {
 
 	private final Compiler compiler;
 	private final SymbolTable symbolTable;
-
 	private final static HashMap<Integer, DataType> tokenIDtoDataType;
 
 	static {
@@ -289,5 +291,29 @@ public class SemanticHelper {
 		LinkedList<String> list = new LinkedList<>();
         Collections.addAll(list, scopeStr.substring("global:".length()).split(":"));
 		return list;
+	}
+
+	public Triplet getTriplet(TripletOperand operand1, TripletOperand operand2, String operation, ListOfTriplets listOfTriplets, ICompatibilityTable compatibilityTable){
+
+		Triplet t = new Triplet(operation, operand1, operand2 );
+
+		DataType type1, type2;
+
+		if (operand1.isFinal()) {
+			type1= (DataType)operand1.getstEntry().getAttrib(AttribKey.DATA_TYPE);
+		}else {
+			type1 = listOfTriplets.getTriplet(operand1.getIndex()).getType();
+		}
+
+		if (operand2.isFinal()) {
+			type2= (DataType)operand2.getstEntry().getAttrib(AttribKey.DATA_TYPE);
+		}else {
+			type2 = listOfTriplets.getTriplet(operand2.getIndex()).getType();
+		}
+
+		t.setDataType(compatibilityTable.calcDataType(type1, type2));
+
+		return t;
+
 	}
 }
