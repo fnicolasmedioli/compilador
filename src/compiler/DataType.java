@@ -6,7 +6,8 @@ public enum DataType {
     DOUBLE("DOUBLE"),
     UINT("UINT"),
     LONG("LONG"),
-    OBJECT("OBJETO");
+    OBJECT("OBJETO"),
+    BOOLEAN("BOOLEAN");
 
     private final String str;
     DataType(String str)
