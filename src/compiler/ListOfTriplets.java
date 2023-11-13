@@ -27,4 +27,9 @@ public class ListOfTriplets {
 
         return s;
     }
+
+    public int getSize()
+    {
+        return tripletList.size();
+    }
 }

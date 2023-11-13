@@ -1,8 +1,9 @@
 %{
- 
+
 import java.util.LinkedList;
 import compiler.semantic.*;
 import compiler.CompatibilityTable.*;
+import java.util.Vector;
 
 %}
 
@@ -24,17 +25,75 @@ programa
 
 comparador
     : CMP_GE
+        {
+            YACCDataUnit data = new YACCDataUnit();
+            data.lexeme = ">=";
+            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
+            $$ = new ParserVal(data);
+        }
     | CMP_LE
+        {
+            YACCDataUnit data = new YACCDataUnit();
+            data.lexeme = "<=";
+            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
+            $$ = new ParserVal(data);
+        }
     | CMP_EQUAL
+        {
+            YACCDataUnit data = new YACCDataUnit();
+            data.lexeme = "==";
+            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
+            $$ = new ParserVal(data);
+        }
     | CMP_NOT_EQUAL
+        {
+            YACCDataUnit data = new YACCDataUnit();
+            data.lexeme = "!!";
+            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
+            $$ = new ParserVal(data);
+        }
     | '>'
+        {
+            YACCDataUnit data = new YACCDataUnit();
+            data.lexeme = ">";
+            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
+            $$ = new ParserVal(data);
+        }
     | '<'
+        {
+            YACCDataUnit data = new YACCDataUnit();
+            data.lexeme = "<";
+            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
+            $$ = new ParserVal(data);
+        }
     ;
 
 condicion
     : expr comparador expr
+        {
+            String compLexeme = ((YACCDataUnit)$2.obj).lexeme;
+
+            YACCDataUnit data1 = (YACCDataUnit)$1.obj;
+            YACCDataUnit data3 = (YACCDataUnit)$3.obj;
+
+            Triplet triplet = semanticHelper.getTriplet(data1.tripletOperand, data3.tripletOperand, compLexeme, listOfTriplets, compCompatibilityTable);
+
+            if (triplet.getType() == null)
+            {
+                compiler.reportSemanticError("No se pueden comparar tipos de datos", ((YACCDataUnit)$2.obj).tokensData.get(0).getLocation());
+                break;
+            }
+
+            int tripletID = listOfTriplets.addTriplet(triplet);
+
+            YACCDataUnit data = new YACCDataUnit();
+            data.firstTriplet = tripletID;
+            data.tripletQuantity = 1 + data1.tripletQuantity + data3.tripletQuantity;
+
+            $$ = new ParserVal(data);
+        }
     ;
-                    
+
 tipo_basico
     : LONG
     | UINT
@@ -73,36 +132,52 @@ declaracion_variable
     : tipo_basico lista_identificadores ','
         {
             semanticHelper.declarePrimitiveList($2, getCurrentScopeStr(), getSTEntry($1));
+
+            YACCDataUnit data = new YACCDataUnit();
+            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
+            $$ = new ParserVal(data);
         }
     | ID lista_identificadores ','
         {
             semanticHelper.declareObjectList($2, getCurrentScopeStr(), (LocatedSymbolTableEntry)$1.obj);
+
+            YACCDataUnit data = new YACCDataUnit();
+            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
+            $$ = new ParserVal(data);
         }
     ;
 
 sentencia_declarativa
     : declaracion_variable
         {
+            YACCDataUnit data1 = (YACCDataUnit)$1.obj;
+
             compiler.addFoundSyntacticStructure(
-                new SyntacticStructureResult("Declaración de variable/s", getTokenLocation($1))
+                new SyntacticStructureResult("Declaración de variable/s", data1.tokensData.get(0).getLocation())
             );
         }
     | definicion_funcion ','
         {
+            YACCDataUnit data1 = (YACCDataUnit)$1.obj;
+
             compiler.addFoundSyntacticStructure(
-                new SyntacticStructureResult("Definición de función", getTokenLocation($1))
+                new SyntacticStructureResult("Definición de función", data1.tokensData.get(0).getLocation())
             );
         }
     | definicion_clase ','
         {
+            YACCDataUnit data1 = (YACCDataUnit)$1.obj;
+
             compiler.addFoundSyntacticStructure(
-                new SyntacticStructureResult("Definición de clase", getTokenLocation($1))
+                new SyntacticStructureResult("Definición de clase", data1.tokensData.get(0).getLocation())
             );
         }
     | implementacion ','
         {
+            YACCDataUnit data1 = (YACCDataUnit)$1.obj;
+
             compiler.addFoundSyntacticStructure(
-                new SyntacticStructureResult("Sentencia IMPL", getTokenLocation($1))
+                new SyntacticStructureResult("Sentencia IMPL", data1.tokensData.get(0).getLocation())
             );
         }
     ;
@@ -110,6 +185,8 @@ sentencia_declarativa
 sentencia_ejecutable
     : ID op_asignacion_aumentada expr ','
         {
+            YACCDataUnit data3 = (YACCDataUnit)$3.obj;
+
             compiler.addFoundSyntacticStructure(
                 new SyntacticStructureResult("Asignación a variable", getTokenLocation($1))
             );
@@ -133,41 +210,41 @@ sentencia_ejecutable
 
             DataType leftDataType = (DataType)varEntry.getAttrib(AttribKey.DATA_TYPE);
 
-            TripletOperand rightTripletOperand = (TripletOperand)$3.obj;
+            TripletOperand rightTripletOperand = data3.tripletOperand;
 
-            // DataType rightDataType = (DataType)varEntry.getAttrib(AttribKey.DATA_TYPE);
             DataType rightDataType;
 
-            if (rightTripletOperand.isFinal()) {
+            if (rightTripletOperand.isFinal())
                 rightDataType = (DataType)(rightTripletOperand.getstEntry().getAttrib(AttribKey.DATA_TYPE));
-            }else {
+            else
                 rightDataType = listOfTriplets.getTriplet(rightTripletOperand.getIndex()).getType();
-            }
 
-
-            if (leftDataType != rightDataType){
+            if (leftDataType != rightDataType) {
                 compiler.reportSemanticError("asignacion de datos invalida diferentes tipos de datos ", getTokenLocation($2));
                 break;
             }
 
-            
             TripletOperand leftTripletOperand = new TripletOperand(varEntry);
 
             Triplet t = new Triplet("=", leftTripletOperand, rightTripletOperand, rightDataType);
 
-            listOfTriplets.addTriplet(t);
+            int tripletID = listOfTriplets.addTriplet(t);
 
-            //  = new ParserVal(new TripletOperand(t));
+            YACCDataUnit data = new YACCDataUnit();
+            data.firstTriplet = tripletID;
+            data.tripletQuantity = 1 + data3.tripletQuantity;
 
-
+            $$ = new ParserVal(data);
         }
     | acceso_atributo op_asignacion_aumentada expr ','
         {
+            YACCDataUnit data3 = (YACCDataUnit)$3.obj;
+
             LinkedList<LocatedSymbolTableEntry> tokenListData = (LinkedList<LocatedSymbolTableEntry>)($1.obj);
 
             compiler.addFoundSyntacticStructure(
                 new SyntacticStructureResult("Asignación a atributo", tokenListData.getFirst().getLocation())
-            );            
+            );
 
             LocatedSymbolTableEntry[] tokenListArray = tokenListData.toArray(new LocatedSymbolTableEntry[tokenListData.size()]);
 
@@ -188,7 +265,7 @@ sentencia_ejecutable
                 compiler.reportSemanticError(String.format("El identificador '%s' no es una variable", varLexeme), tokenListData.getFirst().getLocation());
                 break;
             }
-            
+
             if (varEntry.getAttrib(AttribKey.DATA_TYPE) != DataType.OBJECT)
             {
                 compiler.reportSemanticError(String.format("La variable '%s' no es de tipo objeto", varLexeme), getTokenLocation($1));
@@ -236,16 +313,23 @@ sentencia_ejecutable
                 }
 
             }
+
+            YACCDataUnit data = new YACCDataUnit();
+            data.tripletQuantity = 1 + data3.tripletQuantity;
+
+            $$ = new ParserVal(data);
         }
     | ID '.' invocacion_funcion ','
         {
+            YACCDataUnit data3 = (YACCDataUnit)$3.obj;
+
             compiler.addFoundSyntacticStructure(
                 new SyntacticStructureResult("Invocación a método", getTokenLocation($1))
             );
 
             String varLexeme = getSTEntry($1).getLexeme();
             String methodLexeme = getSTEntry($3).getLexeme();
-            
+
             String varEntryKey = semanticHelper.getEntryKeyByScope(varLexeme, getCurrentScopeStr());
 
             if (varEntryKey == null)
@@ -253,15 +337,15 @@ sentencia_ejecutable
                 compiler.reportSemanticError("Variable no encontrada: " + varLexeme, getTokenLocation($1));
                 break;
             }
-            
+
             SymbolTableEntry varEntry = symbolTable.getEntry(varEntryKey);
-            
+
             if (varEntry.getAttrib(AttribKey.ID_TYPE) != IDType.VAR_ATTRIB)
             {
                 compiler.reportSemanticError(String.format("El identificador '%s' no es una variable", varLexeme), getTokenLocation($1));
                 break;
             }
-            
+
             if (varEntry.getAttrib(AttribKey.DATA_TYPE) != DataType.OBJECT)
             {
                 compiler.reportSemanticError(String.format("La variable '%s' no es de tipo objeto", varLexeme), getTokenLocation($1));
@@ -275,18 +359,24 @@ sentencia_ejecutable
 
             if (methodEntry == null)
             {
-                compiler.reportSemanticError(String.format("El método '%s' no está definido para la clase '%s'", methodLexeme, classLexeme), getTokenLocation($3));
+                compiler.reportSemanticError(String.format("El método '%s' no está definido para la clase '%s'", methodLexeme, classLexeme), data3.tokensData.get(0).getLocation());
                 break;
             }
 
             if (methodEntry.getAttrib(AttribKey.ID_TYPE) != IDType.FUNC_METHOD)
             {
-                compiler.reportSemanticError(String.format("El identificador '%s' no es un método en la clase '%s'", methodLexeme, classLexeme), getTokenLocation($3));
+                compiler.reportSemanticError(String.format("El identificador '%s' no es un método en la clase '%s'", methodLexeme, classLexeme), data3.tokensData.get(0).getLocation());
                 break;
             }
+
+            YACCDataUnit data = new YACCDataUnit();
+
+            $$ = new ParserVal(data);
         }
     | acceso_atributo '.' invocacion_funcion ','
         {
+            YACCDataUnit data3 = (YACCDataUnit)$3.obj;
+
             LinkedList<LocatedSymbolTableEntry> tokenListData = (LinkedList<LocatedSymbolTableEntry>)($1.obj);
 
             compiler.addFoundSyntacticStructure(
@@ -312,7 +402,7 @@ sentencia_ejecutable
                 compiler.reportSemanticError(String.format("El identificador '%s' no es una variable", varLexeme), tokenListData.getFirst().getLocation());
                 break;
             }
-            
+
             if (varEntry.getAttrib(AttribKey.DATA_TYPE) != DataType.OBJECT)
             {
                 compiler.reportSemanticError(String.format("La variable '%s' no es de tipo objeto", varLexeme), getTokenLocation($1));
@@ -362,47 +452,59 @@ sentencia_ejecutable
 
             if (methodEntry == null)
             {
-                compiler.reportSemanticError(String.format("No se encuentra el método '%s' en la clase '%s'", methodLexeme, lastClassLexeme), getTokenLocation($3));
+                compiler.reportSemanticError(String.format("No se encuentra el método '%s' en la clase '%s'", methodLexeme, lastClassLexeme), data3.tokensData.get(0).getLocation());
                 break;
             }
 
             if (methodEntry.getAttrib(AttribKey.ID_TYPE) != IDType.FUNC_METHOD)
             {
-                compiler.reportSemanticError(String.format("'%s' no es ejecutable ya que no es un método", methodLexeme), getTokenLocation($3));
+                compiler.reportSemanticError(String.format("'%s' no es ejecutable ya que no es un método", methodLexeme), data3.tokensData.get(0).getLocation());
                 break;
             }
 
             // Chequear que coincidan los parámetros
 
-            
+            YACCDataUnit data = new YACCDataUnit();
 
+            $$ = new ParserVal(data);
 
         }
     | invocacion_funcion ','
         {
+            YACCDataUnit data1 = (YACCDataUnit)$1.obj;
+
             compiler.addFoundSyntacticStructure(
-                new SyntacticStructureResult("Invocación a función", getTokenLocation($1))
+                new SyntacticStructureResult("Invocación a función", data1.tokensData.get(0).getLocation())
             );
 
-            String functionLexeme = getSTEntry($1).getLexeme();
+            String functionLexeme = data1.tokensData.get(0).getSTEntry().getLexeme();
             SymbolTableEntry functionEntry = semanticHelper.getEntryByScope(functionLexeme, getCurrentScopeStr());
 
             if (functionEntry == null)
             {
-                compiler.reportSemanticError(String.format("La función '%s' no es alcanzable", functionLexeme), getTokenLocation($1));
+                compiler.reportSemanticError(String.format("La función '%s' no es alcanzable", functionLexeme), data1.tokensData.get(0).getLocation());
                 break;
             }
+
+            YACCDataUnit data = new YACCDataUnit();
+            data.tripletQuantity = 0;
+
+            $$ = new ParserVal(data);
         }
     | sentencia_if ','
         {
+            YACCDataUnit data1 = (YACCDataUnit)$1.obj;
+
             compiler.addFoundSyntacticStructure(
-                new SyntacticStructureResult("Sentencia IF", getTokenLocation($1))
+                new SyntacticStructureResult("Sentencia IF", data1.tokensData.get(0).getLocation())
             );
         }
     | do_until ','
         {
+            YACCDataUnit data1 = (YACCDataUnit)$1.obj;
+
             compiler.addFoundSyntacticStructure(
-                new SyntacticStructureResult("Estructura DO UNTIL", getTokenLocation($1))
+                new SyntacticStructureResult("Estructura DO UNTIL", data1.tokensData.get(0).getLocation())
             );
         }
     | PRINT imprimible ','
@@ -410,12 +512,23 @@ sentencia_ejecutable
             compiler.addFoundSyntacticStructure(
                 new SyntacticStructureResult("Sentencia PRINT", getTokenLocation($1))
             );
+
+            Triplet triplet = new Triplet("PRINT", new TripletOperand(getSTEntry($2)), null);
+            int tripletID = listOfTriplets.addTriplet(triplet);
+
+            YACCDataUnit data = new YACCDataUnit();
+            data.firstTriplet = tripletID;
+            data.tripletQuantity = 1;
+
+            $$ = new ParserVal(data);
         }
     | RETURN ','
         {
             compiler.addFoundSyntacticStructure(
                 new SyntacticStructureResult("Sentencia RETURN", getTokenLocation($1))
             );
+
+            $$ = new ParserVal(new YACCDataUnit());
         }
     ;
 
@@ -434,6 +547,12 @@ lista_sentencias
 
 lista_sentencias_ejecutables
     : lista_sentencias_ejecutables sentencia_ejecutable
+        {
+            YACCDataUnit data = new YACCDataUnit();
+            data.tripletQuantity = ((YACCDataUnit)$1.obj).tripletQuantity + ((YACCDataUnit)$2.obj).tripletQuantity;
+
+            $$ = new ParserVal(data);
+        }
     | sentencia_ejecutable
     ;
 
@@ -441,14 +560,26 @@ invocacion_funcion
     : ID '(' ')'
         {
             // Chequar que coincidan los argumentos
+
+            YACCDataUnit data = new YACCDataUnit();
+            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
+            $$ = new ParserVal(data);
         }
     | ID '(' expr ')'
         {
             // Chequar que coincidan los argumentos
+
+            YACCDataUnit data = new YACCDataUnit();
+            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
+            $$ = new ParserVal(data);
         }
     | ID '(' error ')'
         {
             compiler.reportSyntaxError("Error en invocacion a metodo", getTokenLocation($1));
+
+            YACCDataUnit data = new YACCDataUnit();
+            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
+            $$ = new ParserVal(data);
         }
     ;
 
@@ -459,14 +590,82 @@ op_asignacion_aumentada
 
 sentencia_if
     : IF '(' condicion ')' sentencia_ejecutable END_IF
+        {
+            YACCDataUnit data3 = (YACCDataUnit)$3.obj;
+            YACCDataUnit data5 = (YACCDataUnit)$5.obj;
+
+            YACCDataUnit data = new YACCDataUnit();
+            data.tripletQuantity = 1 + data3.tripletQuantity + data5.tripletQuantity;
+            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
+
+            $$ = new ParserVal(data);
+        }
     | IF '(' condicion ')' '{' lista_sentencias_ejecutables '}' END_IF
+        {
+            YACCDataUnit data3 = (YACCDataUnit)$3.obj;
+            YACCDataUnit data6 = (YACCDataUnit)$6.obj;
+
+            YACCDataUnit data = new YACCDataUnit();
+            data.tripletQuantity = 1 + data3.tripletQuantity + data6.tripletQuantity;
+            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
+
+            $$ = new ParserVal(data);
+        }
     | IF '(' condicion ')' sentencia_ejecutable ELSE sentencia_ejecutable END_IF
+        {
+            YACCDataUnit data3 = (YACCDataUnit)$3.obj;
+            YACCDataUnit data5 = (YACCDataUnit)$5.obj;
+            YACCDataUnit data7 = (YACCDataUnit)$7.obj;
+
+            YACCDataUnit data = new YACCDataUnit();
+            data.tripletQuantity = 2 + data3.tripletQuantity + data5.tripletQuantity + data7.tripletQuantity;
+            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
+
+            $$ = new ParserVal(data);
+        }
     | IF '(' condicion ')' sentencia_ejecutable ELSE '{' lista_sentencias_ejecutables '}' END_IF
+        {
+            YACCDataUnit data3 = (YACCDataUnit)$3.obj;
+            YACCDataUnit data5 = (YACCDataUnit)$5.obj;
+            YACCDataUnit data8 = (YACCDataUnit)$8.obj;
+
+            YACCDataUnit data = new YACCDataUnit();
+            data.tripletQuantity = 2 + data3.tripletQuantity + data5.tripletQuantity + data8.tripletQuantity;
+            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
+
+            $$ = new ParserVal(data);
+        }
     | IF '(' condicion ')' '{' lista_sentencias_ejecutables '}' ELSE sentencia_ejecutable END_IF
+        {
+            YACCDataUnit data3 = (YACCDataUnit)$3.obj;
+            YACCDataUnit data6 = (YACCDataUnit)$6.obj;
+            YACCDataUnit data9 = (YACCDataUnit)$9.obj;
+
+            YACCDataUnit data = new YACCDataUnit();
+            data.tripletQuantity = 2 + data3.tripletQuantity + data6.tripletQuantity + data9.tripletQuantity;
+            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
+
+            $$ = new ParserVal(data);
+        }
     | IF '(' condicion ')' '{' lista_sentencias_ejecutables '}' ELSE '{' lista_sentencias_ejecutables '}' END_IF
+        {
+            YACCDataUnit data3 = (YACCDataUnit)$3.obj;
+            YACCDataUnit data6 = (YACCDataUnit)$6.obj;
+            YACCDataUnit data10 = (YACCDataUnit)$10.obj;
+
+            YACCDataUnit data = new YACCDataUnit();
+            data.tripletQuantity = 2 + data3.tripletQuantity + data6.tripletQuantity + data10.tripletQuantity;
+            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
+
+            $$ = new ParserVal(data);
+        }
     | IF error END_IF ','
         {
             compiler.reportSyntaxError("Error en IF", getTokenLocation($1));
+
+            YACCDataUnit data = new YACCDataUnit();
+            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
+            $$ = new ParserVal(data);
         }
     ;
 
@@ -496,30 +695,49 @@ constante
 expr
     : basic_expr
     | TOD '(' basic_expr ')'
+        {
+            YACCDataUnit data3 = (YACCDataUnit)$3.obj;
+            data3.tripletQuantity++;
+            $$ = new ParserVal(data3);
+        }
     ;
 
 basic_expr
     : expr '+' term
         {
+            YACCDataUnit data1 = (YACCDataUnit)$1.obj;
+            YACCDataUnit data3 = (YACCDataUnit)$3.obj;
 
-            TripletOperand operand1 = (TripletOperand)$1.obj;
-            TripletOperand operand2 = (TripletOperand)$3.obj;
+            TripletOperand operand1 = data1.tripletOperand;
+            TripletOperand operand2 = data3.tripletOperand;
 
             Triplet t = semanticHelper.getTriplet(operand1, operand2, "+", listOfTriplets, sumCompatibilityTable);
 
             int tripletIndex = listOfTriplets.addTriplet(t);
-            $$ = new ParserVal(new TripletOperand(tripletIndex));
 
+            YACCDataUnit data = new YACCDataUnit();
+            data.tripletQuantity = 1 + data1.tripletQuantity + data3.tripletQuantity;
+            data.tripletOperand = new TripletOperand(tripletIndex);
+
+            $$ = new ParserVal(data);
         }
     | expr '-' term
         {
-            TripletOperand operand1 = (TripletOperand)$1.obj;
-            TripletOperand operand2 = (TripletOperand)$3.obj;
+            YACCDataUnit data1 = (YACCDataUnit)$1.obj;
+            YACCDataUnit data3 = (YACCDataUnit)$3.obj;
+
+            TripletOperand operand1 = data1.tripletOperand;
+            TripletOperand operand2 = data3.tripletOperand;
 
             Triplet t = semanticHelper.getTriplet(operand1, operand2, "-", listOfTriplets, sumCompatibilityTable);
 
             int tripletIndex = listOfTriplets.addTriplet(t);
-            $$ = new ParserVal(new TripletOperand(tripletIndex));
+
+            YACCDataUnit data = new YACCDataUnit();
+            data.tripletQuantity = 1 + data1.tripletQuantity + data3.tripletQuantity;
+            data.tripletOperand = new TripletOperand(tripletIndex);
+
+            $$ = new ParserVal(data);
         }
     | term
     ;
@@ -527,30 +745,43 @@ basic_expr
 term
     : term '*' factor
         {
-            TripletOperand operand1 = (TripletOperand)$1.obj;
-            TripletOperand operand2 = (TripletOperand)$3.obj;
+            YACCDataUnit data1 = (YACCDataUnit)$1.obj;
+            YACCDataUnit data3 = (YACCDataUnit)$3.obj;
+
+            TripletOperand operand1 = data1.tripletOperand;
+            TripletOperand operand2 = data3.tripletOperand;
 
             Triplet t = semanticHelper.getTriplet(operand1, operand2, "*", listOfTriplets, mulCompatibilityTable);
 
             int tripletIndex = listOfTriplets.addTriplet(t);
-            $$ = new ParserVal(new TripletOperand(tripletIndex));
+
+            YACCDataUnit data = new YACCDataUnit();
+            data.tripletQuantity = 1 + data1.tripletQuantity;
+            data.tripletOperand = new TripletOperand(tripletIndex);
+
+            $$ = new ParserVal(data);
         }
     | term '/' factor
         {
-            TripletOperand operand1 = (TripletOperand)$1.obj;
-            TripletOperand operand2 = (TripletOperand)$3.obj;
+            YACCDataUnit data1 = (YACCDataUnit)$1.obj;
+            YACCDataUnit data3 = (YACCDataUnit)$3.obj;
+
+            TripletOperand operand1 = data1.tripletOperand;
+            TripletOperand operand2 = data3.tripletOperand;
 
             Triplet t = semanticHelper.getTriplet(operand1, operand2, "/", listOfTriplets, divCompatibilityTable);
 
             int tripletIndex = listOfTriplets.addTriplet(t);
-            $$ = new ParserVal(new TripletOperand(tripletIndex));
+
+            YACCDataUnit data = new YACCDataUnit();
+            data.tripletQuantity = 1 + data1.tripletQuantity;
+            data.tripletOperand = new TripletOperand(tripletIndex);
+
+            $$ = new ParserVal(data);
         }
     | factor
-        {
-            $$ = new ParserVal((TripletOperand)$1.obj);
-        }
     ;
-        
+
 factor
     : ID
         {
@@ -571,11 +802,15 @@ factor
                 break;
             }
 
-            $$ = new ParserVal(new TripletOperand(varEntry));
+            YACCDataUnit data = new YACCDataUnit();
+            data.tripletOperand = new TripletOperand(varEntry);
+            $$ = new ParserVal(data);
         }
     | constante
         {
-            $$ = new ParserVal(new TripletOperand(getSTEntry($1)));
+            YACCDataUnit data = new YACCDataUnit();
+            data.tripletOperand = new TripletOperand(getSTEntry($1));
+            $$ = new ParserVal(data);
         }
     ;
 
@@ -607,6 +842,8 @@ cerrar_scope
 procedimiento
     : VOID id_ambito '(' tipo_basico ID ')' abrir_scope lista_sentencias cerrar_scope
         {
+            YACCDataUnit data8 = (YACCDataUnit)$8.obj;
+
             String funcLexeme = getSTEntry($2).getLexeme();
 
             if (semanticHelper.alreadyDeclaredInScope(funcLexeme, getCurrentScopeStr()))
@@ -619,9 +856,17 @@ procedimiento
 
             String scopeAdentro = getCurrentScopeStr() + ":" + getSTEntry($2).getLexeme();
             semanticHelper.declareArg(scopeAdentro, $5.obj, $4.obj);
+
+            YACCDataUnit data = new YACCDataUnit();
+            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
+            data.tripletQuantity = data8.tripletQuantity;
+
+            $$ = new ParserVal(data);
         }
     | VOID id_ambito '(' ')' abrir_scope lista_sentencias cerrar_scope
         {
+            YACCDataUnit data6 = (YACCDataUnit)$6.obj;
+
             String funcLexeme = getSTEntry($2).getLexeme();
 
             if (semanticHelper.alreadyDeclaredInScope(funcLexeme, getCurrentScopeStr()))
@@ -631,6 +876,12 @@ procedimiento
             }
 
             semanticHelper.declareFunction(getCurrentScopeStr(), $2.obj);
+
+            YACCDataUnit data = new YACCDataUnit();
+            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
+            data.tripletQuantity = data6.tripletQuantity;
+
+            $$ = new ParserVal(data);
         }
     | VOID id_ambito '(' tipo_basico ID ')' abrir_scope cerrar_scope
         {
@@ -643,6 +894,11 @@ procedimiento
             }
 
             semanticHelper.declareFunction(getCurrentScopeStr(), $2.obj, $4.obj);
+
+            YACCDataUnit data = new YACCDataUnit();
+            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
+
+            $$ = new ParserVal(data);
         }
     | VOID id_ambito '(' ')' abrir_scope cerrar_scope
         {
@@ -655,16 +911,46 @@ procedimiento
             }
 
             semanticHelper.declareFunction(getCurrentScopeStr(), $2.obj);
+
+            YACCDataUnit data = new YACCDataUnit();
+            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
+
+            $$ = new ParserVal(data);
         }
     | VOID error '}'
         {
             compiler.reportSyntaxError("Error en funcion/metodo", getTokenLocation($1));
+
+            YACCDataUnit data = new YACCDataUnit();
+            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
+
+            $$ = new ParserVal(data);
         }
     ;
 
 do_until
     : DO sentencia_ejecutable UNTIL '(' condicion ')'
+        {
+            YACCDataUnit data2 = (YACCDataUnit)$2.obj;
+            YACCDataUnit data5 = (YACCDataUnit)$5.obj;
+
+            YACCDataUnit data = new YACCDataUnit();
+            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
+            data.tripletQuantity = 1 + data2.tripletQuantity + data5.tripletQuantity;
+
+            $$ = new ParserVal(data);
+        }
     | DO '{' lista_sentencias_ejecutables '}' UNTIL '(' condicion ')'
+        {
+            YACCDataUnit data3 = (YACCDataUnit)$3.obj;
+            YACCDataUnit data7 = (YACCDataUnit)$7.obj;
+
+            YACCDataUnit data = new YACCDataUnit();
+            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
+            data.tripletQuantity = 1 + data3.tripletQuantity + data7.tripletQuantity;
+
+            $$ = new ParserVal(data);
+        }
     ;
 
 metodo
@@ -675,10 +961,18 @@ definicion_clase
     : CLASS id_ambito abrir_scope cuerpo_clase cerrar_scope
         {
             semanticHelper.declareClass(getCurrentScopeStr(), (LocatedSymbolTableEntry)$2.obj);
+
+            YACCDataUnit data = new YACCDataUnit();
+            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
+            $$ = new ParserVal(data);
         }
     | CLASS id_ambito abrir_scope cerrar_scope
         {
             semanticHelper.declareClass(getCurrentScopeStr(), (LocatedSymbolTableEntry)$2.obj);
+
+            YACCDataUnit data = new YACCDataUnit();
+            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
+            $$ = new ParserVal(data);
         }
     ;
 
@@ -773,7 +1067,6 @@ id_implementacion
         }
     ;
 
-
 implementacion_abrir_scope
     : '{'
         {
@@ -794,9 +1087,17 @@ implementacion_cerrar_scope
 
 implementacion
     : IMPL FOR id_implementacion ':' implementacion_abrir_scope implementacion_metodos implementacion_cerrar_scope
+        {
+            YACCDataUnit data = new YACCDataUnit();
+            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
+            $$ = new ParserVal(data);
+        }
     | IMPL error '}'
         {
             compiler.reportSyntaxError("Error en implementación distribuida", getTokenLocation($1));
+            YACCDataUnit data = new YACCDataUnit();
+            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
+            $$ = new ParserVal(data);
         }
     ;
 
@@ -812,9 +1113,9 @@ int yylex()
     return compiler.yylex();
 }
 
-public void setyylval(LocatedSymbolTableEntry tokenData)
+public void setyylval(LocatedSymbolTableEntry tokensData)
 {
-    this.yylval = new ParserVal(tokenData);
+    this.yylval = new ParserVal(tokensData);
 }
 
 public SymbolTableEntry getSTEntry(ParserVal o)
@@ -843,7 +1144,7 @@ private String getCurrentScopeStr()
 
     for (String subscope : _currentScope)
         scope += ":" + subscope;
-    
+
     return scope;
 }
 
@@ -873,6 +1174,7 @@ ListOfTriplets listOfTriplets;
 SumCompatibilityTable sumCompatibilityTable;
 MulCompatibilityTable mulCompatibilityTable;
 DivCompatibilityTable divCompatibilityTable;
+CompCompatibilityTable compCompatibilityTable;
 
 public Parser(Compiler compiler)
 {
@@ -884,6 +1186,7 @@ public Parser(Compiler compiler)
     this.listOfTriplets = new ListOfTriplets();
     this.sumCompatibilityTable = new SumCompatibilityTable();
     this.mulCompatibilityTable = new MulCompatibilityTable();
-    this.divCompatibilityTable = new DivCompatibilityTable();   
+    this.divCompatibilityTable = new DivCompatibilityTable();
+    this.compCompatibilityTable = new CompCompatibilityTable();
     yydebug = false;
 }

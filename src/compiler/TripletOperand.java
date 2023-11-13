@@ -32,7 +32,7 @@ public class TripletOperand {
             return "Triplet: " + index;
     }
 
-    
+
     public Integer getIndex() {
         return index;
     }
