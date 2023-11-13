@@ -642,13 +642,13 @@ sentencia_if
             YACCDataUnit data3 = (YACCDataUnit)$3.obj;
             YACCDataUnit data5 = (YACCDataUnit)$5.obj;
 
-            int jumpToBackpatch = data3.reservedTriplet;
+            int jzToBackpatch = data3.reservedTriplet;
 
             listOfTriplets.replaceTriplet(
-                jumpToBackpatch,
+                jzToBackpatch,
                 new Triplet(
                     "JZ",
-                    new TripletOperand(1 + jumpToBackpatch + data5.tripletQuantity),
+                    new TripletOperand(1 + jzToBackpatch + data5.tripletQuantity),
                     null
                 )
             );
@@ -665,28 +665,27 @@ sentencia_if
             YACCDataUnit data5 = (YACCDataUnit)$5.obj;
             YACCDataUnit data7 = (YACCDataUnit)$7.obj;
 
-            int jumpToBackpatch = data3.reservedTriplet;
+            int jzToBackpatch = data3.reservedTriplet;
 
             listOfTriplets.replaceTriplet(
-                jumpToBackpatch,
+                jzToBackpatch,
                 new Triplet(
                     "JZ",
-                    new TripletOperand(1 + jumpToBackpatch + data5.tripletQuantity),
+                    new TripletOperand(1 + jzToBackpatch + data5.tripletQuantity),
                     null
                 )
             );
 
-            int jumpToBackpatch2 = data5.reservedTriplet;
+            int jmpToBackpatch = data5.reservedTriplet;
 
             listOfTriplets.replaceTriplet(
-                jumpToBackpatch2,
+                jmpToBackpatch,
                 new Triplet(
                     "JMP",
-                    new TripletOperand(1 + jumpToBackpatch2 + data7.tripletQuantity),
+                    new TripletOperand(1 + jmpToBackpatch + data7.tripletQuantity),
                     null
                 )
             );
-
 
             YACCDataUnit data = new YACCDataUnit();
             data.tripletQuantity = 2 + data3.tripletQuantity + data5.tripletQuantity + data7.tripletQuantity;
