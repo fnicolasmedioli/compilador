@@ -11,6 +11,8 @@ public class YACCDataUnit {
     public Vector<LocatedSymbolTableEntry> tokensData;
     public TripletOperand tripletOperand;
 
+    public int reservedTriplet;
+
     public YACCDataUnit()
     {
         tokensData = new Vector<>();

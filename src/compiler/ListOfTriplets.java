@@ -18,14 +18,19 @@ public class ListOfTriplets {
         return this.tripletList.elementAt(index);
     }
 
+    public void replaceTriplet(int index, Triplet newTriplet)
+    {
+        this.tripletList.set(index, newTriplet);
+    }
+
     @Override
     public String toString()
     {
-        String s = "";
-        for (Triplet t : tripletList)
-            s += t + "\n";
+        StringBuilder s = new StringBuilder();
+        for (int i = 0; i < tripletList.size(); i++)
+            s.append(String.format("[%d] %s\n", i, tripletList.get(i)));
 
-        return s;
+        return s.toString();
     }
 
     public int getSize()

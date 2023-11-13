@@ -588,11 +588,70 @@ op_asignacion_aumentada
     | SUB_ASIGN
     ;
 
+condicion_if_reserva
+    : condicion
+        {
+            // Agrega el terceto del jump condicional
+
+            Triplet triplet = new Triplet("JZ", null, null);
+            int tripletID = listOfTriplets.addTriplet(triplet);
+
+            YACCDataUnit data = (YACCDataUnit)$1.obj;
+            data.reservedTriplet = tripletID;
+
+            $$ = new ParserVal(data);
+        }
+    ;
+
+cuerpo_if
+    : sentencia_ejecutable
+    | '{' lista_sentencias_ejecutables '}'
+        {
+
+            $$ = $2;
+        }
+    ;
+
+cuerpo_else
+    : sentencia_ejecutable
+    | '{' lista_sentencias_ejecutables '}'
+        {
+            $$ = $2;
+        }
+    ;
+
+cuerpo_if_reserva
+    : cuerpo_if
+        {
+            YACCDataUnit data = (YACCDataUnit)$1.obj;
+            // Agrega el terceto del jump incondicional
+
+            Triplet triplet = new Triplet("JMP", null, null);
+            int tripletID = listOfTriplets.addTriplet(triplet);
+
+            data.tripletQuantity += 1;
+            data.reservedTriplet = tripletID;
+
+            $$ = new ParserVal(data);
+        }
+    ;
+
 sentencia_if
-    : IF '(' condicion ')' sentencia_ejecutable END_IF
+    : IF '(' condicion_if_reserva ')' cuerpo_if END_IF
         {
             YACCDataUnit data3 = (YACCDataUnit)$3.obj;
             YACCDataUnit data5 = (YACCDataUnit)$5.obj;
+
+            int jumpToBackpatch = data3.reservedTriplet;
+
+            listOfTriplets.replaceTriplet(
+                jumpToBackpatch,
+                new Triplet(
+                    "JZ",
+                    new TripletOperand(1 + jumpToBackpatch + data5.tripletQuantity),
+                    null
+                )
+            );
 
             YACCDataUnit data = new YACCDataUnit();
             data.tripletQuantity = 1 + data3.tripletQuantity + data5.tripletQuantity;
@@ -600,61 +659,37 @@ sentencia_if
 
             $$ = new ParserVal(data);
         }
-    | IF '(' condicion ')' '{' lista_sentencias_ejecutables '}' END_IF
-        {
-            YACCDataUnit data3 = (YACCDataUnit)$3.obj;
-            YACCDataUnit data6 = (YACCDataUnit)$6.obj;
-
-            YACCDataUnit data = new YACCDataUnit();
-            data.tripletQuantity = 1 + data3.tripletQuantity + data6.tripletQuantity;
-            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
-
-            $$ = new ParserVal(data);
-        }
-    | IF '(' condicion ')' sentencia_ejecutable ELSE sentencia_ejecutable END_IF
+    | IF '(' condicion_if_reserva ')' cuerpo_if_reserva ELSE cuerpo_else END_IF
         {
             YACCDataUnit data3 = (YACCDataUnit)$3.obj;
             YACCDataUnit data5 = (YACCDataUnit)$5.obj;
             YACCDataUnit data7 = (YACCDataUnit)$7.obj;
 
+            int jumpToBackpatch = data3.reservedTriplet;
+
+            listOfTriplets.replaceTriplet(
+                jumpToBackpatch,
+                new Triplet(
+                    "JZ",
+                    new TripletOperand(1 + jumpToBackpatch + data5.tripletQuantity),
+                    null
+                )
+            );
+
+            int jumpToBackpatch2 = data5.reservedTriplet;
+
+            listOfTriplets.replaceTriplet(
+                jumpToBackpatch2,
+                new Triplet(
+                    "JMP",
+                    new TripletOperand(1 + jumpToBackpatch2 + data7.tripletQuantity),
+                    null
+                )
+            );
+
+
             YACCDataUnit data = new YACCDataUnit();
             data.tripletQuantity = 2 + data3.tripletQuantity + data5.tripletQuantity + data7.tripletQuantity;
-            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
-
-            $$ = new ParserVal(data);
-        }
-    | IF '(' condicion ')' sentencia_ejecutable ELSE '{' lista_sentencias_ejecutables '}' END_IF
-        {
-            YACCDataUnit data3 = (YACCDataUnit)$3.obj;
-            YACCDataUnit data5 = (YACCDataUnit)$5.obj;
-            YACCDataUnit data8 = (YACCDataUnit)$8.obj;
-
-            YACCDataUnit data = new YACCDataUnit();
-            data.tripletQuantity = 2 + data3.tripletQuantity + data5.tripletQuantity + data8.tripletQuantity;
-            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
-
-            $$ = new ParserVal(data);
-        }
-    | IF '(' condicion ')' '{' lista_sentencias_ejecutables '}' ELSE sentencia_ejecutable END_IF
-        {
-            YACCDataUnit data3 = (YACCDataUnit)$3.obj;
-            YACCDataUnit data6 = (YACCDataUnit)$6.obj;
-            YACCDataUnit data9 = (YACCDataUnit)$9.obj;
-
-            YACCDataUnit data = new YACCDataUnit();
-            data.tripletQuantity = 2 + data3.tripletQuantity + data6.tripletQuantity + data9.tripletQuantity;
-            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
-
-            $$ = new ParserVal(data);
-        }
-    | IF '(' condicion ')' '{' lista_sentencias_ejecutables '}' ELSE '{' lista_sentencias_ejecutables '}' END_IF
-        {
-            YACCDataUnit data3 = (YACCDataUnit)$3.obj;
-            YACCDataUnit data6 = (YACCDataUnit)$6.obj;
-            YACCDataUnit data10 = (YACCDataUnit)$10.obj;
-
-            YACCDataUnit data = new YACCDataUnit();
-            data.tripletQuantity = 2 + data3.tripletQuantity + data6.tripletQuantity + data10.tripletQuantity;
             data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
 
             $$ = new ParserVal(data);

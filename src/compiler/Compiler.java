@@ -46,6 +46,7 @@ public class Compiler {
 		CompilerMessagePrinter.printFoundSyntacticalStrucutres(syntacticStructuresFound);
 		CompilerMessagePrinter.printSymbolTable(getSymbolTable());
 
+		System.out.println("\nLista de tercetos:");
 		System.out.println(parser.getListOfTriplets());
 	}
 	
