@@ -317,6 +317,8 @@ sentencia_ejecutable
             YACCDataUnit data = new YACCDataUnit();
             data.tripletQuantity = 1 + data3.tripletQuantity;
 
+            // NECESARIO AGREGAR First Triplet
+
             $$ = new ParserVal(data);
         }
     | ID '.' invocacion_funcion ','
@@ -548,8 +550,11 @@ lista_sentencias
 lista_sentencias_ejecutables
     : lista_sentencias_ejecutables sentencia_ejecutable
         {
+            YACCDataUnit data1 = (YACCDataUnit)$1.obj;
+
             YACCDataUnit data = new YACCDataUnit();
             data.tripletQuantity = ((YACCDataUnit)$1.obj).tripletQuantity + ((YACCDataUnit)$2.obj).tripletQuantity;
+            data.firstTriplet = data1.firstTriplet;
 
             $$ = new ParserVal(data);
         }
@@ -962,26 +967,32 @@ procedimiento
         }
     ;
 
+
+cuerpo_do
+    : sentencia_ejecutable
+    | '{' lista_sentencias_ejecutables '}'
+        {
+            $$ = $2;
+        }
+    ;
+
+
 do_until
-    : DO sentencia_ejecutable UNTIL '(' condicion ')'
+    : DO cuerpo_do UNTIL '(' condicion ')'
         {
             YACCDataUnit data2 = (YACCDataUnit)$2.obj;
             YACCDataUnit data5 = (YACCDataUnit)$5.obj;
 
+            // Agregar salto condicional
+
+            int bodyStartTriplet = data2.firstTriplet;
+
+            Triplet triplet = new Triplet("JNZ", new TripletOperand(bodyStartTriplet), null);
+            int tripletID = listOfTriplets.addTriplet(triplet);
+
             YACCDataUnit data = new YACCDataUnit();
             data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
             data.tripletQuantity = 1 + data2.tripletQuantity + data5.tripletQuantity;
-
-            $$ = new ParserVal(data);
-        }
-    | DO '{' lista_sentencias_ejecutables '}' UNTIL '(' condicion ')'
-        {
-            YACCDataUnit data3 = (YACCDataUnit)$3.obj;
-            YACCDataUnit data7 = (YACCDataUnit)$7.obj;
-
-            YACCDataUnit data = new YACCDataUnit();
-            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
-            data.tripletQuantity = 1 + data3.tripletQuantity + data7.tripletQuantity;
 
             $$ = new ParserVal(data);
         }
