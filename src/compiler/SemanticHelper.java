@@ -244,6 +244,9 @@ public class SemanticHelper {
 
 	public SymbolTableEntry declareFunction(String scope, Object _idTokenData, Object argToken)
 	{
+		if (argToken == null)
+			return declareFunction(scope, _idTokenData);
+
 		DataType argDataType = tokenIDtoDataType.get( ((LocatedSymbolTableEntry)argToken).getSTEntry().getTokenID() );
 		return declareFunction(scope, _idTokenData).setAttrib(AttribKey.ARG_TYPE, argDataType);
 	}

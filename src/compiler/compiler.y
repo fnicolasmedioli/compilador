@@ -878,10 +878,39 @@ cerrar_scope
         }
     ;
 
+
+procedimiento_args
+    : '(' tipo_basico ID ')'
+        {
+            YACCDataUnit data = new YACCDataUnit();
+
+            data.tokensData.add((LocatedSymbolTableEntry)$2.obj);
+            data.tokensData.add((LocatedSymbolTableEntry)$3.obj);
+
+            $$ = new ParserVal(data);
+        }
+    | '(' ')'
+        {
+            $$ = new ParserVal(new YACCDataUnit());
+        }
+    ;
+
+procedimiento_cuerpo
+    : abrir_scope cerrar_scope
+        {
+            $$ = new ParserVal(new YACCDataUnit());
+        }
+    | abrir_scope lista_sentencias cerrar_scope
+        {
+            $$ = $2;
+        }
+    ;
+
 procedimiento
-    : VOID id_ambito '(' tipo_basico ID ')' abrir_scope lista_sentencias cerrar_scope
+    : VOID id_ambito procedimiento_args procedimiento_cuerpo
         {
-            YACCDataUnit data8 = (YACCDataUnit)$8.obj;
+            YACCDataUnit data3 = (YACCDataUnit)$3.obj;
+            YACCDataUnit data4 = (YACCDataUnit)$4.obj;
 
             String funcLexeme = getSTEntry($2).getLexeme();
 
@@ -891,68 +920,24 @@ procedimiento
                 break;
             }
 
-            semanticHelper.declareFunction(getCurrentScopeStr(), $2.obj, $4.obj);
+            boolean hasArgument = data3.tokensData.size() > 0;
 
-            String scopeAdentro = getCurrentScopeStr() + ":" + getSTEntry($2).getLexeme();
-            semanticHelper.declareArg(scopeAdentro, $5.obj, $4.obj);
+            LocatedSymbolTableEntry argDataType = hasArgument ? data3.tokensData.get(0) : null;
+            LocatedSymbolTableEntry argName = hasArgument ? data3.tokensData.get(1) : null;
 
-            YACCDataUnit data = new YACCDataUnit();
-            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
-            data.tripletQuantity = data8.tripletQuantity;
+            semanticHelper.declareFunction(getCurrentScopeStr(), $2.obj, argDataType);
 
-            $$ = new ParserVal(data);
-        }
-    | VOID id_ambito '(' ')' abrir_scope lista_sentencias cerrar_scope
-        {
-            YACCDataUnit data6 = (YACCDataUnit)$6.obj;
-
-            String funcLexeme = getSTEntry($2).getLexeme();
-
-            if (semanticHelper.alreadyDeclaredInScope(funcLexeme, getCurrentScopeStr()))
+            if (hasArgument)
             {
-                compiler.reportSemanticError("Identificador ya declarado en el ámbito local", getTokenLocation($2));
-                break;
+                // Declarar la variable del argumento en el scope del procedimiento
+
+                String scopeAdentro = getCurrentScopeStr() + ":" + getSTEntry($2).getLexeme();
+                semanticHelper.declareArg(scopeAdentro, argName, argDataType);
             }
 
-            semanticHelper.declareFunction(getCurrentScopeStr(), $2.obj);
-
             YACCDataUnit data = new YACCDataUnit();
             data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
-            data.tripletQuantity = data6.tripletQuantity;
-
-            $$ = new ParserVal(data);
-        }
-    | VOID id_ambito '(' tipo_basico ID ')' abrir_scope cerrar_scope
-        {
-            String funcLexeme = getSTEntry($2).getLexeme();
-
-            if (semanticHelper.alreadyDeclaredInScope(funcLexeme, getCurrentScopeStr()))
-            {
-                compiler.reportSemanticError("Identificador ya declarado en el ámbito local", getTokenLocation($2));
-                break;
-            }
-
-            semanticHelper.declareFunction(getCurrentScopeStr(), $2.obj, $4.obj);
-
-            YACCDataUnit data = new YACCDataUnit();
-            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
-
-            $$ = new ParserVal(data);
-        }
-    | VOID id_ambito '(' ')' abrir_scope cerrar_scope
-        {
-            String funcLexeme = getSTEntry($2).getLexeme();
-
-            if (semanticHelper.alreadyDeclaredInScope(funcLexeme, getCurrentScopeStr()))
-            {
-                compiler.reportSemanticError("Identificador ya declarado en el ámbito local", getTokenLocation($2));
-                break;
-            }
-
-            semanticHelper.declareFunction(getCurrentScopeStr(), $2.obj);
-
-            YACCDataUnit data = new YACCDataUnit();
-            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
+            data.tripletQuantity = data4.tripletQuantity;
 
             $$ = new ParserVal(data);
         }
