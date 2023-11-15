@@ -429,14 +429,13 @@ sentencia_ejecutable
 
             DataType exprDataType = null;
 
-            if (data2.tripletOperand.isFinal())
-                exprDataType = (DataType)data2.tripletOperand.stEntry.getAttrib(AttribKey.DATA_TYPE);
-            else
-                exprDataType = listOfTriplets.getTriplet(data2.tripletOperand.index).getType();
-
             if (funcHasArgument)
             {
                 // Chequear que coincidan los tipos
+                if (data2.tripletOperand.isFinal())
+                    exprDataType = (DataType)data2.tripletOperand.stEntry.getAttrib(AttribKey.DATA_TYPE);
+                else
+                    exprDataType = listOfTriplets.getTriplet(data2.tripletOperand.index).getType();
 
                 if (referencedEntry.getAttrib(AttribKey.ARG_TYPE) != exprDataType)
                 {
