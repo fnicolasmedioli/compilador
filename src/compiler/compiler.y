@@ -119,16 +119,24 @@ acceso_memoria
         {
             YACCDataUnit data1 = (YACCDataUnit)$1.obj;
 
+            if (!data1.isValid())
+            {
+                $$ = new ParserVal(new YACCInvalidDataUnit());
+                break;
+            }
+
             // Chequear que el ultimo elemento sea objeto
 
-            LocatedSymbolTableEntry lastTokenData = data1.tokensData.get(data1.tokensData.size() - 1);
-            SymbolTableEntry lastTokenEntry = lastTokenData.getSTEntry();
+            String lastTokenLexeme = data1.tokensData.get(data1.tokensData.size() - 1).getSTEntry().getLexeme();
+            TokenLocation lastTokenLocation = data1.tokensData.get(data1.tokensData.size() - 1).getLocation();
+
+            SymbolTableEntry lastTokenEntry = symbolTable.getEntry(data1.referencedEntryKey);
 
             if (lastTokenEntry.getAttrib(AttribKey.DATA_TYPE) != DataType.OBJECT)
             {
                 compiler.reportSemanticError(
                     String.format("ID no es de tipo objeto: %s", lastTokenEntry.getLexeme()),
-                    lastTokenData.getLocation()
+                    lastTokenLocation
                 );
 
                 $$ = new ParserVal(new YACCInvalidDataUnit());
@@ -139,11 +147,11 @@ acceso_memoria
 
             String classEntryKey = (String)lastTokenEntry.getAttrib(AttribKey.INSTANCE_OF);
 
-            String propertyEntryKey = getSTEntry($3).getLexeme() + ":" + semanticHelper.invertScope(classEntryKey) + ":" + lastTokenData.getSTEntry().getLexeme();
+            String propertyClassEntryKey = getSTEntry($3).getLexeme() + ":" + semanticHelper.invertScope(classEntryKey);
 
-            SymbolTableEntry stEntry = symbolTable.getEntry(propertyEntryKey);
+            SymbolTableEntry stPropertyClassEntry = symbolTable.getEntry(propertyClassEntryKey);
 
-            if (stEntry == null)
+            if (stPropertyClassEntry == null)
             {
                 compiler.reportSemanticError(
                     String.format("No se encuentra el ID: %s dentro de la clase: %s", getSTEntry($3).getLexeme(), symbolTable.getEntry(classEntryKey).getLexeme()),
@@ -153,6 +161,10 @@ acceso_memoria
                 $$ = new ParserVal(new YACCInvalidDataUnit());
                 break;
             }
+
+            // Buscar la referencia a la variable en si
+
+            String propertyEntryKey = getSTEntry($3).getLexeme() + ":" + semanticHelper.invertScope(data1.referencedEntryKey);
 
             data1.tokensData.add((LocatedSymbolTableEntry)$3.obj);
             data1.referencedEntryKey = propertyEntryKey;
@@ -166,7 +178,9 @@ acceso_memoria
             LocatedSymbolTableEntry tokenData = (LocatedSymbolTableEntry)$1.obj;
             String lexeme = tokenData.getSTEntry().getLexeme();
 
-            if (!semanticHelper.alreadyDeclaredInScope(lexeme, getCurrentScopeStr()))
+            String referencedEntryKey = semanticHelper.getEntryKeyByScope(lexeme, getCurrentScopeStr());
+
+            if (referencedEntryKey == null)
             {
                 compiler.reportSemanticError(
                     String.format("ID no encontrado: ", lexeme),
@@ -177,9 +191,11 @@ acceso_memoria
                 break;
             }
 
+            // SymbolTableEntry referencedEntry = symbolTable.getEntry(referencedEntryKey);
+
             YACCDataUnit data = new YACCDataUnit();
             data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
-            data.referencedEntryKey = lexeme + ":" + getCurrentScopeStr();
+            data.referencedEntryKey = referencedEntryKey;
 
             $$ = new ParserVal(data);
         }
@@ -905,26 +921,34 @@ definicion_clase
 cuerpo_clase
     : cuerpo_clase declaracion_variable
         {
+            YACCDataUnit data1 = (YACCDataUnit)$1.obj;
+
             compiler.addFoundSyntacticStructure(
-                new SyntacticStructureResult("Declaracion de atributo", getTokenLocation($2))
+                new SyntacticStructureResult("Declaracion de atributo", data1.tokensData.get(0).getLocation())
             );
         }
     | declaracion_variable
         {
+            YACCDataUnit data1 = (YACCDataUnit)$1.obj;
+
             compiler.addFoundSyntacticStructure(
-                new SyntacticStructureResult("Declaracion de atributo", getTokenLocation($1))
+                new SyntacticStructureResult("Declaracion de atributo", data1.tokensData.get(0).getLocation())
             );
         }
     | cuerpo_clase metodo ','
         {
+            YACCDataUnit data1 = (YACCDataUnit)$1.obj;
+
             compiler.addFoundSyntacticStructure(
-                new SyntacticStructureResult("Implementacion de metodo dentro de clase", getTokenLocation($2))
+                new SyntacticStructureResult("Implementacion de metodo dentro de clase", data1.tokensData.get(0).getLocation())
             );
         }
     | metodo ','
         {
+            YACCDataUnit data1 = (YACCDataUnit)$1.obj;
+
             compiler.addFoundSyntacticStructure(
-                new SyntacticStructureResult("Implementacion de metodo dentro de clase", getTokenLocation($1))
+                new SyntacticStructureResult("Implementacion de metodo dentro de clase", data1.tokensData.get(0).getLocation())
             );
         }
     | cuerpo_clase ID ','
@@ -941,7 +965,7 @@ cuerpo_clase
                 new SyntacticStructureResult("Herencia por composicion", getTokenLocation($1))
             );
 
-            semanticHelper.declareComposition(getCurrentScopeStr(), $2.obj);
+            semanticHelper.declareComposition(getCurrentScopeStr(), $1.obj);
         }
     ;
 
