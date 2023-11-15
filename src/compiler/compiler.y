@@ -1,9 +1,11 @@
 %{
 
+import java.util.Vector;
+import java.util.HashMap;
 import java.util.LinkedList;
+
 import compiler.semantic.*;
 import compiler.CompatibilityTable.*;
-import java.util.Vector;
 
 %}
 
@@ -201,21 +203,58 @@ acceso_memoria
         }
     ;
 
-declaracion_variable
-    : tipo_basico lista_identificadores ','
-        {
-            semanticHelper.declarePrimitiveList($2, getCurrentScopeStr(), getSTEntry($1));
 
+tipo_de_dato
+    : tipo_basico
+        {
             YACCDataUnit data = new YACCDataUnit();
             data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
             $$ = new ParserVal(data);
         }
-    | ID lista_identificadores ','
+    | ID
         {
-            semanticHelper.declareObjectList($2, getCurrentScopeStr(), (LocatedSymbolTableEntry)$1.obj);
-
+            getSTEntry($1).setAttrib(AttribKey.DATA_TYPE, DataType.OBJECT);
             YACCDataUnit data = new YACCDataUnit();
             data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
+            $$ = new ParserVal(data);
+        }
+    ;
+
+
+declaracion_variable
+    : tipo_de_dato lista_identificadores ','
+        {
+            YACCDataUnit data1 = (YACCDataUnit)$1.obj;
+
+            if (!data1.isValid())
+            {
+                $$ = new ParserVal(new YACCInvalidDataUnit());
+                break;
+            }
+
+            LinkedList<String> lexemeList = new LinkedList<>();
+
+            for (LocatedSymbolTableEntry tokenData : (LinkedList<LocatedSymbolTableEntry>)($2.obj))
+                lexemeList.add(tokenData.getSTEntry().getLexeme());
+
+            // Si es una declaracion dentro de clase, agregarla a la lista
+
+            if (this.currentClassEntryKey != null)
+            {
+                SymbolTableEntry classEntry = symbolTable.getEntry(currentClassEntryKey);
+                HashMap<String, String> attribsMap = (HashMap<String, String>)(classEntry.getAttrib(AttribKey.ATTRIBS_MAP));
+
+                for (String lexeme : lexemeList)
+                    attribsMap.put(lexeme, lexeme + ":" + getCurrentScopeStr());
+            }
+
+            semanticHelper.declareRecursive(lexemeList, getCurrentScopeStr(), data1.tokensData.get(0).getSTEntry());
+
+            YACCDataUnit data = new YACCDataUnit();
+
+            data.tokensData.add(data1.tokensData.get(0));
+
+
             $$ = new ParserVal(data);
         }
     ;
@@ -899,22 +938,59 @@ metodo
     : procedimiento
     ;
 
-definicion_clase
-    : CLASS id_ambito abrir_scope cuerpo_clase cerrar_scope
+
+clase_con_nombre
+    : CLASS id_ambito
         {
-            semanticHelper.declareClass(getCurrentScopeStr(), (LocatedSymbolTableEntry)$2.obj);
+            boolean success = semanticHelper.declareClass(getCurrentScopeStr(), (LocatedSymbolTableEntry)$2.obj);
+
+            if (!success)
+            {
+                $$ = new ParserVal(new YACCInvalidDataUnit());
+                break;
+            }
+
+            String className = getSTEntry($2).getLexeme();
+
+            this.currentClassEntryKey = className + ":" + getCurrentScopeStr();
 
             YACCDataUnit data = new YACCDataUnit();
+            data.referencedEntryKey = currentClassEntryKey;
             data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
+            data.tokensData.add((LocatedSymbolTableEntry)$2.obj);
+
             $$ = new ParserVal(data);
         }
-    | CLASS id_ambito abrir_scope cerrar_scope
-        {
-            semanticHelper.declareClass(getCurrentScopeStr(), (LocatedSymbolTableEntry)$2.obj);
+    ;
 
-            YACCDataUnit data = new YACCDataUnit();
-            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
-            $$ = new ParserVal(data);
+definicion_clase
+    : clase_con_nombre abrir_scope cuerpo_clase cerrar_scope
+        {
+            this.currentClassEntryKey = null;
+
+            YACCDataUnit data1 = (YACCDataUnit)$1.obj;
+
+            if (!data1.isValid())
+            {
+                $$ = new ParserVal(new YACCInvalidDataUnit());
+                break;
+            }
+
+            $$ = new ParserVal(data1);
+        }
+    | clase_con_nombre abrir_scope cerrar_scope
+        {
+            this.currentClassEntryKey = null;
+
+            YACCDataUnit data1 = (YACCDataUnit)$1.obj;
+
+            if (!data1.isValid())
+            {
+                $$ = new ParserVal(new YACCInvalidDataUnit());
+                break;
+            }
+
+            $$ = new ParserVal(data1);
         }
     ;
 
@@ -1125,6 +1201,7 @@ SumCompatibilityTable sumCompatibilityTable;
 MulCompatibilityTable mulCompatibilityTable;
 DivCompatibilityTable divCompatibilityTable;
 CompCompatibilityTable compCompatibilityTable;
+String currentClassEntryKey;
 
 public Parser(Compiler compiler)
 {
@@ -1138,5 +1215,6 @@ public Parser(Compiler compiler)
     this.mulCompatibilityTable = new MulCompatibilityTable();
     this.divCompatibilityTable = new DivCompatibilityTable();
     this.compCompatibilityTable = new CompCompatibilityTable();
+    this.currentClassEntryKey = null;
     yydebug = false;
 }
