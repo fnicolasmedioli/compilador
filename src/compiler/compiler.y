@@ -392,6 +392,16 @@ sentencia_ejecutable
                 }
             }
 
+            // Agregar terceto de invocacion
+
+            Triplet invokeTriplet = new Triplet(
+                "INVOKE",
+                new TripletOperand(referencedEntry),
+                data2.tripletOperand
+            );
+
+            int tripletID = listOfTriplets.addTriplet(invokeTriplet);
+
             YACCDataUnit data = new YACCDataUnit();
 
             $$ = new ParserVal(data);
