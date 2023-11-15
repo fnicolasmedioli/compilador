@@ -10,11 +10,23 @@ public class YACCDataUnit {
     public String lexeme;
     public Vector<LocatedSymbolTableEntry> tokensData;
     public TripletOperand tripletOperand;
-
     public int reservedTriplet;
+    public String referencedEntryKey;
+    protected boolean valid;
+
+    public LocatedSymbolTableEntry getLastTokenData()
+    {
+        return tokensData.get(tokensData.size() - 1);
+    }
+
+    public boolean isValid()
+    {
+        return valid;
+    }
 
     public YACCDataUnit()
     {
+        valid = true;
         tokensData = new Vector<>();
     }
 }

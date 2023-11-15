@@ -114,17 +114,74 @@ lista_identificadores
         }
     ;
 
-acceso_atributo
-    : acceso_atributo '.' ID
+acceso_memoria
+    : acceso_memoria '.' ID
         {
-            ((LinkedList<LocatedSymbolTableEntry>)($1.obj)).add((LocatedSymbolTableEntry)$3.obj);
+            YACCDataUnit data1 = (YACCDataUnit)$1.obj;
+
+            // Chequear que el ultimo elemento sea objeto
+
+            LocatedSymbolTableEntry lastTokenData = data1.tokensData.get(data1.tokensData.size() - 1);
+            SymbolTableEntry lastTokenEntry = lastTokenData.getSTEntry();
+
+            if (lastTokenEntry.getAttrib(AttribKey.DATA_TYPE) != DataType.OBJECT)
+            {
+                compiler.reportSemanticError(
+                    String.format("ID no es de tipo objeto: %s", lastTokenEntry.getLexeme()),
+                    lastTokenData.getLocation()
+                );
+
+                $$ = new ParserVal(new YACCInvalidDataUnit());
+                break;
+            }
+
+            // Chequar que la clase tenga la propiedad
+
+            String classEntryKey = (String)lastTokenEntry.getAttrib(AttribKey.INSTANCE_OF);
+
+            String propertyEntryKey = getSTEntry($3).getLexeme() + ":" + semanticHelper.invertScope(classEntryKey) + ":" + lastTokenData.getSTEntry().getLexeme();
+
+            SymbolTableEntry stEntry = symbolTable.getEntry(propertyEntryKey);
+
+            if (stEntry == null)
+            {
+                compiler.reportSemanticError(
+                    String.format("No se encuentra el ID: %s dentro de la clase: %s", getSTEntry($3).getLexeme(), symbolTable.getEntry(classEntryKey).getLexeme()),
+                    getTokenLocation($3)
+                );
+
+                $$ = new ParserVal(new YACCInvalidDataUnit());
+                break;
+            }
+
+            data1.tokensData.add((LocatedSymbolTableEntry)$3.obj);
+            data1.referencedEntryKey = propertyEntryKey;
+
+            $$ = new ParserVal(data1);
         }
-    | ID '.' ID
+    | ID
         {
-            LinkedList<LocatedSymbolTableEntry> lista = new LinkedList<>();
-            lista.add((LocatedSymbolTableEntry)$1.obj);
-            lista.add((LocatedSymbolTableEntry)$3.obj);
-            $$ = new ParserVal(lista);
+            // Chequear que exista en el ambito local
+
+            LocatedSymbolTableEntry tokenData = (LocatedSymbolTableEntry)$1.obj;
+            String lexeme = tokenData.getSTEntry().getLexeme();
+
+            if (!semanticHelper.alreadyDeclaredInScope(lexeme, getCurrentScopeStr()))
+            {
+                compiler.reportSemanticError(
+                    String.format("ID no encontrado: ", lexeme),
+                    getTokenLocation($1)
+                );
+
+                $$ = new ParserVal(new YACCInvalidDataUnit());
+                break;
+            }
+
+            YACCDataUnit data = new YACCDataUnit();
+            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
+            data.referencedEntryKey = lexeme + ":" + getCurrentScopeStr();
+
+            $$ = new ParserVal(data);
         }
     ;
 
@@ -182,314 +239,160 @@ sentencia_declarativa
         }
     ;
 
-sentencia_ejecutable
-    : ID op_asignacion_aumentada expr ','
+argumentos_reales
+    : '(' ')'
         {
+            YACCDataUnit data = new YACCDataUnit();
+            $$ = new ParserVal(data);
+        }
+    | '(' expr ')'
+        {
+            YACCDataUnit data2 = (YACCDataUnit)$2.obj;
+
+            if (!data2.isValid())
+            {
+                $$ = new ParserVal(new YACCInvalidDataUnit());
+                break;
+            }
+
+            YACCDataUnit data = new YACCDataUnit();
+            data.tripletOperand = data2.tripletOperand;
+
+            $$ = new ParserVal(data);
+        }
+    ;
+
+sentencia_ejecutable
+    : acceso_memoria op_asignacion_aumentada expr ','
+        {
+            // Chequar que data1 y data3 no tiren error
+
+            YACCDataUnit data1 = (YACCDataUnit)$1.obj;
+            YACCDataUnit data2 = (YACCDataUnit)$2.obj;
             YACCDataUnit data3 = (YACCDataUnit)$3.obj;
 
-            compiler.addFoundSyntacticStructure(
-                new SyntacticStructureResult("Asignación a variable", getTokenLocation($1))
-            );
-
-            String varLexeme = getSTEntry($1).getLexeme();
-            SymbolTableEntry varEntry = semanticHelper.getEntryByScope(varLexeme, getCurrentScopeStr());
-
-            if (varEntry == null)
+            if (!data1.isValid() || !data2.isValid() || !data3.isValid())
             {
-                compiler.reportSemanticError("Variable no encontrada: " + varLexeme, getTokenLocation($1));
+                $$ = new ParserVal(new YACCInvalidDataUnit());
                 break;
             }
 
-            if (varEntry.getAttrib(AttribKey.ID_TYPE) != IDType.VAR_ATTRIB)
+            String operation = data2.lexeme;
+
+            String referencedEntryKey = data1.referencedEntryKey;
+            SymbolTableEntry referencedEntry = symbolTable.getEntry(referencedEntryKey);
+
+            // Chequar que sea una variable
+
+            if (referencedEntry.getAttrib(AttribKey.ID_TYPE) != IDType.VAR_ATTRIB)
             {
-                compiler.reportSemanticError(String.format("El identificador '%s' no es una variable", varLexeme), getTokenLocation($1));
+                LocatedSymbolTableEntry lastAttrib = data1.tokensData.get(data1.tokensData.size() - 1);
+                compiler.reportSemanticError(String.format(
+                    "El ID: %s no es una variable/atributo",
+                    referencedEntry.getLexeme()
+                ), lastAttrib.getLocation());
+
+                $$ = new ParserVal(new YACCInvalidDataUnit());
                 break;
             }
 
-            // HELP NICO DEL FUTURO el -= hay que tenerlo en cuenta (el facu del presente no sabe por que)
+            // Chequar tipos y demas
 
-            DataType leftDataType = (DataType)varEntry.getAttrib(AttribKey.DATA_TYPE);
-
+            DataType leftDataType = (DataType)referencedEntry.getAttrib(AttribKey.DATA_TYPE);
             TripletOperand rightTripletOperand = data3.tripletOperand;
 
-            DataType rightDataType;
+            TripletOperand equalizeTo;
 
-            if (rightTripletOperand.isFinal())
-                rightDataType = (DataType)(rightTripletOperand.getstEntry().getAttrib(AttribKey.DATA_TYPE));
+            int firstTriplet = -1;
+
+            if (operation.equals("="))
+            {
+                equalizeTo = rightTripletOperand;
+            }
             else
-                rightDataType = listOfTriplets.getTriplet(rightTripletOperand.getIndex()).getType();
-
-            if (leftDataType != rightDataType) {
-                compiler.reportSemanticError("asignacion de datos invalida diferentes tipos de datos ", getTokenLocation($2));
-                break;
+            {
+                Triplet subTriplet = new Triplet("-", new TripletOperand(referencedEntry), rightTripletOperand);
+                int tripletID = listOfTriplets.addTriplet(subTriplet);
+                equalizeTo = new TripletOperand(tripletID);
+                firstTriplet = tripletID;
             }
 
-            TripletOperand leftTripletOperand = new TripletOperand(varEntry);
+            Triplet equalTriplet = new Triplet("=", new TripletOperand(referencedEntry), equalizeTo);
+            int tripletID = listOfTriplets.addTriplet(equalTriplet);
 
-            Triplet t = new Triplet("=", leftTripletOperand, rightTripletOperand, rightDataType);
-
-            int tripletID = listOfTriplets.addTriplet(t);
+            if (firstTriplet == -1)
+                firstTriplet = tripletID;
 
             YACCDataUnit data = new YACCDataUnit();
-            data.firstTriplet = tripletID;
-            data.tripletQuantity = 1 + data3.tripletQuantity;
+            data.firstTriplet = firstTriplet;
+            data.tripletQuantity = (operation.equals("=") ? 1 : 2) + data3.tripletQuantity;
 
             $$ = new ParserVal(data);
         }
-    | acceso_atributo op_asignacion_aumentada expr ','
-        {
-            YACCDataUnit data3 = (YACCDataUnit)$3.obj;
-
-            LinkedList<LocatedSymbolTableEntry> tokenListData = (LinkedList<LocatedSymbolTableEntry>)($1.obj);
-
-            compiler.addFoundSyntacticStructure(
-                new SyntacticStructureResult("Asignación a atributo", tokenListData.getFirst().getLocation())
-            );
-
-            LocatedSymbolTableEntry[] tokenListArray = tokenListData.toArray(new LocatedSymbolTableEntry[tokenListData.size()]);
-
-            // La primera debe ser una variable
-
-            String varLexeme = tokenListData.getFirst().getSTEntry().getLexeme();
-            String varEntryKey = semanticHelper.getEntryKeyByScope(varLexeme, getCurrentScopeStr());
-            SymbolTableEntry varEntry = symbolTable.getEntry(varEntryKey);
-
-            if (varEntry == null)
-            {
-                compiler.reportSemanticError("Variable no encontrada: " + varLexeme, tokenListData.getFirst().getLocation());
-                break;
-            }
-
-            if (varEntry.getAttrib(AttribKey.ID_TYPE) != IDType.VAR_ATTRIB)
-            {
-                compiler.reportSemanticError(String.format("El identificador '%s' no es una variable", varLexeme), tokenListData.getFirst().getLocation());
-                break;
-            }
-
-            if (varEntry.getAttrib(AttribKey.DATA_TYPE) != DataType.OBJECT)
-            {
-                compiler.reportSemanticError(String.format("La variable '%s' no es de tipo objeto", varLexeme), getTokenLocation($1));
-                break;
-            }
-
-            String lastClassEntryKey = (String)varEntry.getAttrib(AttribKey.INSTANCE_OF);
-            String lastClassLexeme = symbolTable.getEntry(lastClassEntryKey).getLexeme();
-
-            // Chequar para el resto de la cadena de atributos, si estan definidos en la clase, su tipo, etc
-
-            for (int i = 1; i < tokenListArray.length; i++)
-            {
-                boolean lastAttrib = i + 1 == tokenListArray.length;
-
-                String attribLexeme = tokenListArray[i].getSTEntry().getLexeme();
-                String attribScope = semanticHelper.invertScope(lastClassEntryKey);
-
-                // Existe en la clase ???
-
-                SymbolTableEntry attribEntry = symbolTable.getEntry(attribLexeme + ":" + attribScope);
-
-                if (attribEntry == null)
-                {
-                    compiler.reportSemanticError(String.format("El atributo '%s' no esta definido para la clase '%s'", attribLexeme, lastClassLexeme), tokenListArray[i].getLocation());
-                    break;
-                }
-
-                if (attribEntry.getAttrib(AttribKey.ID_TYPE) != IDType.VAR_ATTRIB)
-                {
-                    compiler.reportSemanticError(String.format("El identificador '%s' no es un atributo", attribLexeme), tokenListArray[i].getLocation());
-                    break;
-                }
-
-                if (!lastAttrib && attribEntry.getAttrib(AttribKey.DATA_TYPE) != DataType.OBJECT)
-                {
-                    compiler.reportSemanticError(String.format("El atributo '%s' no es de tipo objeto", attribLexeme), tokenListArray[i].getLocation());
-                    break;
-                }
-
-                if (!lastAttrib)
-                {
-                    lastClassEntryKey = (String)attribEntry.getAttrib(AttribKey.INSTANCE_OF);
-                    lastClassLexeme = symbolTable.getEntry(lastClassEntryKey).getLexeme();
-                }
-
-            }
-
-            YACCDataUnit data = new YACCDataUnit();
-            data.tripletQuantity = 1 + data3.tripletQuantity;
-
-            // NECESARIO AGREGAR First Triplet
-
-            $$ = new ParserVal(data);
-        }
-    | ID '.' invocacion_funcion ','
-        {
-            YACCDataUnit data3 = (YACCDataUnit)$3.obj;
-
-            compiler.addFoundSyntacticStructure(
-                new SyntacticStructureResult("Invocación a método", getTokenLocation($1))
-            );
-
-            String varLexeme = getSTEntry($1).getLexeme();
-            String methodLexeme = getSTEntry($3).getLexeme();
-
-            String varEntryKey = semanticHelper.getEntryKeyByScope(varLexeme, getCurrentScopeStr());
-
-            if (varEntryKey == null)
-            {
-                compiler.reportSemanticError("Variable no encontrada: " + varLexeme, getTokenLocation($1));
-                break;
-            }
-
-            SymbolTableEntry varEntry = symbolTable.getEntry(varEntryKey);
-
-            if (varEntry.getAttrib(AttribKey.ID_TYPE) != IDType.VAR_ATTRIB)
-            {
-                compiler.reportSemanticError(String.format("El identificador '%s' no es una variable", varLexeme), getTokenLocation($1));
-                break;
-            }
-
-            if (varEntry.getAttrib(AttribKey.DATA_TYPE) != DataType.OBJECT)
-            {
-                compiler.reportSemanticError(String.format("La variable '%s' no es de tipo objeto", varLexeme), getTokenLocation($1));
-                break;
-            }
-
-            String classEntryKey = (String)varEntry.getAttrib(AttribKey.INSTANCE_OF);
-            String classLexeme = symbolTable.getEntry(classEntryKey).getLexeme();
-            String methodEntryKey = methodLexeme + ":" + semanticHelper.removeLexemeFromKey(classEntryKey) + ":" + classLexeme;
-            SymbolTableEntry methodEntry = symbolTable.getEntry(methodEntryKey);
-
-            if (methodEntry == null)
-            {
-                compiler.reportSemanticError(String.format("El método '%s' no está definido para la clase '%s'", methodLexeme, classLexeme), data3.tokensData.get(0).getLocation());
-                break;
-            }
-
-            if (methodEntry.getAttrib(AttribKey.ID_TYPE) != IDType.FUNC_METHOD)
-            {
-                compiler.reportSemanticError(String.format("El identificador '%s' no es un método en la clase '%s'", methodLexeme, classLexeme), data3.tokensData.get(0).getLocation());
-                break;
-            }
-
-            YACCDataUnit data = new YACCDataUnit();
-
-            $$ = new ParserVal(data);
-        }
-    | acceso_atributo '.' invocacion_funcion ','
-        {
-            YACCDataUnit data3 = (YACCDataUnit)$3.obj;
-
-            LinkedList<LocatedSymbolTableEntry> tokenListData = (LinkedList<LocatedSymbolTableEntry>)($1.obj);
-
-            compiler.addFoundSyntacticStructure(
-                new SyntacticStructureResult("Invocación a método", tokenListData.getFirst().getLocation())
-            );
-
-            LocatedSymbolTableEntry[] tokenListArray = tokenListData.toArray(new LocatedSymbolTableEntry[tokenListData.size()]);
-
-            // La primera debe ser una variable
-
-            String varLexeme = tokenListData.getFirst().getSTEntry().getLexeme();
-            String varEntryKey = semanticHelper.getEntryKeyByScope(varLexeme, getCurrentScopeStr());
-            SymbolTableEntry varEntry = symbolTable.getEntry(varEntryKey);
-
-            if (varEntry == null)
-            {
-                compiler.reportSemanticError("Variable no encontrada: " + varLexeme, tokenListData.getFirst().getLocation());
-                break;
-            }
-
-            if (varEntry.getAttrib(AttribKey.ID_TYPE) != IDType.VAR_ATTRIB)
-            {
-                compiler.reportSemanticError(String.format("El identificador '%s' no es una variable", varLexeme), tokenListData.getFirst().getLocation());
-                break;
-            }
-
-            if (varEntry.getAttrib(AttribKey.DATA_TYPE) != DataType.OBJECT)
-            {
-                compiler.reportSemanticError(String.format("La variable '%s' no es de tipo objeto", varLexeme), getTokenLocation($1));
-                break;
-            }
-
-            String lastClassEntryKey = (String)varEntry.getAttrib(AttribKey.INSTANCE_OF);
-            String lastClassLexeme = symbolTable.getEntry(lastClassEntryKey).getLexeme();
-
-            // Todos los atributos deben ser objetos
-
-            for (int i = 1; i < tokenListArray.length; i++)
-            {
-
-                String attribLexeme = tokenListArray[i].getSTEntry().getLexeme();
-                String attribScope = semanticHelper.invertScope(lastClassEntryKey);
-
-                SymbolTableEntry attribEntry = symbolTable.getEntry(attribLexeme + ":" + attribScope);
-
-                if (attribEntry == null)
-                {
-                    compiler.reportSemanticError(String.format("El atributo '%s' no esta definido para la clase '%s'", attribLexeme, lastClassLexeme), tokenListArray[i].getLocation());
-                    break;
-                }
-
-                if (attribEntry.getAttrib(AttribKey.ID_TYPE) != IDType.VAR_ATTRIB)
-                {
-                    compiler.reportSemanticError(String.format("El identificador '%s' no es un atributo", attribLexeme), tokenListArray[i].getLocation());
-                    break;
-                }
-
-                if (attribEntry.getAttrib(AttribKey.DATA_TYPE) != DataType.OBJECT)
-                {
-                    compiler.reportSemanticError(String.format("El atributo '%s' no es de tipo objeto", attribLexeme), tokenListArray[i].getLocation());
-                    break;
-                }
-
-                lastClassEntryKey = (String)attribEntry.getAttrib(AttribKey.INSTANCE_OF);
-                lastClassLexeme = symbolTable.getEntry(lastClassEntryKey).getLexeme();
-            }
-
-            // Chequear que el método esté en la clase
-
-            String methodLexeme = getSTEntry($3).getLexeme();
-            String methodEntryKey = methodLexeme + ":" + semanticHelper.invertScope(lastClassEntryKey);
-            SymbolTableEntry methodEntry = symbolTable.getEntry(methodEntryKey);
-
-            if (methodEntry == null)
-            {
-                compiler.reportSemanticError(String.format("No se encuentra el método '%s' en la clase '%s'", methodLexeme, lastClassLexeme), data3.tokensData.get(0).getLocation());
-                break;
-            }
-
-            if (methodEntry.getAttrib(AttribKey.ID_TYPE) != IDType.FUNC_METHOD)
-            {
-                compiler.reportSemanticError(String.format("'%s' no es ejecutable ya que no es un método", methodLexeme), data3.tokensData.get(0).getLocation());
-                break;
-            }
-
-            // Chequear que coincidan los parámetros
-
-            YACCDataUnit data = new YACCDataUnit();
-
-            $$ = new ParserVal(data);
-
-        }
-    | invocacion_funcion ','
+    | acceso_memoria argumentos_reales ','
         {
             YACCDataUnit data1 = (YACCDataUnit)$1.obj;
+            YACCDataUnit data2 = (YACCDataUnit)$2.obj;
 
-            compiler.addFoundSyntacticStructure(
-                new SyntacticStructureResult("Invocación a función", data1.tokensData.get(0).getLocation())
-            );
-
-            String functionLexeme = data1.tokensData.get(0).getSTEntry().getLexeme();
-            SymbolTableEntry functionEntry = semanticHelper.getEntryByScope(functionLexeme, getCurrentScopeStr());
-
-            if (functionEntry == null)
+            if (!data1.isValid() || !data2.isValid())
             {
-                compiler.reportSemanticError(String.format("La función '%s' no es alcanzable", functionLexeme), data1.tokensData.get(0).getLocation());
+                $$ = new ParserVal(new YACCInvalidDataUnit());
                 break;
             }
 
+            String functionName = data1.getLastTokenData().getSTEntry().getLexeme();
+            TokenLocation functionTokenLocation = data1.getLastTokenData().getLocation();
+
+            compiler.addFoundSyntacticStructure(
+                new SyntacticStructureResult("Invocación a método", functionTokenLocation)
+            );
+
+            SymbolTableEntry referencedEntry = symbolTable.getEntry(data1.referencedEntryKey);
+
+            if (referencedEntry.getAttrib(AttribKey.ID_TYPE) != IDType.FUNC_METHOD)
+            {
+                compiler.reportSemanticError(String.format("El identificador '%s' no es ejecutable", functionName), functionTokenLocation);
+
+                $$ = new ParserVal(new YACCInvalidDataUnit());
+                break;
+            }
+
+            // Chequear el parametro
+
+            boolean funcHasArgument = referencedEntry.getAttrib(AttribKey.ARG_TYPE) != null;
+            boolean argumentWasPassed = data2.tripletOperand != null;
+
+            if (funcHasArgument ^ argumentWasPassed)
+            {
+                compiler.reportSemanticError(String.format("La función '%s' espera: %d argumentos", functionName, funcHasArgument ? 1 : 0), functionTokenLocation);
+
+                $$ = new ParserVal(new YACCInvalidDataUnit());
+                break;
+            }
+
+            // Codigo un poquito sucio
+
+            DataType exprDataType = null;
+
+            if (data2.tripletOperand.isFinal())
+                exprDataType = (DataType)data2.tripletOperand.stEntry.getAttrib(AttribKey.DATA_TYPE);
+            else
+                exprDataType = listOfTriplets.getTriplet(data2.tripletOperand.index).getType();
+
+            if (funcHasArgument)
+            {
+                // Chequear que coincidan los tipos
+
+                if (referencedEntry.getAttrib(AttribKey.ARG_TYPE) != exprDataType)
+                {
+                    compiler.reportSemanticError(String.format("El tipo de dato no coincide"), functionTokenLocation);
+
+                    $$ = new ParserVal(new YACCInvalidDataUnit());
+                    break;
+                }
+            }
+
             YACCDataUnit data = new YACCDataUnit();
-            data.tripletQuantity = 0;
 
             $$ = new ParserVal(data);
         }
@@ -561,36 +464,19 @@ lista_sentencias_ejecutables
     | sentencia_ejecutable
     ;
 
-invocacion_funcion
-    : ID '(' ')'
-        {
-            // Chequar que coincidan los argumentos
-
-            YACCDataUnit data = new YACCDataUnit();
-            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
-            $$ = new ParserVal(data);
-        }
-    | ID '(' expr ')'
-        {
-            // Chequar que coincidan los argumentos
-
-            YACCDataUnit data = new YACCDataUnit();
-            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
-            $$ = new ParserVal(data);
-        }
-    | ID '(' error ')'
-        {
-            compiler.reportSyntaxError("Error en invocacion a metodo", getTokenLocation($1));
-
-            YACCDataUnit data = new YACCDataUnit();
-            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
-            $$ = new ParserVal(data);
-        }
-    ;
-
 op_asignacion_aumentada
     : '='
+        {
+            YACCDataUnit data = new YACCDataUnit();
+            data.lexeme = "=";
+            $$ = new ParserVal(data);
+        }
     | SUB_ASIGN
+        {
+            YACCDataUnit data = new YACCDataUnit();
+            data.lexeme = "-=";
+            $$ = new ParserVal(data);
+        }
     ;
 
 condicion_if_reserva
