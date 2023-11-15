@@ -1,0 +1,12 @@
+{
+    UINT var1,
+    UINT var2,
+
+    var1 = 1_ui,
+    var2 = 4_ui,
+
+    var2 -= var1,
+
+    RETURN,
+    
+}
