@@ -443,6 +443,8 @@ sentencia_ejecutable
                 new SyntacticStructureResult("Sentencia RETURN", getTokenLocation($1))
             );
 
+            Triplet t = new Triplet("RETURN", null, null);
+            int pos = listOfTriplets.addTriplet(t);
             $$ = new ParserVal(new YACCDataUnit());
         }
     ;
