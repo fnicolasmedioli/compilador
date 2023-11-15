@@ -1,0 +1,12 @@
+{
+    UINT var1,
+    UINT var2,
+    UINT var3,
+
+    var1 = 0_ui,
+    var2 = 1_ui,
+   
+    var2 -= var1,
+
+
+}

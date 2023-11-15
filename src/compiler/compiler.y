@@ -226,7 +226,9 @@ sentencia_ejecutable
 
             TripletOperand leftTripletOperand = new TripletOperand(varEntry);
 
-            Triplet t = new Triplet("=", leftTripletOperand, rightTripletOperand, rightDataType);
+            YACCDataUnit data2 = (YACCDataUnit)$2.obj;
+
+            Triplet t = new Triplet(data2.lexeme, leftTripletOperand, rightTripletOperand, rightDataType);
 
             int tripletID = listOfTriplets.addTriplet(t);
 
@@ -590,7 +592,17 @@ invocacion_funcion
 
 op_asignacion_aumentada
     : '='
+        {   
+            YACCDataUnit data = new YACCDataUnit();
+            data.lexeme = "=";
+            $$ = new ParserVal(data);
+        }
     | SUB_ASIGN
+        {
+            YACCDataUnit data = new YACCDataUnit();
+            data.lexeme = "-=";
+            $$ = new ParserVal(data);
+        }
     ;
 
 condicion_if_reserva
