@@ -5,7 +5,7 @@ import java.util.Vector;
 public class YACCDataUnit {
 
     public DataType dataType;
-    public int firstTriplet;
+    public Integer firstTriplet;
     public int tripletQuantity;
     public String lexeme;
     public Vector<LocatedSymbolTableEntry> tokensData;

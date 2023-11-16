@@ -516,6 +516,8 @@ sentencia_ejecutable
             int tripletID = listOfTriplets.addTriplet(invokeTriplet);
 
             YACCDataUnit data = new YACCDataUnit();
+            data.tripletQuantity = 1;
+            data.firstTriplet = tripletID;
 
             $$ = new ParserVal(data);
         }
@@ -547,6 +549,7 @@ sentencia_ejecutable
             YACCDataUnit data = new YACCDataUnit();
             data.firstTriplet = tripletID;
             data.tripletQuantity = 1;
+            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
 
             $$ = new ParserVal(data);
         }
@@ -557,8 +560,14 @@ sentencia_ejecutable
             );
 
             Triplet t = new Triplet("RETURN", null, null);
-            int pos = listOfTriplets.addTriplet(t);
-            $$ = new ParserVal(new YACCDataUnit());
+            int tripletID = listOfTriplets.addTriplet(t);
+
+            YACCDataUnit data = new YACCDataUnit();
+            data.tripletQuantity = 1;
+            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
+            data.firstTriplet = tripletID;
+
+            $$ = new ParserVal(data);
         }
     ;
 
@@ -570,7 +579,29 @@ imprimible
 
 lista_sentencias
     : lista_sentencias sentencia_ejecutable
+        {
+            YACCDataUnit data1 = (YACCDataUnit)$1.obj;
+            YACCDataUnit data2 = (YACCDataUnit)$2.obj;
+
+            YACCDataUnit data = new YACCDataUnit();
+
+            data.tripletQuantity = data1.tripletQuantity + data2.tripletQuantity;
+            data.firstTriplet = (data1.firstTriplet != null ? data1.firstTriplet : data2.firstTriplet);
+
+            $$ = new ParserVal(data);
+        }
     | lista_sentencias sentencia_declarativa
+        {
+            YACCDataUnit data1 = (YACCDataUnit)$1.obj;
+            YACCDataUnit data2 = (YACCDataUnit)$2.obj;
+
+            YACCDataUnit data = new YACCDataUnit();
+
+            data.tripletQuantity = data1.tripletQuantity + data2.tripletQuantity;
+            data.firstTriplet = (data1.firstTriplet != null ? data1.firstTriplet : data2.firstTriplet);
+
+            $$ = new ParserVal(data);
+        }
     | sentencia_ejecutable
     | sentencia_declarativa
     ;
@@ -579,10 +610,11 @@ lista_sentencias_ejecutables
     : lista_sentencias_ejecutables sentencia_ejecutable
         {
             YACCDataUnit data1 = (YACCDataUnit)$1.obj;
+            YACCDataUnit data2 = (YACCDataUnit)$2.obj;
 
             YACCDataUnit data = new YACCDataUnit();
-            data.tripletQuantity = ((YACCDataUnit)$1.obj).tripletQuantity + ((YACCDataUnit)$2.obj).tripletQuantity;
-            data.firstTriplet = data1.firstTriplet;
+            data.tripletQuantity = data1.tripletQuantity + data2.tripletQuantity;
+            data.firstTriplet = (data1.firstTriplet != null ? data1.firstTriplet : data2.firstTriplet);
 
             $$ = new ParserVal(data);
         }
@@ -674,6 +706,7 @@ sentencia_if
             YACCDataUnit data = new YACCDataUnit();
             data.tripletQuantity = 1 + data3.tripletQuantity + data5.tripletQuantity;
             data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
+            data.firstTriplet = data3.reservedTriplet;
 
             $$ = new ParserVal(data);
         }
@@ -708,6 +741,7 @@ sentencia_if
             YACCDataUnit data = new YACCDataUnit();
             data.tripletQuantity = 2 + data3.tripletQuantity + data5.tripletQuantity + data7.tripletQuantity;
             data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
+            data.firstTriplet = data3.reservedTriplet;
 
             $$ = new ParserVal(data);
         }
@@ -715,7 +749,7 @@ sentencia_if
         {
             compiler.reportSyntaxError("Error en IF", getTokenLocation($1));
 
-            YACCDataUnit data = new YACCDataUnit();
+            YACCDataUnit data = new YACCInvalidDataUnit();
             data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
             $$ = new ParserVal(data);
         }
@@ -859,7 +893,7 @@ term
             TripletOperand operand2 = data3.tripletOperand;
 
             Triplet t = semanticHelper.getTriplet(operand1, operand2, "*", listOfTriplets, mulCompatibilityTable);
-            
+
             if (t.getType() == null){
                 compiler.reportSemanticError("No se pueden multiplcar variables de distinto tipo", getTokenLocation($2));
             }
@@ -986,11 +1020,37 @@ procedimiento_cuerpo
         }
     ;
 
-procedimiento
-    : VOID id_ambito procedimiento_args procedimiento_cuerpo
+
+void_con_reserva
+    : VOID
         {
+            Triplet t = new Triplet(null, null, null);
+            int tripletID = listOfTriplets.addTriplet(t);
+
+            YACCDataUnit data = new YACCDataUnit();
+            data.reservedTriplet = tripletID;
+            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
+
+            $$ = new ParserVal(data);
+        }
+    ;
+
+procedimiento
+    : void_con_reserva id_ambito procedimiento_args procedimiento_cuerpo
+        {
+            YACCDataUnit data1 = (YACCDataUnit)$1.obj;
             YACCDataUnit data3 = (YACCDataUnit)$3.obj;
             YACCDataUnit data4 = (YACCDataUnit)$4.obj;
+
+            if (!data3.isValid() || !data4.isValid())
+            {
+                YACCDataUnit data = new YACCInvalidDataUnit();
+                data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
+                $$ = new ParserVal(data);
+                break;
+            }
+
+            System.out.println("La cantidad de tercetos dentro de la funcion es: " + data4.tripletQuantity);
 
             String funcLexeme = getSTEntry($2).getLexeme();
 
@@ -1017,9 +1077,17 @@ procedimiento
             }
 
             YACCDataUnit data = new YACCDataUnit();
-            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
+            data.tokensData.add(data1.tokensData.get(0));
             data.tripletQuantity = data4.tripletQuantity;
             data.referencedEntryKey = funcLexeme + ":" + getCurrentScopeStr();
+
+            // Backpatch del salto
+
+            listOfTriplets.replaceTriplet(data1.reservedTriplet, new Triplet(
+                "JMP",
+                new TripletOperand(1 + data1.reservedTriplet + data.tripletQuantity),
+                null
+            ));
 
             $$ = new ParserVal(data);
         }
@@ -1060,6 +1128,7 @@ do_until
             YACCDataUnit data = new YACCDataUnit();
             data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
             data.tripletQuantity = 1 + data2.tripletQuantity + data5.tripletQuantity;
+            data.firstTriplet = tripletID;
 
             $$ = new ParserVal(data);
         }
