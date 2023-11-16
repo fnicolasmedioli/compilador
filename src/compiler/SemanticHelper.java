@@ -6,6 +6,9 @@ import java.util.LinkedList;
 import compiler.CompatibilityTable.ICompatibilityTable;
 import jdk.nashorn.internal.ir.Symbol;
 
+import java.util.Set;
+import java.util.HashSet;
+
 import java.util.HashMap;
 
 public class SemanticHelper {
@@ -210,7 +213,7 @@ public class SemanticHelper {
 	{
 		DataType dataType = tokenIDtoDataType.get(dataTypeEntry.getTokenID());
 
-		HashMap<String, String> subVarsMap = null;
+		HashSet<String> subVarsSet = null;
 		String classEntryKey = null;
 		SymbolTableEntry classEntry = null;
 
@@ -226,7 +229,7 @@ public class SemanticHelper {
 
 			classEntry = symbolTable.getEntry(classEntryKey);
 
-			subVarsMap = (HashMap<String, String>)(classEntry.getAttrib(AttribKey.ATTRIBS_MAP));
+			subVarsSet = (HashSet<String>)(classEntry.getAttrib(AttribKey.ATTRIBS_SET));
 		}
 
 		// Para cada token en DATATYPE a; b; c
@@ -247,6 +250,10 @@ public class SemanticHelper {
 			.setAttrib(AttribKey.ID_TYPE, IDType.VAR_ATTRIB)
 			.setAttrib(AttribKey.DATA_TYPE, dataType);
 
+			 // Agregarlo a la lista de atribut ??
+
+
+
 			// Y si es tipo objeto hacerlo recursivamente
 
 			if (dataType == DataType.OBJECT)
@@ -258,9 +265,19 @@ public class SemanticHelper {
 				// LinkedList<String> subVarLexemeList = new LinkedList<>();
 				// LinkedList<SymbolTableEntry> subVarDataTypeEntryList = new LinkedList<>();
 
-				for (String subVarName : subVarsMap.keySet()) {
+				for (String subVarEntryKey : subVarsSet) {
 					// sub-variable a generar
-					String subVarEntryKey = subVarName + ":" + invertScope(varEntryKey);
+					// String subVarEntryKey = subVarName + ":" + invertScope(varEntryKey);
+
+					SymbolTableEntry subVarEntry = symbolTable.getEntry(subVarEntryKey);
+
+					if (subVarEntry == null)
+					{
+						System.out.println("Error critico 14");
+						return;
+					}
+
+					String subVarName = subVarEntry.getLexeme();
 
 					// Obtener tipo de dato de la sub-variable
 
@@ -338,7 +355,7 @@ public class SemanticHelper {
 			classTokenData.getSTEntry().getLexeme() + ":" + scope
 			)
 			.setAttrib(AttribKey.ID_TYPE, IDType.CLASSNAME)
-			.setAttrib(AttribKey.ATTRIBS_MAP, new HashMap<String, String>());
+			.setAttrib(AttribKey.ATTRIBS_SET, new HashSet<String>());
 
 		return true;
 	}
@@ -389,44 +406,6 @@ public class SemanticHelper {
 		return declareFunction(scope, _idTokenData).setAttrib(AttribKey.ARG_TYPE, argDataType);
 	}
 
-	public void declareComposition(String scope, Object _idTokenData)
-	{
-		LocatedSymbolTableEntry idTokenData = (LocatedSymbolTableEntry)_idTokenData;
-
-		if (alreadyDeclaredInScope(idTokenData.getSTEntry().getLexeme(), scope))
-		{
-			compiler.reportSemanticError("Herencia por composicion duplicada", idTokenData.getLocation());
-			return;
-		}
-
-		/* Ver si el ID referido por la composicion, existe */
-
-		SymbolTableEntry classEntry = getEntryByScope(idTokenData.getSTEntry().getLexeme(), scope);
-
-		if (classEntry == null)
-		{
-			compiler.reportSemanticError("La clase referenciada por la composicion no existe", idTokenData.getLocation());
-			return;
-		}
-
-		/* Ver si el ID es una clase */
-
-		if (classEntry.getAttrib(AttribKey.ID_TYPE) != IDType.CLASSNAME)
-		{
-			compiler.reportSemanticError("El ID de la composicion no hace referencia a una clase", idTokenData.getLocation());
-			return;
-		}
-
-		symbolTable.addNewEntry(
-			new SymbolTableEntry(
-				Parser.ID,
-				idTokenData.getSTEntry().getLexeme()
-			),
-			idTokenData.getSTEntry().getLexeme() + ":" + scope
-		)
-		.setAttrib(AttribKey.ID_TYPE, IDType.COMPOSITION);
-	}
-
 	public LinkedList<String> scopeStrToList(String scopeStr)
 	{
 		LinkedList<String> list = new LinkedList<>();
@@ -455,6 +434,99 @@ public class SemanticHelper {
 		t.setDataType(compatibilityTable.calcDataType(type1, type2));
 
 		return t;
+	}
 
+	public void declareCompos(LocatedSymbolTableEntry composTokenData, String scope, String currentClassEntryKey)
+	{
+		String composEntryKey = getEntryKeyByScope(composTokenData.getSTEntry().getLexeme(), scope);
+
+		if (composEntryKey == null)
+		{
+			System.out.println("es null");
+			return;
+		}
+
+		SymbolTableEntry composEntry = symbolTable.getEntry(composEntryKey);
+
+		if (composEntry.getAttrib(AttribKey.ATTRIBS_SET) == null)
+		{
+			System.out.println("GRAN ERROR");
+			return;
+		}
+
+		HashSet<String> subVarsSet = (HashSet<String>)(composEntry.getAttrib(AttribKey.ATTRIBS_SET));
+
+		if (subVarsSet == null)
+		{
+			System.out.println("No se encontro el set de atributos");
+			return;
+		}
+
+		String lexeme = composTokenData.getSTEntry().getLexeme();
+
+		// Objeto base
+
+		symbolTable.addNewEntry(
+			new SymbolTableEntry(Parser.ID, lexeme),
+			lexeme + ":" + scope
+		)
+		.setAttrib(AttribKey.ID_TYPE, IDType.VAR_ATTRIB)
+		.setAttrib(AttribKey.DATA_TYPE, DataType.OBJECT)
+		.setAttrib(AttribKey.INSTANCE_OF, composEntryKey);
+
+		// Agregar a la lista de atributos de la clase, el nuevo atributo
+
+		SymbolTableEntry currentClassEntry = symbolTable.getEntry(currentClassEntryKey);
+
+		((HashSet<String>)(currentClassEntry.getAttrib(AttribKey.ATTRIBS_SET))).add(lexeme + ":" + scope);
+
+		// Copiar el resto de atributos
+
+		for (String attribEntryKey : subVarsSet)
+		{
+			SymbolTableEntry attribEntry = symbolTable.getEntry(attribEntryKey);
+
+			if (attribEntry == null)
+			{
+				System.out.println("No se encontro el attribEntry");
+				continue;
+			}
+
+			String attribName = attribEntry.getLexeme();
+
+			DataType attribDataType = (DataType)(attribEntry.getAttrib(AttribKey.DATA_TYPE));
+
+			SymbolTableEntry recDataTypeEntry = null;
+
+			if (attribDataType == DataType.OBJECT)
+			{
+				String attribClassEntryKey = (String)attribEntry.getAttrib(AttribKey.INSTANCE_OF);
+				SymbolTableEntry attribClassEntry = symbolTable.getEntry(attribClassEntryKey);
+				recDataTypeEntry = symbolTable.getEntry(attribClassEntry.getLexeme());
+			}
+			else {
+				switch (attribDataType) {
+					case LONG:
+						recDataTypeEntry = symbolTable.getEntry("LONG");
+						break;
+					case UINT:
+						recDataTypeEntry = symbolTable.getEntry("UINT");
+						break;
+					case STRING:
+						recDataTypeEntry = symbolTable.getEntry("STRING");
+						break;
+					case DOUBLE:
+						recDataTypeEntry = symbolTable.getEntry("DOUBLE");
+						break;
+					case BOOLEAN:
+						recDataTypeEntry = symbolTable.getEntry("BOOLEAN");
+						break;
+				}
+			}
+
+			LinkedList<String> t = new LinkedList<>();
+			t.add(attribName);
+			declareRecursive(t, scope + ":" + lexeme, recDataTypeEntry);
+		}
 	}
 }

@@ -3,6 +3,8 @@
 import java.util.Vector;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Set;
+import java.util.HashSet;
 
 import compiler.semantic.*;
 import compiler.CompatibilityTable.*;
@@ -134,6 +136,16 @@ acceso_memoria
 
             SymbolTableEntry lastTokenEntry = symbolTable.getEntry(data1.referencedEntryKey);
 
+            if (lastTokenEntry == null)
+            {
+                compiler.reportSemanticError(
+                    "No se encuentra la clave: " + data1.referencedEntryKey, lastTokenLocation
+                );
+
+                $$ = new ParserVal(new YACCInvalidDataUnit());
+                break;
+            }
+
             if (lastTokenEntry.getAttrib(AttribKey.DATA_TYPE) != DataType.OBJECT)
             {
                 compiler.reportSemanticError(
@@ -171,7 +183,6 @@ acceso_memoria
                 // Reemplazar la referencia por el método en la clase
 
                 data1.referencedEntryKey = staticVarEntryKey;
-
             }
             else
             {
@@ -252,10 +263,10 @@ declaracion_variable
             if (this.currentClassEntryKey != null)
             {
                 SymbolTableEntry classEntry = symbolTable.getEntry(currentClassEntryKey);
-                HashMap<String, String> attribsMap = (HashMap<String, String>)(classEntry.getAttrib(AttribKey.ATTRIBS_MAP));
+                HashSet<String> attribsSet = (HashSet<String>)(classEntry.getAttrib(AttribKey.ATTRIBS_SET));
 
                 for (String lexeme : lexemeList)
-                    attribsMap.put(lexeme, lexeme + ":" + getCurrentScopeStr());
+                    attribsSet.add(lexeme + ":" + getCurrentScopeStr());
             }
 
             semanticHelper.declareRecursive(lexemeList, getCurrentScopeStr(), data1.tokensData.get(0).getSTEntry());
@@ -263,7 +274,6 @@ declaracion_variable
             YACCDataUnit data = new YACCDataUnit();
 
             data.tokensData.add(data1.tokensData.get(0));
-
 
             $$ = new ParserVal(data);
         }
@@ -1039,19 +1049,23 @@ cuerpo_clase
         }
     | cuerpo_clase ID ','
         {
+            String composLexeme = getSTEntry($2).getLexeme();
+
+            semanticHelper.declareCompos((LocatedSymbolTableEntry)$2.obj, getCurrentScopeStr(), currentClassEntryKey);
+
             compiler.addFoundSyntacticStructure(
                 new SyntacticStructureResult("Herencia por composicion", getTokenLocation($2))
             );
-
-            semanticHelper.declareComposition(getCurrentScopeStr(), $2.obj);
         }
     | ID ','
         {
+            String composLexeme = getSTEntry($1).getLexeme();
+
+            semanticHelper.declareCompos((LocatedSymbolTableEntry)$1.obj, getCurrentScopeStr(), currentClassEntryKey);
+
             compiler.addFoundSyntacticStructure(
                 new SyntacticStructureResult("Herencia por composicion", getTokenLocation($1))
             );
-
-            semanticHelper.declareComposition(getCurrentScopeStr(), $1.obj);
         }
     ;
 

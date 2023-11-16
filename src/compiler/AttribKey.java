@@ -6,7 +6,7 @@ public enum AttribKey {
     DATA_TYPE("Tipo de dato"),
     INSTANCE_OF("Instancia de clase"),
     ARG_TYPE("Tipo de argumento"),
-    ATTRIBS_MAP("Mapa de atributos");
+    ATTRIBS_SET("Conjunto de atributos");
 
     private final String str;
     AttribKey(String str)
