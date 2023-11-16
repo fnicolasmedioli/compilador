@@ -11,24 +11,26 @@ public class SumCompatibilityTable implements ICompatibilityTable {
     private static final int _string = DataType.STRING.ordinal();
     private static final int _double = DataType.DOUBLE.ordinal();
     private static final int _object = DataType.OBJECT.ordinal();
+    private static final int _boolean = DataType.BOOLEAN.ordinal();
+
 
     private static synchronized void initializeMatrix()
     {
         int dataTypesQuantity = DataType.values().length;
         matrix = new DataType[dataTypesQuantity][dataTypesQuantity];
 
-        setSymmetric(_uint, _uint, DataType.UINT);
-        matrix[_uint][_long] = DataType.LONG;
+        setSymmetric(_uint, _uint, DataType.BOOLEAN);
+        //matrix[_uint][_long] = DataType.LONG;
         // matrix[_uint][_double] = DataType.DOUBLE;
 
-        setSymmetric(_long, _long, DataType.LONG);
+        setSymmetric(_long, _long, DataType.BOOLEAN);
         // matrix[_long][_double] = DataType.DOUBLE;
 
-        setSymmetric(_string, _string, DataType.STRING);
+        setSymmetric(_string, _string, DataType.BOOLEAN);
 
-        setSymmetric(_double, _double, DataType.DOUBLE);
+        setSymmetric(_double, _double, DataType.BOOLEAN);
         // DOUBLE to UINT/LONG ??
-        setSymmetric(_uint, _double, DataType.DOUBLE);
+        //setSymmetric(_uint, _double, DataType.DOUBLE);
 
     }
 

@@ -772,6 +772,10 @@ basic_expr
 
             Triplet t = semanticHelper.getTriplet(operand1, operand2, "+", listOfTriplets, sumCompatibilityTable);
 
+            if (t.getType() == null){
+                compiler.reportSemanticError("No se pueden sumar variables de distinto tipo", null);
+            }
+
             int tripletIndex = listOfTriplets.addTriplet(t);
 
             YACCDataUnit data = new YACCDataUnit();
@@ -789,6 +793,10 @@ basic_expr
             TripletOperand operand2 = data3.tripletOperand;
 
             Triplet t = semanticHelper.getTriplet(operand1, operand2, "-", listOfTriplets, sumCompatibilityTable);
+
+            if (t.getType() == null){
+                compiler.reportSemanticError("No se pueden restarvar iables de distinto tipo", null);
+            }
 
             int tripletIndex = listOfTriplets.addTriplet(t);
 
@@ -811,6 +819,10 @@ term
             TripletOperand operand2 = data3.tripletOperand;
 
             Triplet t = semanticHelper.getTriplet(operand1, operand2, "*", listOfTriplets, mulCompatibilityTable);
+            
+            if (t.getType() == null){
+                compiler.reportSemanticError("No se pueden multiplcar variables de distinto tipo", null);
+            }
 
             int tripletIndex = listOfTriplets.addTriplet(t);
 
@@ -829,6 +841,10 @@ term
             TripletOperand operand2 = data3.tripletOperand;
 
             Triplet t = semanticHelper.getTriplet(operand1, operand2, "/", listOfTriplets, divCompatibilityTable);
+
+            if (t.getType() == null){
+                compiler.reportSemanticError("No se pueden dividir variables de distinto tipo", null);
+            }
 
             int tripletIndex = listOfTriplets.addTriplet(t);
 
