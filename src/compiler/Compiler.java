@@ -10,6 +10,7 @@ public class Compiler {
 	private final PriorityQueue<SyntacticStructureResult> syntacticStructuresFound;
 	private final CompilerMessagePrinter messagePrinter;
 	private int errorCount;
+	private final Translate translate;
 
 	public Compiler(String sourceFileName) throws FileNotFoundException
 	{
@@ -20,6 +21,7 @@ public class Compiler {
 		);
 		this.messagePrinter = new CompilerMessagePrinter(this);
 		this.errorCount = 0;
+		this.translate = new Translate();
 	}
 
 	public void compile()
@@ -41,14 +43,20 @@ public class Compiler {
 		else
 			messagePrinter.error("Hubo errores en el parsing");
 
-		System.out.println();
-		messagePrinter.printTokenList();
-		CompilerMessagePrinter.printFoundSyntacticalStrucutres(syntacticStructuresFound);
-		CompilerMessagePrinter.printSymbolTable(getSymbolTable());
+		//System.out.println();
+		//messagePrinter.printTokenList();
+		//CompilerMessagePrinter.printFoundSyntacticalStrucutres(syntacticStructuresFound);
+		//CompilerMessagePrinter.printSymbolTable(getSymbolTable());
 
+		ListOfTriplets listOfTriplets = parser.getListOfTriplets();
 		System.out.println("\nLista de tercetos:");
-		System.out.println(parser.getListOfTriplets());
+		System.out.println(listOfTriplets);
+		
+		String codAssembler = translate.translateTriplets(listOfTriplets);
+		System.out.println("\nCodigo Assembler");
+		System.out.println(codAssembler);
 	}
+
 
 	public int yylex()
 	{
