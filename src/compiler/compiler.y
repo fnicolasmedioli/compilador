@@ -1054,6 +1054,8 @@ procedimiento
 
             String funcLexeme = getSTEntry($2).getLexeme();
 
+            String funcEntryKey = funcLexeme + ":" + getCurrentScopeStr();
+
             if (semanticHelper.alreadyDeclaredInScope(funcLexeme, getCurrentScopeStr()))
             {
                 compiler.reportSemanticError("Identificador ya declarado en el ámbito local", getTokenLocation($2));
@@ -1099,6 +1101,10 @@ procedimiento
                 listOfTriplets.addTriplet(returnTriplet);
                 System.out.println("Se agrego un terceto return implicitamente");
             }
+
+            // Agregar a la tabla de simbolos el terceto donde empieza la funcion
+
+            symbolTable.getEntry(funcEntryKey).setAttrib(AttribKey.FIRST_TRIPLET, data4.firstTriplet);
 
             $$ = new ParserVal(data);
         }

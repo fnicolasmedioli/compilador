@@ -7,7 +7,8 @@ public enum AttribKey {
     INSTANCE_OF("Instancia de clase"),
     ARG_TYPE("Tipo de argumento"),
     ATTRIBS_SET("Conjunto de atributos"),
-    METHODS_SET("Conjunto de metodos");
+    METHODS_SET("Conjunto de metodos"),
+    FIRST_TRIPLET("Primer terceto de la instruccion");
 
     private final String str;
     AttribKey(String str)
