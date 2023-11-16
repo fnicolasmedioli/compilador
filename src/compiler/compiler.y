@@ -1089,6 +1089,17 @@ procedimiento
                 null
             ));
 
+            Triplet lastTriplet = listOfTriplets.getLastTriplet();
+
+            if (lastTriplet.getOperation().equals("RETURN") == false)
+            {
+                // Entonces agregar un RETURN implicitamente
+
+                Triplet returnTriplet = new Triplet("RETURN", null, null);
+                listOfTriplets.addTriplet(returnTriplet);
+                System.out.println("Se agrego un terceto return implicitamente");
+            }
+
             $$ = new ParserVal(data);
         }
     | VOID error '}'

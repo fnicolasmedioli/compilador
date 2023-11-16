@@ -37,4 +37,10 @@ public class ListOfTriplets {
     {
         return tripletList.size();
     }
+
+    public Triplet getLastTriplet()
+    {
+        return tripletList.get(getSize() - 1);
+    }
+
 }
