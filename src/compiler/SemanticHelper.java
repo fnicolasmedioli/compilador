@@ -59,23 +59,9 @@ public class SemanticHelper {
 	 */
 	public SymbolTableEntry getEntryByScope(String id, String scope)
 	{
-		String idscope = id + ":" + scope;
-
-		while (true)
-		{
-			SymbolTableEntry stEntry = symbolTable.getEntry(idscope);
-
-			if (stEntry != null)
-				return stEntry;
-
-			if (idscope.length() < 7 || idscope.endsWith(":global"))
-				return null;
-
-			idscope = removeScopeLevel(idscope);
-
-			if (idscope == null)
-				return null;
-		}
+		String entryKey = getEntryKeyByScope(id, scope);
+		if (entryKey == null) return null;
+		return symbolTable.getEntry(entryKey);
 	}
 
 	public String getEntryKeyByScope(String id, String scope)

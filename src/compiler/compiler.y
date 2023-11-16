@@ -208,7 +208,7 @@ acceso_memoria
             if (referencedEntryKey == null)
             {
                 compiler.reportSemanticError(
-                    String.format("ID no encontrado: ", lexeme),
+                    String.format("ID no encontrado: %s", lexeme),
                     getTokenLocation($1)
                 );
 
@@ -381,6 +381,10 @@ sentencia_ejecutable
             YACCDataUnit data1 = (YACCDataUnit)$1.obj;
             YACCDataUnit data2 = (YACCDataUnit)$2.obj;
             YACCDataUnit data3 = (YACCDataUnit)$3.obj;
+
+            compiler.addFoundSyntacticStructure(
+                new SyntacticStructureResult("Asignacion", data2.tokensData.get(0).getLocation())
+            );
 
             if (!data1.isValid() || !data2.isValid() || !data3.isValid())
             {
@@ -590,12 +594,14 @@ op_asignacion_aumentada
         {
             YACCDataUnit data = new YACCDataUnit();
             data.lexeme = "=";
+            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
             $$ = new ParserVal(data);
         }
     | SUB_ASIGN
         {
             YACCDataUnit data = new YACCDataUnit();
             data.lexeme = "-=";
+            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
             $$ = new ParserVal(data);
         }
     ;
@@ -744,6 +750,13 @@ expr
         {
             YACCDataUnit data3 = (YACCDataUnit)$3.obj;
             data3.tripletQuantity++;
+
+            Triplet convTriplet = new Triplet("TOD", data3.tripletOperand, null, DataType.DOUBLE);
+            int tripletID = listOfTriplets.addTriplet(convTriplet);
+
+            data3.tripletOperand = new TripletOperand(tripletID);
+            data3.dataType = DataType.DOUBLE;
+
             $$ = new ParserVal(data3);
         }
     ;
@@ -829,27 +842,31 @@ term
     ;
 
 factor
-    : ID
+    : acceso_memoria
         {
-            // Chequear alcance y tipo de ID
+            YACCDataUnit data1 = (YACCDataUnit)$1.obj;
 
-            String varLexeme = getSTEntry($1).getLexeme();
-            SymbolTableEntry varEntry = semanticHelper.getEntryByScope(varLexeme, getCurrentScopeStr());
-
-            if (varEntry == null)
+            if (!data1.isValid())
             {
-                compiler.reportSemanticError("Variable no alcanzable", getTokenLocation($1));
+                $$ = new ParserVal(new YACCInvalidDataUnit());
                 break;
             }
 
-            if (varEntry.getAttrib(AttribKey.ID_TYPE) != IDType.VAR_ATTRIB)
+            // Chequear que acceso_memoria sea una variable
+
+            String referencedEntryKey = data1.referencedEntryKey;
+            SymbolTableEntry referencedEntry = symbolTable.getEntry(referencedEntryKey);
+
+            if (referencedEntry.getAttrib(AttribKey.ID_TYPE) != IDType.VAR_ATTRIB)
             {
-                compiler.reportSemanticError("El identificador " + varEntry.getLexeme() + "no es de tipo var/attribute", getTokenLocation($1));
+                compiler.reportSemanticError("Se espera una variable", null);
+
+                $$ = new ParserVal(new YACCInvalidDataUnit());
                 break;
             }
 
             YACCDataUnit data = new YACCDataUnit();
-            data.tripletOperand = new TripletOperand(varEntry);
+            data.tripletOperand = new TripletOperand(referencedEntry);
             $$ = new ParserVal(data);
         }
     | constante
