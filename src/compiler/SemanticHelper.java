@@ -167,50 +167,10 @@ public class SemanticHelper {
 		return entriesKeys;
 	}
 
-	public LinkedList<String> declarePrimitiveList(ParserVal list, String scope, SymbolTableEntry dataTypeEntry)
-	{
-		DataType dataType = tokenIDtoDataType.get(dataTypeEntry.getTokenID());
-		if (dataType == null)
-		{
-			System.out.println("Error critico!");
-			return null;
-		}
-		return declareIDList(list, scope, dataType);
-	}
-
-	public LinkedList<String> declareObjectList(ParserVal list, String scope, LocatedSymbolTableEntry classTokenData)
-	{
-		// Find symbol table entry for class ID if reachable
-		String classEntryKey = getEntryKeyByScope(classTokenData.getSTEntry().getLexeme(), scope);
-
-		if (classEntryKey == null)
-		{
-			compiler.reportSemanticError(
-				"Tipo de dato no definido: " + classTokenData.getSTEntry().getLexeme(),
-				classTokenData.getLocation()
-			);
-			return null;
-		}
-
-		SymbolTableEntry classEntry = symbolTable.getEntry(classEntryKey);
-
-		/* Aca se deberia chequar si realmente es una clase o un id de una variable, por ejemplo */
-
-		LinkedList<String> declaredEntriesKeys = declareIDList(list, scope, DataType.OBJECT);
-		LinkedList<SymbolTableEntry> declaredEntries = entriesKeysToEntries(declaredEntriesKeys);
-
-		for (SymbolTableEntry entry : declaredEntries)
-			entry.setAttrib(AttribKey.INSTANCE_OF, classEntryKey);
-
-		// Generar los atributos dentro del objeto
-
-		System.out.println(declaredEntriesKeys);
-
-		return declaredEntriesKeys;
-	}
-
 	public void declareRecursive(LinkedList<String> varLexemeList, String scope, SymbolTableEntry dataTypeEntry)
 	{
+
+
 		DataType dataType = tokenIDtoDataType.get(dataTypeEntry.getTokenID());
 
 		HashSet<String> subVarsSet = null;
@@ -238,6 +198,14 @@ public class SemanticHelper {
 		{
 			String varEntryKey = varLexeme + ":" + scope;
 
+			if (symbolTable.getEntry(varEntryKey) != null)
+			{
+				compiler.reportSemanticError(
+					String.format("El ID '%s' ya esta definido en el ambito local", varLexeme),
+				null);
+				continue;
+			}
+
 			// Declarar la variable localmente
 
 			SymbolTableEntry varEntry = symbolTable.addNewEntry(
@@ -249,10 +217,6 @@ public class SemanticHelper {
 			)
 			.setAttrib(AttribKey.ID_TYPE, IDType.VAR_ATTRIB)
 			.setAttrib(AttribKey.DATA_TYPE, dataType);
-
-			 // Agregarlo a la lista de atribut ??
-
-
 
 			// Y si es tipo objeto hacerlo recursivamente
 
