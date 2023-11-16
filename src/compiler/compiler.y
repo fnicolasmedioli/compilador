@@ -224,7 +224,6 @@ acceso_memoria
         }
     ;
 
-
 tipo_de_dato
     : tipo_basico
         {
@@ -888,6 +887,7 @@ procedimiento
             if (semanticHelper.alreadyDeclaredInScope(funcLexeme, getCurrentScopeStr()))
             {
                 compiler.reportSemanticError("Identificador ya declarado en el ámbito local", getTokenLocation($2));
+                $$ = new ParserVal(new YACCInvalidDataUnit());
                 break;
             }
 
@@ -909,6 +909,7 @@ procedimiento
             YACCDataUnit data = new YACCDataUnit();
             data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
             data.tripletQuantity = data4.tripletQuantity;
+            data.referencedEntryKey = funcLexeme + ":" + getCurrentScopeStr();
 
             $$ = new ParserVal(data);
         }
@@ -916,7 +917,7 @@ procedimiento
         {
             compiler.reportSyntaxError("Error en funcion/metodo", getTokenLocation($1));
 
-            YACCDataUnit data = new YACCDataUnit();
+            YACCDataUnit data = new YACCInvalidDataUnit();
             data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
 
             $$ = new ParserVal(data);
@@ -1033,15 +1034,39 @@ cuerpo_clase
         }
     | cuerpo_clase metodo ','
         {
-            YACCDataUnit data1 = (YACCDataUnit)$1.obj;
+            YACCDataUnit data2 = (YACCDataUnit)$2.obj;
+
+            if (!data2.isValid())
+            {
+                $$ = new ParserVal(new YACCInvalidDataUnit());
+                break;
+            }
+
+            SymbolTableEntry currentClass = symbolTable.getEntry(currentClassEntryKey);
+
+            Set<String> methodsSet = (Set<String>)(currentClass.getAttrib(AttribKey.METHODS_SET));
+
+            methodsSet.add(data2.referencedEntryKey);
 
             compiler.addFoundSyntacticStructure(
-                new SyntacticStructureResult("Implementacion de metodo dentro de clase", data1.tokensData.get(0).getLocation())
+                new SyntacticStructureResult("Implementacion de metodo dentro de clase", data2.tokensData.get(0).getLocation())
             );
         }
     | metodo ','
         {
             YACCDataUnit data1 = (YACCDataUnit)$1.obj;
+
+            if (!data1.isValid())
+            {
+                $$ = new ParserVal(new YACCInvalidDataUnit());
+                break;
+            }
+
+            SymbolTableEntry currentClass = symbolTable.getEntry(currentClassEntryKey);
+
+            Set<String> methodsSet = (Set<String>)(currentClass.getAttrib(AttribKey.METHODS_SET));
+
+            methodsSet.add(data1.referencedEntryKey);
 
             compiler.addFoundSyntacticStructure(
                 new SyntacticStructureResult("Implementacion de metodo dentro de clase", data1.tokensData.get(0).getLocation())

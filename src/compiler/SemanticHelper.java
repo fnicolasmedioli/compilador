@@ -355,7 +355,8 @@ public class SemanticHelper {
 			classTokenData.getSTEntry().getLexeme() + ":" + scope
 			)
 			.setAttrib(AttribKey.ID_TYPE, IDType.CLASSNAME)
-			.setAttrib(AttribKey.ATTRIBS_SET, new HashSet<String>());
+			.setAttrib(AttribKey.ATTRIBS_SET, new HashSet<String>())
+			.setAttrib(AttribKey.METHODS_SET, new HashSet<String>());
 
 		return true;
 	}
@@ -421,13 +422,13 @@ public class SemanticHelper {
 
 		if (operand1.isFinal()) {
 			type1= (DataType)operand1.getstEntry().getAttrib(AttribKey.DATA_TYPE);
-		}else {
+		} else {
 			type1 = listOfTriplets.getTriplet(operand1.getIndex()).getType();
 		}
 
 		if (operand2.isFinal()) {
 			type2= (DataType)operand2.getstEntry().getAttrib(AttribKey.DATA_TYPE);
-		}else {
+		} else {
 			type2 = listOfTriplets.getTriplet(operand2.getIndex()).getType();
 		}
 
@@ -448,19 +449,14 @@ public class SemanticHelper {
 
 		SymbolTableEntry composEntry = symbolTable.getEntry(composEntryKey);
 
-		if (composEntry.getAttrib(AttribKey.ATTRIBS_SET) == null)
+		if (composEntry.getAttrib(AttribKey.ATTRIBS_SET) == null || composEntry.getAttrib(AttribKey.METHODS_SET) == null)
 		{
 			System.out.println("GRAN ERROR");
 			return;
 		}
 
 		HashSet<String> subVarsSet = (HashSet<String>)(composEntry.getAttrib(AttribKey.ATTRIBS_SET));
-
-		if (subVarsSet == null)
-		{
-			System.out.println("No se encontro el set de atributos");
-			return;
-		}
+		HashSet<String> subMethodsSet = (HashSet<String>)(composEntry.getAttrib(AttribKey.METHODS_SET));
 
 		String lexeme = composTokenData.getSTEntry().getLexeme();
 
@@ -478,7 +474,17 @@ public class SemanticHelper {
 
 		SymbolTableEntry currentClassEntry = symbolTable.getEntry(currentClassEntryKey);
 
+		Set<String> currentClassMethods = (Set<String>)(currentClassEntry.getAttrib(AttribKey.METHODS_SET));
+
 		((HashSet<String>)(currentClassEntry.getAttrib(AttribKey.ATTRIBS_SET))).add(lexeme + ":" + scope);
+
+		// Agregar los metodos al conjunto de metodos de la clase actual
+
+		for (String inheritedMethodEntryKey : subMethodsSet)
+		{
+			// Aca se podria hacer un chequeo para eliminar entradas con el mismo nombre
+			currentClassMethods.add(inheritedMethodEntryKey);
+		}
 
 		// Copiar el resto de atributos
 
