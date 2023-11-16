@@ -149,11 +149,11 @@ acceso_memoria
 
             String classEntryKey = (String)lastTokenEntry.getAttrib(AttribKey.INSTANCE_OF);
 
-            String propertyClassEntryKey = getSTEntry($3).getLexeme() + ":" + semanticHelper.invertScope(classEntryKey);
+            String staticVarEntryKey = getSTEntry($3).getLexeme() + ":" + semanticHelper.invertScope(classEntryKey);
 
-            SymbolTableEntry stPropertyClassEntry = symbolTable.getEntry(propertyClassEntryKey);
+            SymbolTableEntry staticVarEntry = symbolTable.getEntry(staticVarEntryKey);
 
-            if (stPropertyClassEntry == null)
+            if (staticVarEntry == null)
             {
                 compiler.reportSemanticError(
                     String.format("No se encuentra el ID: %s dentro de la clase: %s", getSTEntry($3).getLexeme(), symbolTable.getEntry(classEntryKey).getLexeme()),
@@ -164,13 +164,23 @@ acceso_memoria
                 break;
             }
 
-            // Buscar la referencia a la variable en si
+            // Si es de tipo funcion reemplazar el lexema con el nombre de la clase
 
-            String propertyEntryKey = getSTEntry($3).getLexeme() + ":" + semanticHelper.invertScope(data1.referencedEntryKey);
+            if (staticVarEntry.getAttrib(AttribKey.ID_TYPE) == IDType.FUNC_METHOD)
+            {
+                // Reemplazar la referencia por el método en la clase
 
+                data1.referencedEntryKey = staticVarEntryKey;
+
+            }
+            else
+            {
+                // Buscar la referencia a la variable en si
+
+                String propertyEntryKey = getSTEntry($3).getLexeme() + ":" + semanticHelper.invertScope(data1.referencedEntryKey);
+                data1.referencedEntryKey = propertyEntryKey;
+            }
             data1.tokensData.add((LocatedSymbolTableEntry)$3.obj);
-            data1.referencedEntryKey = propertyEntryKey;
-
             $$ = new ParserVal(data1);
         }
     | ID
@@ -425,13 +435,12 @@ sentencia_ejecutable
                 break;
             }
 
-            // Codigo un poquito sucio
-
-            DataType exprDataType = null;
-
             if (funcHasArgument)
             {
                 // Chequear que coincidan los tipos
+
+                DataType exprDataType = null;
+
                 if (data2.tripletOperand.isFinal())
                     exprDataType = (DataType)data2.tripletOperand.stEntry.getAttrib(AttribKey.DATA_TYPE);
                 else
