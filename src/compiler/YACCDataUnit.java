@@ -29,4 +29,9 @@ public class YACCDataUnit {
         valid = true;
         tokensData = new Vector<>();
     }
+
+    public void setValid(boolean v)
+    {
+        valid = v;
+    }
 }

@@ -749,9 +749,49 @@ expr
     | TOD '(' basic_expr ')'
         {
             YACCDataUnit data3 = (YACCDataUnit)$3.obj;
+
+            if (!data3.isValid())
+            {
+                data3.setValid(false);
+                $$ = new ParserVal(data3);
+                break;
+            }
+
+            DataType exprDataType = getTripletOperandDataType(data3.tripletOperand);
+
+            if (exprDataType == DataType.DOUBLE)
+            {
+                compiler.generateWarning("Se elimina TOD innecesario", getTokenLocation($1));
+                $$ = new ParserVal(data3);
+                break;
+            }
+
             data3.tripletQuantity++;
 
-            Triplet convTriplet = new Triplet("TOD", data3.tripletOperand, null, DataType.DOUBLE);
+            String tripletOP = null;
+
+            switch (exprDataType)
+            {
+                case UINT:
+                    tripletOP = "UITOD";
+                    break;
+                case LONG:
+                    tripletOP = "LTOD";
+                    break;
+            }
+
+            if (tripletOP == null)
+            {
+                compiler.reportSemanticError(
+                    "No se puede convertir el tipo: " + exprDataType + " a DOUBLE",
+                    getTokenLocation($2)
+                );
+                data3.setValid(false);
+                $$ = new ParserVal(data3);
+                break;
+            }
+
+            Triplet convTriplet = new Triplet(tripletOP, data3.tripletOperand, null, DataType.DOUBLE);
             int tripletID = listOfTriplets.addTriplet(convTriplet);
 
             data3.tripletOperand = new TripletOperand(tripletID);
@@ -1291,6 +1331,16 @@ public ListOfTriplets getListOfTriplets()
 {
     return listOfTriplets;
 }
+
+
+DataType getTripletOperandDataType(TripletOperand o)
+{
+    if (o.isFinal())
+        return (DataType)(o.getstEntry().getAttrib(AttribKey.DATA_TYPE));
+    else
+        return listOfTriplets.getTriplet(o.getIndex()).getType();
+}
+
 
 String _currentID;
 LinkedList<String> _currentScope;

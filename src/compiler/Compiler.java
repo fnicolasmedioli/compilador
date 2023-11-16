@@ -49,17 +49,17 @@ public class Compiler {
 		System.out.println("\nLista de tercetos:");
 		System.out.println(parser.getListOfTriplets());
 	}
-	
+
 	public int yylex()
 	{
 		return lexicalAnalyzer.getToken();
 	}
-	
+
 	public void setyylval(LocatedSymbolTableEntry tokenData)
 	{
 		parser.setyylval(tokenData);
 	}
-	
+
 	public void reportLexicalError(String msg, TokenLocation loc)
 	{
 		if (loc != null)
@@ -69,7 +69,7 @@ public class Compiler {
 
 		errorCount++;
 	}
-	
+
 	public void reportSemanticError(String msg, TokenLocation loc)
 	{
 		if (loc != null)
@@ -79,22 +79,30 @@ public class Compiler {
 
 		errorCount++;
 	}
-	
+
 	public void reportSyntaxError(String msg, TokenLocation loc)
 	{
 		if (loc != null)
 			messagePrinter.error("[Sintactico: " + loc + "] " + msg);
 		else
 			messagePrinter.error("[Sintactico] " + msg);
-	
+
 		errorCount++;
 	}
-	
+
+	public void generateWarning(String msg, TokenLocation loc)
+	{
+		if (loc != null)
+			messagePrinter.warning("[Warning: " + loc + "] " + msg);
+		else
+			messagePrinter.warning("[Warning] " + msg);
+	}
+
 	public void addFoundSyntacticStructure(SyntacticStructureResult s)
 	{
 		syntacticStructuresFound.add(s);
 	}
-	
+
 	public SymbolTable getSymbolTable()
 	{
 		return lexicalAnalyzer.getSymbolTable();
