@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Arrays;
 
 import compiler.semantic.*;
 import compiler.CompatibilityTable.*;
@@ -233,6 +235,41 @@ tipo_de_dato
         }
     | ID
         {
+            List reservedDataTypeWords = Arrays.asList("uint", "double", "long", "string");
+
+            if (reservedDataTypeWords.contains(getSTEntry($1).getLexeme().toLowerCase()))
+            {
+                compiler.reportSemanticError("Las palabras reservadas van en mayusculas", getTokenLocation($1));
+                YACCDataUnit data = new YACCInvalidDataUnit();
+                data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
+                $$ = new ParserVal(data);
+                break;
+            }
+
+            // Ver si es accesible y si es un token de clase
+
+            String classEntryKey = semanticHelper.getEntryKeyByScope(getSTEntry($1).getLexeme(), getCurrentScopeStr());
+
+            if (classEntryKey == null)
+            {
+                compiler.reportSemanticError("No se encuentra la clase: " + getSTEntry($1).getLexeme(), getTokenLocation($1));
+                YACCDataUnit data = new YACCInvalidDataUnit();
+                data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
+                $$ = new ParserVal(data);
+                break;
+            }
+
+            SymbolTableEntry classEntry = symbolTable.getEntry(classEntryKey);
+
+            if (classEntry.getAttrib(AttribKey.ID_TYPE) != IDType.CLASSNAME)
+            {
+                compiler.reportSemanticError("El ID: " + getSTEntry($1).getLexeme() + " no es una clase definida", getTokenLocation($1));
+                YACCDataUnit data = new YACCInvalidDataUnit();
+                data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
+                $$ = new ParserVal(data);
+                break;
+            }
+
             getSTEntry($1).setAttrib(AttribKey.DATA_TYPE, DataType.OBJECT);
             YACCDataUnit data = new YACCDataUnit();
             data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
@@ -248,7 +285,7 @@ declaracion_variable
 
             if (!data1.isValid())
             {
-                $$ = new ParserVal(new YACCInvalidDataUnit());
+                $$ = new ParserVal(data1);
                 break;
             }
 
