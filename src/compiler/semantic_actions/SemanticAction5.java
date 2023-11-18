@@ -38,7 +38,7 @@ public class SemanticAction5 implements SemanticAction {
 		{
 			// Check LONG
 			
-			if (ConstantRange.isValidLONG(lexeme, true) == false)
+			if (!ConstantRange.isValidLONG(lexeme, true))
 			{
 				compiler.reportLexicalError(
 					"Constante LONG fuera de rango: " + lexeme,
@@ -53,7 +53,9 @@ public class SemanticAction5 implements SemanticAction {
 						Parser.CTE_LONG,
 						validRange ? lexeme : null
 					)
-					.setAttrib(AttribKey.DATA_TYPE, DataType.LONG)),
+					.setAttrib(AttribKey.DATA_TYPE, DataType.LONG))
+					.setAttrib(AttribKey.IS_CONSTANT, true)
+					.setAttrib(AttribKey.MEMORY_ASSOCIATION, new MemoryAssociation(lexeme, DataType.LONG.getSize(), DataType.LONG)),
 					new TokenLocation(lexicalAnalyzerState.getCurrentLine())
 				)				
 			);
@@ -66,7 +68,7 @@ public class SemanticAction5 implements SemanticAction {
 		{
 			// Check UINT
 			
-			if (ConstantRange.isValidUINT(lexeme) == false)
+			if (!ConstantRange.isValidUINT(lexeme))
 			{
 				compiler.reportLexicalError(
 					"Constante UINT fuera de rango: " + lexeme,
@@ -81,7 +83,9 @@ public class SemanticAction5 implements SemanticAction {
 						Parser.CTE_UINT,
 						validRange ? lexeme : null
 					)
-					.setAttrib(AttribKey.DATA_TYPE, DataType.UINT)),
+					.setAttrib(AttribKey.DATA_TYPE, DataType.UINT))
+					.setAttrib(AttribKey.IS_CONSTANT, true)
+					.setAttrib(AttribKey.MEMORY_ASSOCIATION, new MemoryAssociation(lexeme, DataType.UINT.getSize(), DataType.UINT)),
 					new TokenLocation(lexicalAnalyzerState.getCurrentLine())
 				)
 			);
@@ -91,7 +95,7 @@ public class SemanticAction5 implements SemanticAction {
 		{
 			// Check DOUBLE
 			
-			if (ConstantRange.isValidDOUBLE(lexeme) == false)
+			if (!ConstantRange.isValidDOUBLE(lexeme))
 			{
 				compiler.reportLexicalError(
 					"Constante DOUBLE fuera de rango: " + lexeme,
@@ -106,7 +110,9 @@ public class SemanticAction5 implements SemanticAction {
 						Parser.CTE_DOUBLE,
 						validRange ? lexeme : null
 					)
-					.setAttrib(AttribKey.DATA_TYPE, DataType.DOUBLE)),
+					.setAttrib(AttribKey.DATA_TYPE, DataType.DOUBLE))
+					.setAttrib(AttribKey.IS_CONSTANT, true)
+					.setAttrib(AttribKey.MEMORY_ASSOCIATION, new MemoryAssociation(lexeme, DataType.DOUBLE.getSize(), DataType.DOUBLE)),
 					new TokenLocation(lexicalAnalyzerState.getCurrentLine())
 				)				
 			);

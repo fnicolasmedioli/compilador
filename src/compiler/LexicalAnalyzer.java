@@ -36,7 +36,7 @@ public class LexicalAnalyzer {
 		this.transitionMatrix = new TransitionMatrix();
 		this.state = new LexicalAnalyzerState();
 		this.loadSourceFile(sourceFilePath);
-		this.symbolTable = new SymbolTable();
+		this.symbolTable = new SymbolTable(compiler);
 		this.readedTokensList = new LinkedList<>();
 		this.compiler = compiler;
 	}

@@ -1,11 +1,7 @@
-src/compiler/Parser.java
-src/compiler/ParserVal.java
-
 ### IntelliJ IDEA ###
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
-.idea
 
 ### Eclipse ###
 .apt_generated
@@ -31,9 +27,3 @@ bin/
 
 ### Mac OS ###
 .DS_Store
-
-source.fn
-Source.fn
-Source.txt
-source.txt
-case.txt

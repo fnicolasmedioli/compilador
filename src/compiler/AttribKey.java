@@ -8,7 +8,9 @@ public enum AttribKey {
     ARG_TYPE("Tipo de argumento"),
     ATTRIBS_SET("Conjunto de atributos"),
     METHODS_SET("Conjunto de metodos"),
-    FIRST_TRIPLET("Primer terceto de la instruccion");
+    FIRST_TRIPLET("Primer terceto de la instruccion"),
+    MEMORY_ASSOCIATION("Asociacion de memoria"),
+    IS_CONSTANT("Es una constante");
 
     private final String str;
     AttribKey(String str)

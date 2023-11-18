@@ -109,59 +109,18 @@ public class SemanticHelper {
 		return classScope.substring(i+1) + ":" + classScope.substring(0, i);
 	}
 
-	private LinkedList<SymbolTableEntry> entriesKeysToEntries(LinkedList<String> entriesKeys)
+	public void declareRecursive(LinkedList<String> varLexemeList, String scope, SymbolTableEntry dataTypeEntry, String currentClassEntryKey, boolean isRecursion)
 	{
-		LinkedList<SymbolTableEntry> entries = new LinkedList<>();
-		for (String entryKey : entriesKeys)
-			entries.push(symbolTable.getEntry(entryKey));
-		return entries;
-	}
-
-	/**
-	 * Add for each ID of the list, an entry in the symbol table
-	 * as ID:[scope] with attributes, if possible.
-	 * @param list Must be a list of LocatedSymbolTableEntry, wrapped into a ParserVal
-	 * @param scope Scope to declare the vars in
-	 * @param dataType
-	 */
-	private LinkedList<String> declareIDList(ParserVal list, String scope, DataType dataType)
-	{
-		LinkedList<String> entriesKeys = new LinkedList<>();
-
-		for (LocatedSymbolTableEntry e: (LinkedList<LocatedSymbolTableEntry>)(list.obj))
-			if (alreadyDeclaredInScope(e.getSTEntry().getLexeme(), scope))
-				compiler.reportSemanticError(
-					"Identificador ya definido en el ambito local: " + e.getSTEntry().getLexeme(),
-					e.getLocation()
-				);
-			else
-			{
-				String entryKey = e.getSTEntry().getLexeme() + ":" + scope;
-				symbolTable.addNewEntry(
-					new SymbolTableEntry(
-						Parser.ID,
-						e.getSTEntry().getLexeme()
-					),
-					entryKey
-				)
-				.setAttrib(AttribKey.ID_TYPE, IDType.VAR_ATTRIB)
-				.setAttrib(AttribKey.DATA_TYPE, dataType);
-
-				entriesKeys.push(entryKey);
-			}
-
-		return entriesKeys;
-	}
-
-	public void declareRecursive(LinkedList<String> varLexemeList, String scope, SymbolTableEntry dataTypeEntry)
-	{
-
-
 		DataType dataType = tokenIDtoDataType.get(dataTypeEntry.getTokenID());
 
 		HashSet<String> subVarsSet = null;
 		String classEntryKey = null;
 		SymbolTableEntry classEntry = null;
+
+		int varSize = 0;
+
+		if (dataType.hasSize())
+			varSize = dataType.getSize();
 
 		if (dataType == DataType.OBJECT)
 		{
@@ -169,13 +128,16 @@ public class SemanticHelper {
 
 			if (classEntryKey == null)
 			{
-				System.out.println("Error critico 25");
+				compiler.reportSemanticError(
+					String.format("La clase '%s' no esta definida en el ambito local", dataTypeEntry.getLexeme()), null
+				);
 				return;
 			}
 
 			classEntry = symbolTable.getEntry(classEntryKey);
-
 			subVarsSet = (HashSet<String>)(classEntry.getAttrib(AttribKey.ATTRIBS_SET));
+
+			varSize = ((MemoryAssociation)(classEntry.getAttrib(AttribKey.MEMORY_ASSOCIATION))).getSize();
 		}
 
 		// Para cada token en DATATYPE a; b; c
@@ -202,12 +164,22 @@ public class SemanticHelper {
 				varEntryKey
 			)
 			.setAttrib(AttribKey.ID_TYPE, IDType.VAR_ATTRIB)
-			.setAttrib(AttribKey.DATA_TYPE, dataType);
+			.setAttrib(AttribKey.DATA_TYPE, dataType)
+			.setAttrib(AttribKey.MEMORY_ASSOCIATION, new MemoryAssociation(varEntryKey));
+
+			// Si es un tipo de dato primitivo, setear el size inmediatamente
+
+			if (dataType.hasSize())
+				varEntry.setAttrib(AttribKey.MEMORY_ASSOCIATION, new MemoryAssociation(varEntryKey, varSize, dataType));
 
 			// Y si es tipo objeto hacerlo recursivamente
 
 			if (dataType == DataType.OBJECT)
 			{
+				// Setear el tamaño del objeto como el tamaño de todos los atributos de la clase
+
+				varEntry.setAttrib(AttribKey.MEMORY_ASSOCIATION, new MemoryAssociation(varEntryKey, varSize, dataType));
+
 				varEntry.setAttrib(AttribKey.INSTANCE_OF, classEntryKey);
 
 				// Encontrar el instance of de los atributos hijo
@@ -277,18 +249,24 @@ public class SemanticHelper {
 					lexeme.add(subVarName);
 					String subVarScope = invertScope(varEntryKey);
 
-					declareRecursive(lexeme, subVarScope, recDataTypeEntry);
+					declareRecursive(lexeme, subVarScope, recDataTypeEntry, currentClassEntryKey, true);
 				}
 			}
+		}
 
+		if (currentClassEntryKey != null && isRecursion == false) {
+			// Sumar el tamaño de la variable * cantidad al tamaño total de la clase
+			MemoryAssociation currentClassMemoryAssociation = (MemoryAssociation)(symbolTable.getEntry(currentClassEntryKey).getAttrib(AttribKey.MEMORY_ASSOCIATION));
+			currentClassMemoryAssociation.addSize(varSize * varLexemeList.size());
 		}
 	}
 
 	public boolean declareClass(String scope, LocatedSymbolTableEntry classTokenData)
 	{
-		SymbolTableEntry classEntry = getEntryByScope(classTokenData.getSTEntry().getLexeme(), scope);
+		String classLexeme = classTokenData.getSTEntry().getLexeme();
+		String classEntryKey = classLexeme + ":" + scope;
 
-		if (alreadyDeclaredInScope(classTokenData.getSTEntry().getLexeme(), scope))
+		if (alreadyDeclaredInScope(classLexeme, scope))
 		{
 			compiler.reportSemanticError(
 				"Clase ya definida en el ambito local: " + classTokenData.getSTEntry().getLexeme(),
@@ -302,11 +280,12 @@ public class SemanticHelper {
 					Parser.ID,
 					classTokenData.getSTEntry().getLexeme()
 				),
-			classTokenData.getSTEntry().getLexeme() + ":" + scope
+				classEntryKey
 			)
 			.setAttrib(AttribKey.ID_TYPE, IDType.CLASSNAME)
 			.setAttrib(AttribKey.ATTRIBS_SET, new HashSet<String>())
-			.setAttrib(AttribKey.METHODS_SET, new HashSet<String>());
+			.setAttrib(AttribKey.METHODS_SET, new HashSet<String>())
+			.setAttrib(AttribKey.MEMORY_ASSOCIATION, new MemoryAssociation(0));
 
 		return true;
 	}
@@ -482,7 +461,7 @@ public class SemanticHelper {
 
 			LinkedList<String> t = new LinkedList<>();
 			t.add(attribName);
-			declareRecursive(t, scope + ":" + lexeme, recDataTypeEntry);
+			declareRecursive(t, scope + ":" + lexeme, recDataTypeEntry, currentClassEntryKey, true);
 		}
 	}
 }

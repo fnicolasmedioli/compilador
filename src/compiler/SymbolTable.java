@@ -1,16 +1,23 @@
 package compiler;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map.Entry;
+import java.util.LinkedList;
 
 public class SymbolTable {
 
 	private HashMap<String, SymbolTableEntry> table;
+
+	private int auxVarCounter = 0;
+
+	private final Compiler compiler;
 	
-	public SymbolTable()
+	public SymbolTable(Compiler compiler)
 	{
 		table = new HashMap<>();
 		loadPredefinedTable();
+		this.compiler = compiler;
 	}
 	
 	public SymbolTableEntry addNewEntry(SymbolTableEntry entry)
@@ -117,5 +124,41 @@ public class SymbolTable {
 
 		return "TOKEN NO CONOCIDO";
 	}
-	
+
+	public String getAuxVarName()
+	{
+		return "@aux" + auxVarCounter++;
+	}
+
+	public List<String> getChildrenOf(String entryKey)
+	{
+		LinkedList<String> toReturn = new LinkedList<>();
+
+		String scope = compiler.getSemanticHelper().invertScope(entryKey);
+
+		for (String key : table.keySet())
+			if (key.endsWith(":" + scope))
+				toReturn.add(key);
+
+		for (String key : new LinkedList<String>(toReturn))
+			toReturn.addAll(getChildrenOf(key));
+
+		return toReturn;
+	}
+
+	public List<String> getConstantList()
+	{
+		LinkedList<String> toReturn = new LinkedList<>();
+
+		for (String key : table.keySet())
+		{
+			SymbolTableEntry entry = table.get(key);
+			if (entry.isPredefined()) continue;
+			if (entry.getAttrib(AttribKey.IS_CONSTANT) == null) continue;
+
+			toReturn.add(key);
+		}
+
+		return toReturn;
+	}
 }

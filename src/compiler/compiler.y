@@ -305,7 +305,7 @@ declaracion_variable
                     attribsSet.add(lexeme + ":" + getCurrentScopeStr());
             }
 
-            semanticHelper.declareRecursive(lexemeList, getCurrentScopeStr(), data1.tokensData.get(0).getSTEntry());
+            semanticHelper.declareRecursive(lexemeList, getCurrentScopeStr(), data1.tokensData.get(0).getSTEntry(), currentClassEntryKey, false);
 
             YACCDataUnit data = new YACCDataUnit();
 
@@ -1502,7 +1502,7 @@ public Parser(Compiler compiler)
     this.compiler = compiler;
     this._currentID = "";
     this._currentScope = new LinkedList<>();
-    this.semanticHelper = new SemanticHelper(compiler);
+    this.semanticHelper = compiler.getSemanticHelper();
     this.symbolTable = compiler.getSymbolTable();
     this.listOfTriplets = new ListOfTriplets();
     this.sumCompatibilityTable = new SumCompatibilityTable();

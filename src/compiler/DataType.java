@@ -2,15 +2,15 @@ package compiler;
 
 public enum DataType {
 
-    STRING("STRING"),
-    DOUBLE("DOUBLE", 64),
-    UINT("UINT", 16),
-    LONG("LONG", 32),
+    STRING("STRING", 4),
+    DOUBLE("DOUBLE", 8),
+    UINT("UINT", 2),
+    LONG("LONG", 4),
     OBJECT("OBJETO"),
     BOOLEAN("BOOLEAN");
 
     private final String str;
-    private final Integer size; // Size in bits
+    private final Integer size; // Size in bytes
 
     DataType(String str, Integer size)
     {
@@ -33,5 +33,10 @@ public enum DataType {
     public Integer getSize()
     {
         return this.size;
+    }
+
+    public boolean hasSize()
+    {
+        return this.size != null;
     }
 }

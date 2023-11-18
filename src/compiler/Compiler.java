@@ -1,5 +1,7 @@
 package compiler;
 
+import compiler.x86.Translator;
+
 import java.io.FileNotFoundException;
 import java.util.PriorityQueue;
 
@@ -11,10 +13,14 @@ public class Compiler {
 	private final CompilerMessagePrinter messagePrinter;
 	private int errorCount;
 	private final Translate translate;
+	private final Translator translator;
+	private final SemanticHelper semanticHelper;
 
 	public Compiler(String sourceFileName) throws FileNotFoundException
 	{
 		this.lexicalAnalyzer = new LexicalAnalyzer(sourceFileName, this);
+		this.semanticHelper = new SemanticHelper(this);
+
 		this.parser = new Parser(this);
 		this.syntacticStructuresFound = new PriorityQueue<>(
 			new SyntacticStructureResultComparator()
@@ -22,19 +28,12 @@ public class Compiler {
 		this.messagePrinter = new CompilerMessagePrinter(this);
 		this.errorCount = 0;
 		this.translate = new Translate(this);
+		this.translator = new Translator(this);
 	}
 
 	public void compile()
 	{
-		boolean yaccSuccess;
-
-		try {
-			yaccSuccess = parser.yyparse() == 0;
-		} catch (Exception e) {
-			yaccSuccess = false;
-			messagePrinter.error("Error en yyparse()");
-			System.out.println(e.getMessage());
-		}
+		boolean yaccSuccess = parser.yyparse() == 0;
 
 		System.out.println();
 
@@ -43,10 +42,10 @@ public class Compiler {
 		else
 			messagePrinter.error("Hubo errores en el parsing");
 
-		//System.out.println();
-		//messagePrinter.printTokenList();
-		//CompilerMessagePrinter.printFoundSyntacticalStrucutres(syntacticStructuresFound);
-		//CompilerMessagePrinter.printSymbolTable(getSymbolTable());
+		System.out.println();
+		messagePrinter.printTokenList();
+		CompilerMessagePrinter.printFoundSyntacticalStrucutres(syntacticStructuresFound);
+		CompilerMessagePrinter.printSymbolTable(getSymbolTable());
 
 		ListOfTriplets listOfTriplets = parser.getListOfTriplets();
 		System.out.println("\nLista de tercetos:");
@@ -55,6 +54,15 @@ public class Compiler {
 		ListOfAssemblerCode listOfAssemblerCode = translate.translateTriplets(listOfTriplets);
 		System.out.println("\nCodigo Assembler");
 		System.out.println(listOfAssemblerCode);
+
+
+		/*
+		for (FlattenObjectItem item : translator.flattenObject("p1:global"))
+		{
+			System.out.println(item);
+		}
+*/
+
 	}
 
 
@@ -124,5 +132,10 @@ public class Compiler {
 	public CompilerMessagePrinter getMessagePrinter()
 	{
 		return this.messagePrinter;
+	}
+
+	public SemanticHelper getSemanticHelper()
+	{
+		return semanticHelper;
 	}
 }

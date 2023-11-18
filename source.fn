@@ -1,0 +1,17 @@
+{
+    CLASS trabajo
+    {
+        UINT licencia,
+        LONG codigo,
+    },
+
+    CLASS persona
+    {
+        STRING nombre,
+        UINT edad,
+
+        trabajo laburito; laburito2,
+    },
+
+    persona p1,
+}

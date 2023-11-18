@@ -33,7 +33,9 @@ public class SemanticAction8 implements SemanticAction {
 						Parser.CTE_STRING,
 						lexeme
 					)
-					.setAttrib(AttribKey.DATA_TYPE, DataType.STRING)),
+					.setAttrib(AttribKey.MEMORY_ASSOCIATION, new MemoryAssociation(lexeme, lexeme.length() + 1, DataType.STRING))
+					.setAttrib(AttribKey.DATA_TYPE, DataType.STRING))
+					.setAttrib(AttribKey.IS_CONSTANT, true),
 					new TokenLocation(lexicalAnalyzerState.getCurrentLine())
 				)
 			);
