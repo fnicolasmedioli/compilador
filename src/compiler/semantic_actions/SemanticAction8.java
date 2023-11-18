@@ -13,7 +13,7 @@ public class SemanticAction8 implements SemanticAction {
 	{
 		CompilerMessagePrinter messagePrinter = compiler.getMessagePrinter();
 		SymbolTable symbolTable = compiler.getSymbolTable();
-		String lexeme = lexicalAnalyzerState.getCurrentLexeme();
+		String lexeme = "%" + lexicalAnalyzerState.getCurrentLexeme() + "%";
 		SymbolTableEntry stEntry = symbolTable.getEntry(lexeme);
 
 		if (stEntry != null)

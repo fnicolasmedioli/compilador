@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.Set;
 import java.util.List;
 import java.util.Collections;
+import java.nio.ByteBuffer;
 
 public class Translator {
 
@@ -16,17 +17,24 @@ public class Translator {
         this.symbolTable = compiler.getSymbolTable();
     }
 
+    public String getAssemblyCode()
+    {
+        return craftHeaderSection() +
+                craftDataSection() +
+                craftCodeSection();
+    }
+
     public String craftHeaderSection()
     {
         return
             ".386\n" +
-            ".model flat, stdcall\n" +
+            ".model flat, stdcall\n\n" +
             "option casemap :none\n" +
             "include \\masm32\\include\\windows.inc\n" +
             "include \\masm32\\include\\kernel32.inc\n" +
             "include \\masm32\\include\\masm32.inc\n" +
             "includelib \\masm32\\lib\\kernel32.lib\n" +
-            "includelib \\masm32\\lib\\masm32.lib\n";
+            "includelib \\masm32\\lib\\masm32.lib\n\n";
     }
 
     private String getConstantDeclarationLine(String entryKey)
@@ -36,8 +44,6 @@ public class Translator {
         DataType dataType = (DataType)entry.getAttrib(AttribKey.DATA_TYPE);
 
         String tag = memoryAssociation.getTag();
-        int size = memoryAssociation.getSize();
-
         String simpleNumber;
 
         switch (dataType)
@@ -46,21 +52,49 @@ public class Translator {
                 simpleNumber = entry.getLexeme().substring(0, entry.getLexeme().length() - 2);
                 return String.format("%s dd %s\n", tag, simpleNumber);
             case STRING:
-                return String.format("%s db '%s', 0\n", tag, entry.getLexeme());
+            return String.format("%s db '%s', 0\n", tag, entry.getLexeme().substring(1, entry.getLexeme().length() - 1));
             case UINT:
                 simpleNumber = entry.getLexeme().substring(0, entry.getLexeme().length() - 3);
                 return String.format("%s dw %s\n", tag, simpleNumber);
             case DOUBLE:
-                return String.format("%s dq %s\n", tag, simpleNumber);
+                double numeric = Double.parseDouble(entry.getLexeme().replace('D', 'e').replace('d', 'e'));
+                ByteBuffer buffer = ByteBuffer.allocate(Double.BYTES);
+                buffer.putDouble(numeric);
+                byte[] bytes = buffer.array();
+
+                return String.format(
+                    "%s db %d %d %d %d %d %d %d %d\n",
+                    tag,
+                    bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], bytes[5], bytes[6], bytes[7]
+                );
             default:
-                return null;
+                return "No deberia estar viendo esto\n";
         }
     }
 
     public String craftDataSection()
     {
         StringBuilder sb = new StringBuilder();
-    return null;
+
+        sb.append(".data\n");
+
+        List<String> constantsKeys = symbolTable.getConstantList();
+
+        for (String constantKey : constantsKeys)
+            sb.append(getConstantDeclarationLine(constantKey));
+
+        sb.append("\n");
+
+        return sb.toString();
+    }
+
+    public String craftCodeSection()
+    {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append(".code\n");
+
+        return sb.toString();
     }
 
     private LinkedList<FlattenObjectItem> _flattenObject(String entryKey, Integer currentOffset)

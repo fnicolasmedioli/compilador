@@ -72,6 +72,9 @@ public class MemoryAssociation {
 
     private String encode(String str)
     {
-        return str.replace(":", "_").replace(".", "_");
+        return str
+            .replace(":", "_")
+            .replace(".", "_")
+            .replace("%", "_");
     }
 }

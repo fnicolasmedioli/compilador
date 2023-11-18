@@ -55,16 +55,8 @@ public class Compiler {
 		System.out.println("\nCodigo Assembler");
 		System.out.println(listOfAssemblerCode);
 
-
-		/*
-		for (FlattenObjectItem item : translator.flattenObject("p1:global"))
-		{
-			System.out.println(item);
-		}
-*/
-
+		System.out.println(translator.getAssemblyCode());
 	}
-
 
 	public int yylex()
 	{

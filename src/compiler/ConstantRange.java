@@ -40,7 +40,13 @@ public class ConstantRange {
 	
 	public static boolean isValidDOUBLE(String lexeme)
 	{
-		double conv = Double.parseDouble(lexeme.replace('D', 'e').replace('d', 'e'));
+		double conv;
+		try {
+			conv = Double.parseDouble(lexeme.replace('D', 'e').replace('d', 'e'));
+		}
+		catch (NumberFormatException e) {
+			return false;
+		}
 		
 		return !(
 			conv != 0 &&
