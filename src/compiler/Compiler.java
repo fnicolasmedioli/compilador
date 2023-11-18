@@ -52,9 +52,9 @@ public class Compiler {
 		System.out.println("\nLista de tercetos:");
 		System.out.println(listOfTriplets);
 		
-		String codAssembler = translate.translateTriplets(listOfTriplets);
+		ListOfAssemblerCode listOfAssemblerCode = translate.translateTriplets(listOfTriplets);
 		System.out.println("\nCodigo Assembler");
-		System.out.println(codAssembler);
+		System.out.println(listOfAssemblerCode);
 	}
 
 
