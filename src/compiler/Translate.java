@@ -120,12 +120,6 @@ public class Translate {
         return  assemblerCode;
     }
 
-    public String calculateOperand(TripletOperand operand, int pos){
-            String toReturn = "";
-            
-            return toReturn;
-    }
-
     public String removeSuffix(String whitSuffix){
 
         String whitoutSuffix = whitSuffix;
