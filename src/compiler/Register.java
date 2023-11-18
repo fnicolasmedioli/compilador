@@ -13,7 +13,7 @@ public class Register {
         this.register = register;
     }
 
-    public void setIndexListOfTiplet(int indexListOfTiplet) {
+    public void setIndexOfTriplet(int indexListOfTiplet) {
         this.indexListOfTiplet = indexListOfTiplet;
     }
 
@@ -21,7 +21,7 @@ public class Register {
         return register;
     }
 
-    public int getIndexListOfTiplet() {
+    public int getIndexOfTriplet() {
         return indexListOfTiplet;
     }
 

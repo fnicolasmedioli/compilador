@@ -48,34 +48,82 @@ public class Translate {
         }
     }
 
+    public boolean isAssign(Triplet t){
+        if  (t.getType() == null && t.getOperation() == "="){
+            return true;
+        }
+        return false;
+    }
+
+    public boolean isOperation(Triplet t){
+        if (t.getOperation() == "*" || t.getOperation() == "+" || t.getOperation() == "-" || t.getOperation() == "/" ){
+            return true;
+        }
+        return false;
+    }
     public AssemblerCode getCodAssembler(Triplet t, ListOfTriplets listOfTriplets, int pos){
   
-        String r1;
-
+        String r1 = "";
+        String r2 = "";
+        
         String operation = getConvertion(t.getOperation());
         
-        if (t.getOperation() == "="){
-            r1 = t.getOperand1().getstEntry().getLexeme();
-        }else{
-            r1 = moveToRegister(t.getOperand1(), pos);
+        TripletOperand operand1 = t.getOperand1();
+        TripletOperand operand2 = t.getOperand2();
+
+        if (isAssign(t)){
+            if (operand1.isFinal() && operand2.isFinal()){
+                r1 = operand1.getstEntry().getLexeme();
+                r2 = operand2.getstEntry().getLexeme();
+            }else if(operand1.isFinal() && !operand2.isFinal()){
+                r1 = operand1.getstEntry().getLexeme();
+                r2 = getRegister(operand2.getIndex());
+            }else if(!operand1.isFinal() && operand2.isFinal()){
+                r1 = getRegister(operand1.getIndex());
+                r2 = operand2.getstEntry().getLexeme();
+            }else{
+                r1 = getRegister(operand1.getIndex());
+                r2 = getRegister(operand2.getIndex());
+            }
+            
+        }else if (isOperation(t)){
+            if (operand1.isFinal() && operand2.isFinal()){
+                r1 = operand1.getstEntry().getLexeme();
+                r1 = moveToRegister(r1, pos);
+                r2 = operand2.getstEntry().getLexeme();
+
+            }else if (operand1.isFinal() && !operand2.isFinal()){
+                r1 = operand1.getstEntry().getLexeme();
+                r1 = moveToRegister(r1, pos);
+                r2 = getRegister(operand2.getIndex());
+
+            }else if (!operand1.isFinal() && operand2.isFinal()){
+                r1 = getRegister(operand1.getIndex());
+                r2 = operand2.getstEntry().getLexeme();
+            }else{
+                r1 = getRegister(operand1.getIndex());
+                r2 = getRegister(operand2.getIndex());
+
+            }
         }
-        
 
-        String r2;
 
-        if (t.getOperand2().isFinal()){
-            r2 = t.getOperand2().getstEntry().getLexeme(); 
-        } else{
-            r2 = getRegister(t.getOperand2().getIndex());
-
-            //operand2= Integer.toString(t.getOperand2().getIndex());
-        }
 
         r1 = removeSuffix(r1);
         r2 = removeSuffix(r2);
 
         AssemblerCode assemblerCode = new AssemblerCode(operation, r1, r2);
+        String var = t.getVarTriplet();
+        Register register = new Register(var, pos);
+        addRegister(register);
+
         return  assemblerCode;
+    }
+
+    public String calculateOperand(TripletOperand operand, int pos){
+            String toReturn = "";
+            
+            return toReturn;
     }
 
     public String removeSuffix(String whitSuffix){
@@ -92,9 +140,9 @@ public class Translate {
         return whitoutSuffix;
     }
     public String getRegister(int index){
-        String toReturn = "";
+        String toReturn = "nt";
         for (int i = 0; i < this.registers.size(); i++){
-            if ( this.registers.elementAt(i).getIndexListOfTiplet() == index)
+            if ( this.registers.elementAt(i).getIndexOfTriplet() == index)
                 toReturn = this.registers.elementAt(i).getRegister();
         }
         return toReturn;
@@ -104,20 +152,16 @@ public class Translate {
         this.listOfAssemblerCode.addCode(assemblerCode);
     }
     
-    public String moveToRegister(TripletOperand t, int pos){
+    public String moveToRegister(String operand, int pos){
 
-        String operand1;
-        if (t.isFinal()){
-            operand1 = t.getstEntry().getLexeme();
+        
+
             Register register = new Register("R1", pos);
             addRegister(register);
-            AssemblerCode assemblerCode = new AssemblerCode(getConvertion("WRITE"), register.getRegister(), operand1);
+            AssemblerCode assemblerCode = new AssemblerCode(getConvertion("WRITE"), register.getRegister(), operand);
             this.listOfAssemblerCode.addCode(assemblerCode);
             return "R1";
-        } else{
-            operand1= Integer.toString(t.getIndex());
-            return "R1";
-        }
+
     }
     
 }
