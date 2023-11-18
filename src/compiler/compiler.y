@@ -841,24 +841,24 @@ basic_expr
             YACCDataUnit data1 = (YACCDataUnit)$1.obj;
             YACCDataUnit data3 = (YACCDataUnit)$3.obj;
 
+            if (!data1.isValid() || !data3.isValid())
+            {
+                $$ = new ParserVal(new YACCInvalidDataUnit());
+                break;
+            }
+
             TripletOperand operand1 = data1.tripletOperand;
             TripletOperand operand2 = data3.tripletOperand;
 
             Triplet t = semanticHelper.getTriplet(operand1, operand2, "+", listOfTriplets, sumCompatibilityTable);
 
-            if (t.getType() == null){
+            if (t.getType() == null) {
                 compiler.reportSemanticError("No se pueden sumar variables de distinto tipo", getTokenLocation($2));
+                $$ = new ParserVal(new YACCInvalidDataUnit());
+                break;
             }
 
-            DataType type;
-                
-            if (operand1.isFinal()) {
-                type = (DataType)operand1.getstEntry().getAttrib(AttribKey.DATA_TYPE);
-            } else {
-                type = listOfTriplets.getTriplet(operand1.getIndex()).getType();
-            }
-
-            t.setDataType(type);
+            t.setMemoryAssociation(new MemoryAssociation(symbolTable.createAuxVar(t.getType()), t.getType().getSize(), t.getType()));
 
             int tripletIndex = listOfTriplets.addTriplet(t);
 
@@ -873,24 +873,24 @@ basic_expr
             YACCDataUnit data1 = (YACCDataUnit)$1.obj;
             YACCDataUnit data3 = (YACCDataUnit)$3.obj;
 
+            if (!data1.isValid() || !data3.isValid())
+            {
+                $$ = new ParserVal(new YACCInvalidDataUnit());
+                break;
+            }
+
             TripletOperand operand1 = data1.tripletOperand;
             TripletOperand operand2 = data3.tripletOperand;
 
             Triplet t = semanticHelper.getTriplet(operand1, operand2, "-", listOfTriplets, sumCompatibilityTable);
 
-            if (t.getType() == null){
+            if (t.getType() == null) {
                 compiler.reportSemanticError("No se pueden restar variables de distinto tipo", getTokenLocation($2));
+                $$ = new ParserVal(new YACCInvalidDataUnit());
+                break;
             }
 
-            DataType type;
-                
-            if (operand1.isFinal()) {
-                type = (DataType)operand1.getstEntry().getAttrib(AttribKey.DATA_TYPE);
-            } else {
-                type = listOfTriplets.getTriplet(operand1.getIndex()).getType();
-            }
-
-            t.setDataType(type);
+            t.setMemoryAssociation(new MemoryAssociation(symbolTable.createAuxVar(t.getType()), t.getType().getSize(), t.getType()));
 
             int tripletIndex = listOfTriplets.addTriplet(t);
 
@@ -909,24 +909,24 @@ term
             YACCDataUnit data1 = (YACCDataUnit)$1.obj;
             YACCDataUnit data3 = (YACCDataUnit)$3.obj;
 
+            if (!data1.isValid() || !data3.isValid())
+            {
+                $$ = new ParserVal(new YACCInvalidDataUnit());
+                break;
+            }
+
             TripletOperand operand1 = data1.tripletOperand;
             TripletOperand operand2 = data3.tripletOperand;
 
             Triplet t = semanticHelper.getTriplet(operand1, operand2, "*", listOfTriplets, mulCompatibilityTable);
 
-            if (t.getType() == null){
-                compiler.reportSemanticError("No se pueden multiplcar variables de distinto tipo", getTokenLocation($2));
+            if (t.getType() == null) {
+                compiler.reportSemanticError("No se pueden dividir variables de distinto tipo", getTokenLocation($2));
+                $$ = new ParserVal(new YACCInvalidDataUnit());
+                break;
             }
 
-            DataType type;
-                
-            if (operand1.isFinal()) {
-                type = (DataType)operand1.getstEntry().getAttrib(AttribKey.DATA_TYPE);
-            } else {
-                type = listOfTriplets.getTriplet(operand1.getIndex()).getType();
-            }
-
-            t.setDataType(type);
+            t.setMemoryAssociation(new MemoryAssociation(symbolTable.createAuxVar(t.getType()), t.getType().getSize(), t.getType()));
 
             int tripletIndex = listOfTriplets.addTriplet(t);
 
@@ -941,23 +941,24 @@ term
             YACCDataUnit data1 = (YACCDataUnit)$1.obj;
             YACCDataUnit data3 = (YACCDataUnit)$3.obj;
 
+            if (!data1.isValid() || !data3.isValid())
+            {
+                $$ = new ParserVal(new YACCInvalidDataUnit());
+                break;
+            }
+
             TripletOperand operand1 = data1.tripletOperand;
             TripletOperand operand2 = data3.tripletOperand;
 
             Triplet t = semanticHelper.getTriplet(operand1, operand2, "/", listOfTriplets, divCompatibilityTable);
 
-            if (t.getType() == null){
+            if (t.getType() == null) {
                 compiler.reportSemanticError("No se pueden dividir variables de distinto tipo", getTokenLocation($2));
-            }
-            DataType type;
-                
-            if (operand1.isFinal()) {
-                type = (DataType)operand1.getstEntry().getAttrib(AttribKey.DATA_TYPE);
-            } else {
-                type = listOfTriplets.getTriplet(operand1.getIndex()).getType();
+                $$ = new ParserVal(new YACCInvalidDataUnit());
+                break;
             }
 
-            t.setDataType(type);
+            t.setMemoryAssociation(new MemoryAssociation(symbolTable.createAuxVar(t.getType()), t.getType().getSize(), t.getType()));
 
             int tripletIndex = listOfTriplets.addTriplet(t);
 

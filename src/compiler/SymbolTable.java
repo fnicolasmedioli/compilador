@@ -42,7 +42,7 @@ public class SymbolTable {
 	{
 		SymbolTableEntry entry = table.get(lexeme);
 		
-		if (entry == null || entry.isPredefined() == false)
+		if (entry == null || !entry.isPredefined())
 			return false;
 	
 		return true;
@@ -125,9 +125,12 @@ public class SymbolTable {
 		return "TOKEN NO CONOCIDO";
 	}
 
-	public String getAuxVarName()
+	public String createAuxVar(DataType dataType)
 	{
-		return "@aux" + auxVarCounter++;
+		String name = "@aux" + auxVarCounter++;
+		addNewEntry(new SymbolTableEntry(), name)
+			.setAttrib(AttribKey.DATA_TYPE, dataType);
+		return name;
 	}
 
 	public List<String> getChildrenOf(String entryKey)

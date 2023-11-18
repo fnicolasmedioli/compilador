@@ -7,9 +7,14 @@ public class SymbolTableEntry {
 	private final int tokenID;
 	private String lexeme;
 	private final boolean predefined;
-
 	private final HashMap<AttribKey, Object> attribs;
-	
+
+	public SymbolTableEntry() {
+		this.tokenID = -1;
+		this.predefined = false;
+		this.attribs = new HashMap<>();
+	}
+
 	public SymbolTableEntry(int tokenID) {
 		this.tokenID = tokenID;
 		this.predefined = false;

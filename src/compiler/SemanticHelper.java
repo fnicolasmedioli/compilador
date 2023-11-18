@@ -343,20 +343,20 @@ public class SemanticHelper {
 		return list;
 	}
 
-	public Triplet getTriplet(TripletOperand operand1, TripletOperand operand2, String operation, ListOfTriplets listOfTriplets, ICompatibilityTable compatibilityTable){
+	public Triplet getTriplet(TripletOperand operand1, TripletOperand operand2, String operation, ListOfTriplets listOfTriplets, ICompatibilityTable compatibilityTable) {
 
-		Triplet t = new Triplet(operation, operand1, operand2 );
+		Triplet t = new Triplet(operation, operand1, operand2);
 
 		DataType type1, type2;
 
 		if (operand1.isFinal()) {
-			type1= (DataType)operand1.getstEntry().getAttrib(AttribKey.DATA_TYPE);
+			type1 = (DataType)operand1.getstEntry().getAttrib(AttribKey.DATA_TYPE);
 		} else {
 			type1 = listOfTriplets.getTriplet(operand1.getIndex()).getType();
 		}
 
 		if (operand2.isFinal()) {
-			type2= (DataType)operand2.getstEntry().getAttrib(AttribKey.DATA_TYPE);
+			type2 = (DataType)operand2.getstEntry().getAttrib(AttribKey.DATA_TYPE);
 		} else {
 			type2 = listOfTriplets.getTriplet(operand2.getIndex()).getType();
 		}

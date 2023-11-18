@@ -7,6 +7,7 @@ public class Triplet {
     private DataType type;
     private static int cantTriplet = 0;
     private String varTriplet;
+    private MemoryAssociation memoryAssociation = null;
 
     public Triplet(String operation, TripletOperand o1, TripletOperand o2) {
         this.operation = operation;
@@ -26,7 +27,6 @@ public class Triplet {
         this.varTriplet = "@aux" + cantTriplet;
     }
 
-    
     public String getVarTriplet() {
         return varTriplet;
     }
@@ -34,6 +34,7 @@ public class Triplet {
     public DataType getType() {
         return this.type;
     }
+
     public String getOperation() {
         return this.operation;
     }
@@ -49,13 +50,20 @@ public class Triplet {
     @Override
     public String toString()
     {
-        return String.format("Triplet: %s [%s] [%s] [%s] [%s]", operation, getOperand1(), getOperand2(), type, varTriplet);
+        return String.format("'%s' [%s] [%s] Type: %s [%s] Mem: %s", operation, getOperand1(), getOperand2(), type, varTriplet, memoryAssociation);
     }
 
-    public void setDataType(DataType dataType){
+    public void setDataType(DataType dataType) {
         this.type = dataType;
     }
 
+    public void setMemoryAssociation(MemoryAssociation memoryAssociation){
+        this.memoryAssociation = memoryAssociation;
+    }
+
+    public MemoryAssociation getMemoryAssociation(){
+        return this.memoryAssociation;
+    }
 }
 
 
