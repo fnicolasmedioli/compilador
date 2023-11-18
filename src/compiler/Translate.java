@@ -7,12 +7,17 @@ public class Translate {
     private HashMap<String, String> convertionMap;
     private ListOfAssemblerCode listOfAssemblerCode;
     private Vector<Register> registers;
+    private SymbolTable symbolTable;
+    private Compiler compiler;
 
-    public Translate() {
+    public Translate(Compiler compiler) {
         convertionMap = new HashMap<>();
         loadTranslations();
         listOfAssemblerCode = new ListOfAssemblerCode();
         this.registers = new Vector<>();
+        this.compiler = compiler;
+        this.symbolTable = compiler.getSymbolTable();
+        
     }
 
   
@@ -66,10 +71,26 @@ public class Translate {
             //operand2= Integer.toString(t.getOperand2().getIndex());
         }
 
+        r1 = removeSuffix(r1);
+        r2 = removeSuffix(r2);
+
         AssemblerCode assemblerCode = new AssemblerCode(operation, r1, r2);
         return  assemblerCode;
     }
 
+    public String removeSuffix(String whitSuffix){
+
+        String whitoutSuffix = whitSuffix;
+        if (whitSuffix.endsWith("_ui")) {
+            whitoutSuffix = whitSuffix.replaceAll("_ui" + "$", ""); // Eliminar el sufijo al final de la cadena
+        }
+
+        if (whitSuffix.endsWith("_l")) {
+            whitoutSuffix = whitSuffix.replaceAll("_l" + "$", ""); // Eliminar el sufijo al final de la cadena
+        }
+
+        return whitoutSuffix;
+    }
     public String getRegister(int index){
         String toReturn = "";
         for (int i = 0; i < this.registers.size(); i++){

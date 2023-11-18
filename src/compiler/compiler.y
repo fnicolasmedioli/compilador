@@ -850,6 +850,16 @@ basic_expr
                 compiler.reportSemanticError("No se pueden sumar variables de distinto tipo", getTokenLocation($2));
             }
 
+            DataType type;
+                
+            if (operand1.isFinal()) {
+                type = (DataType)operand1.getstEntry().getAttrib(AttribKey.DATA_TYPE);
+            } else {
+                type = listOfTriplets.getTriplet(operand1.getIndex()).getType();
+            }
+
+            t.setDataType(type);
+
             int tripletIndex = listOfTriplets.addTriplet(t);
 
             YACCDataUnit data = new YACCDataUnit();
@@ -869,8 +879,18 @@ basic_expr
             Triplet t = semanticHelper.getTriplet(operand1, operand2, "-", listOfTriplets, sumCompatibilityTable);
 
             if (t.getType() == null){
-                compiler.reportSemanticError("No se pueden restarvar iables de distinto tipo", getTokenLocation($2));
+                compiler.reportSemanticError("No se pueden restar variables de distinto tipo", getTokenLocation($2));
             }
+
+            DataType type;
+                
+            if (operand1.isFinal()) {
+                type = (DataType)operand1.getstEntry().getAttrib(AttribKey.DATA_TYPE);
+            } else {
+                type = listOfTriplets.getTriplet(operand1.getIndex()).getType();
+            }
+
+            t.setDataType(type);
 
             int tripletIndex = listOfTriplets.addTriplet(t);
 
@@ -898,6 +918,16 @@ term
                 compiler.reportSemanticError("No se pueden multiplcar variables de distinto tipo", getTokenLocation($2));
             }
 
+            DataType type;
+                
+            if (operand1.isFinal()) {
+                type = (DataType)operand1.getstEntry().getAttrib(AttribKey.DATA_TYPE);
+            } else {
+                type = listOfTriplets.getTriplet(operand1.getIndex()).getType();
+            }
+
+            t.setDataType(type);
+
             int tripletIndex = listOfTriplets.addTriplet(t);
 
             YACCDataUnit data = new YACCDataUnit();
@@ -919,6 +949,15 @@ term
             if (t.getType() == null){
                 compiler.reportSemanticError("No se pueden dividir variables de distinto tipo", getTokenLocation($2));
             }
+            DataType type;
+                
+            if (operand1.isFinal()) {
+                type = (DataType)operand1.getstEntry().getAttrib(AttribKey.DATA_TYPE);
+            } else {
+                type = listOfTriplets.getTriplet(operand1.getIndex()).getType();
+            }
+
+            t.setDataType(type);
 
             int tripletIndex = listOfTriplets.addTriplet(t);
 

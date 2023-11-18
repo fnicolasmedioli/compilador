@@ -21,7 +21,7 @@ public class Compiler {
 		);
 		this.messagePrinter = new CompilerMessagePrinter(this);
 		this.errorCount = 0;
-		this.translate = new Translate();
+		this.translate = new Translate(this);
 	}
 
 	public void compile()
