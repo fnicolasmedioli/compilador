@@ -102,6 +102,7 @@ public class Translate {
                 r2 = operand2.getstEntry().getLexeme();
             }else{
                 r1 = getRegister(operand1.getIndex());
+                r1 = moveToRegister(r1, pos);
                 r2 = getRegister(operand2.getIndex());
 
             }
@@ -113,22 +114,29 @@ public class Translate {
         r2 = removeSuffix(r2);
 
         AssemblerCode assemblerCode = new AssemblerCode(operation, r1, r2);
-        String var = t.getVarTriplet();
-        Register register = new Register(var, pos);
+
+        String varAux = t.getVarTriplet();
+        Register register = new Register(varAux, pos);
+        addSymbolTableEntry(varAux);
         addRegister(register);
 
         return  assemblerCode;
     }
 
+    public void addSymbolTableEntry(String varAux){
+        SymbolTableEntry varEntry = new SymbolTableEntry(Parser.ID, varAux);
+        this.symbolTable.addNewEntry(varEntry, varAux);
+    }   
+
     public String removeSuffix(String whitSuffix){
 
         String whitoutSuffix = whitSuffix;
         if (whitSuffix.endsWith("_ui")) {
-            whitoutSuffix = whitSuffix.replaceAll("_ui" + "$", ""); // Eliminar el sufijo al final de la cadena
+            whitoutSuffix = whitSuffix.replaceAll("_ui" + "$", ""); // Se elimina el sufijo al final de la cadena
         }
 
         if (whitSuffix.endsWith("_l")) {
-            whitoutSuffix = whitSuffix.replaceAll("_l" + "$", ""); // Eliminar el sufijo al final de la cadena
+            whitoutSuffix = whitSuffix.replaceAll("_l" + "$", ""); 
         }
 
         return whitoutSuffix;
@@ -147,8 +155,6 @@ public class Translate {
     }
     
     public String moveToRegister(String operand, int pos){
-
-        
 
             Register register = new Register("R1", pos);
             addRegister(register);
