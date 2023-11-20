@@ -25,6 +25,48 @@ public class TripletTranslator {
         return s;
     }
 
+    public String translateSub(Triplet triplet)
+    {
+        TripletOperand o1 = triplet.getOperand1();
+        TripletOperand o2 = triplet.getOperand2();
+
+        String s = "";
+
+        s += String.format("mov eax, %s\n", o1.getMemoryAssociation().getTag());
+        s += String.format("sub eax, %s\n", o2.getMemoryAssociation().getTag());
+        s += String.format("mov %s, eax\n", triplet.getMemoryAssociation().getTag());
+
+        return s;
+    }
+
+    public String translateMul(Triplet triplet)
+    {
+        TripletOperand o1 = triplet.getOperand1();
+        TripletOperand o2 = triplet.getOperand2();
+
+        String s = "";
+
+        s += String.format("mov eax, %s\n", o1.getMemoryAssociation().getTag());
+        s += String.format("mul %s\n", o2.getMemoryAssociation().getTag());
+        s += String.format("mov %s, eax\n", triplet.getMemoryAssociation().getTag());
+
+        return s;
+    }
+
+    public String translateDiv(Triplet triplet)
+    {
+        TripletOperand o1 = triplet.getOperand1();
+        TripletOperand o2 = triplet.getOperand2();
+
+        String s = "";
+
+        s += String.format("mov eax, %s\n", o1.getMemoryAssociation().getTag());
+        s += String.format("mul eax, %s\n", o2.getMemoryAssociation().getTag());
+        s += String.format("mov %s, eax\n", triplet.getMemoryAssociation().getTag());
+
+        return s;
+    }
+
     public String translateAssign(Triplet triplet)
     {
         TripletOperand o1 = triplet.getOperand1();

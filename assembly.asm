@@ -9,23 +9,13 @@ includelib \masm32\lib\kernel32.lib
 includelib \masm32\lib\masm32.lib
 
 .data
-6_ui dw 6
-2_ui dw 2
 4_ui dw 4
+3_ui dw 3
 
 .code
 mov eax, 4_ui
-mov var1_global, eax
-mov eax, 6_ui
-mov var2_global, eax
-mov eax, var1_global
-add eax, var2_global
+mul 3_ui
 mov @aux0, eax
 mov eax, @aux0
 mov var1_global, eax
-mov eax, 2_ui
-add eax, var1_global
-mov @aux1, eax
-mov eax, @aux1
-mov var3_global, eax
 

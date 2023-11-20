@@ -107,6 +107,15 @@ public class Translator {
                 case "=":
                     sb.append(tripletTranslator.translateAssign(triplet));
                     break;
+                case "-":
+                    sb.append(tripletTranslator.translateSub(triplet));
+                    break;
+                case "/":
+                    sb.append(tripletTranslator.translateDiv(triplet));
+                    break;
+                case "*":
+                    sb.append(tripletTranslator.translateMul(triplet));
+                    break;
                 default:
                     sb.append("Operacion no implementada: ").append(triplet.getOperation()).append("\n");
                     break;
