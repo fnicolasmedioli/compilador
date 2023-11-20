@@ -416,6 +416,25 @@ sentencia_ejecutable
             DataType leftDataType = (DataType)referencedEntry.getAttrib(AttribKey.DATA_TYPE);
             TripletOperand rightTripletOperand = data3.tripletOperand;
 
+            boolean areSameDataType = true;
+
+            if (rightTripletOperand.isFinal())
+            {
+                if (leftDataType != rightTripletOperand.getstEntry().getAttrib(AttribKey.DATA_TYPE))
+                    areSameDataType = false;
+            }
+            else
+                if (leftDataType != listOfTriplets.getTriplet(rightTripletOperand.getIndex()).getType())
+                    areSameDataType = false;
+
+            
+            if (!areSameDataType)
+            {
+                compiler.reportSemanticError("Los tipos de datos no son compatibles para la asignacion", data2.tokensData.get(0).getLocation());
+                $$ = new ParserVal(new YACCInvalidDataUnit());
+                break;
+            }
+
             TripletOperand equalizeTo;
 
             int firstTriplet = -1;
