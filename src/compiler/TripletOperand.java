@@ -6,16 +6,20 @@ public class TripletOperand {
 
     public final SymbolTableEntry stEntry;
 
-    public TripletOperand(Integer index)
+    public final ListOfTriplets listOfTriplets;
+
+    public TripletOperand(Integer index, ListOfTriplets listOfTriplets)
     {
         this.index = index;
         this.stEntry = null;
+        this.listOfTriplets = listOfTriplets;
     }
 
-    public TripletOperand(SymbolTableEntry stEntry)
+    public TripletOperand(SymbolTableEntry stEntry, ListOfTriplets listOfTriplets)
     {
         this.index = null;
         this.stEntry = stEntry;
+        this.listOfTriplets = listOfTriplets;
     }
 
     public boolean isFinal()
@@ -38,5 +42,13 @@ public class TripletOperand {
 
     public SymbolTableEntry getstEntry(){
         return this.stEntry;
+    }
+
+    public MemoryAssociation getMemoryAssociation()
+    {
+        if (isFinal())
+            return (MemoryAssociation)stEntry.getAttrib(AttribKey.MEMORY_ASSOCIATION);
+        else
+            return listOfTriplets.getTriplet(index).getMemoryAssociation();
     }
 }

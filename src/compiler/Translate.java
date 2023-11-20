@@ -1,5 +1,6 @@
 package compiler;
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.Vector;
 
 public class Translate {
@@ -49,17 +50,11 @@ public class Translate {
     }
 
     public boolean isAssign(Triplet t){
-        if  (t.getType() == null && t.getOperation() == "="){
-            return true;
-        }
-        return false;
+        return (t.getType() == null && Objects.equals(t.getOperation(), "="));
     }
 
     public boolean isOperation(Triplet t){
-        if (t.getOperation() == "*" || t.getOperation() == "+" || t.getOperation() == "-" || t.getOperation() == "/" ){
-            return true;
-        }
-        return false;
+        return Objects.equals(t.getOperation(), "*") || Objects.equals(t.getOperation(), "+") || Objects.equals(t.getOperation(), "-") || Objects.equals(t.getOperation(), "/");
     }
     public AssemblerCode getCodAssembler(Triplet t, ListOfTriplets listOfTriplets, int pos){
   

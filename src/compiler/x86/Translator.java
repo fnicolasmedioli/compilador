@@ -12,9 +12,13 @@ import java.nio.ByteBuffer;
 public class Translator {
 
     SymbolTable symbolTable;
+    TripletTranslator tripletTranslator;
+    ListOfTriplets listOfTriplets;
 
-    public Translator(Compiler compiler) {
+    public Translator(Compiler compiler, ListOfTriplets listOfTriplets) {
         this.symbolTable = compiler.getSymbolTable();
+        this.tripletTranslator = new TripletTranslator(symbolTable);
+        this.listOfTriplets = listOfTriplets;
     }
 
     public String getAssemblyCode()
@@ -94,6 +98,22 @@ public class Translator {
 
         sb.append(".code\n");
 
+        for (Triplet triplet : listOfTriplets)
+            switch (triplet.getOperation())
+            {
+                case "+":
+                    sb.append(tripletTranslator.translateAdd(triplet));
+                    break;
+                case "=":
+                    sb.append(tripletTranslator.translateAssign(triplet));
+                    break;
+                default:
+                    sb.append("Operacion no implementada: ").append(triplet.getOperation()).append("\n");
+                    break;
+            }
+
+        sb.append("\n");
+
         return sb.toString();
     }
 
@@ -142,6 +162,4 @@ public class Translator {
         Integer baseOffset = 0;
         return _flattenObject(entryKey, baseOffset);
     }
-
-
 }

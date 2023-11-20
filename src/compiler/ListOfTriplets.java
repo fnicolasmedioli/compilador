@@ -1,8 +1,9 @@
 package compiler;
 
 import java.util.Vector;
+import java.util.Iterator;
 
-public class ListOfTriplets {
+public class ListOfTriplets implements Iterable<Triplet> {
     private final Vector<Triplet> tripletList;
 
     public ListOfTriplets() {
@@ -43,4 +44,26 @@ public class ListOfTriplets {
         return tripletList.get(getSize() - 1);
     }
 
+    @Override
+    public Iterator<Triplet> iterator() {
+        return new Iterator<Triplet>() {
+
+            private int currentIndex = 0;
+
+            @Override
+            public boolean hasNext() {
+                return currentIndex < tripletList.size();
+            }
+
+            @Override
+            public Triplet next() {
+                return tripletList.get(currentIndex++);
+            }
+
+            @Override
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
+        };
+    }
 }

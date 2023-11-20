@@ -445,13 +445,13 @@ sentencia_ejecutable
             }
             else
             {
-                Triplet subTriplet = new Triplet("-", new TripletOperand(referencedEntry), rightTripletOperand);
+                Triplet subTriplet = new Triplet("-", new TripletOperand(referencedEntry, listOfTriplets), rightTripletOperand);
                 int tripletID = listOfTriplets.addTriplet(subTriplet);
-                equalizeTo = new TripletOperand(tripletID);
+                equalizeTo = new TripletOperand(tripletID, listOfTriplets);
                 firstTriplet = tripletID;
             }
 
-            Triplet equalTriplet = new Triplet("=", new TripletOperand(referencedEntry), equalizeTo);
+            Triplet equalTriplet = new Triplet("=", new TripletOperand(referencedEntry, listOfTriplets), equalizeTo);
             int tripletID = listOfTriplets.addTriplet(equalTriplet);
 
             if (firstTriplet == -1)
@@ -528,7 +528,7 @@ sentencia_ejecutable
 
             Triplet invokeTriplet = new Triplet(
                 "INVOKE",
-                new TripletOperand(referencedEntry),
+                new TripletOperand(referencedEntry, listOfTriplets),
                 data2.tripletOperand
             );
 
@@ -562,7 +562,7 @@ sentencia_ejecutable
                 new SyntacticStructureResult("Sentencia PRINT", getTokenLocation($1))
             );
 
-            Triplet triplet = new Triplet("PRINT", new TripletOperand(getSTEntry($2)), null);
+            Triplet triplet = new Triplet("PRINT", new TripletOperand(getSTEntry($2), listOfTriplets), null);
             int tripletID = listOfTriplets.addTriplet(triplet);
 
             YACCDataUnit data = new YACCDataUnit();
@@ -717,7 +717,7 @@ sentencia_if
                 jzToBackpatch,
                 new Triplet(
                     "JZ",
-                    new TripletOperand(1 + jzToBackpatch + data5.tripletQuantity),
+                    new TripletOperand(1 + jzToBackpatch + data5.tripletQuantity, listOfTriplets),
                     null
                 )
             );
@@ -741,7 +741,7 @@ sentencia_if
                 jzToBackpatch,
                 new Triplet(
                     "JZ",
-                    new TripletOperand(1 + jzToBackpatch + data5.tripletQuantity),
+                    new TripletOperand(1 + jzToBackpatch + data5.tripletQuantity, listOfTriplets),
                     null
                 )
             );
@@ -752,7 +752,7 @@ sentencia_if
                 jmpToBackpatch,
                 new Triplet(
                     "JMP",
-                    new TripletOperand(1 + jmpToBackpatch + data7.tripletQuantity),
+                    new TripletOperand(1 + jmpToBackpatch + data7.tripletQuantity, listOfTriplets),
                     null
                 )
             );
@@ -847,7 +847,7 @@ expr
             Triplet convTriplet = new Triplet(tripletOP, data3.tripletOperand, null, DataType.DOUBLE);
             int tripletID = listOfTriplets.addTriplet(convTriplet);
 
-            data3.tripletOperand = new TripletOperand(tripletID);
+            data3.tripletOperand = new TripletOperand(tripletID, listOfTriplets);
             data3.dataType = DataType.DOUBLE;
 
             $$ = new ParserVal(data3);
@@ -883,7 +883,7 @@ basic_expr
 
             YACCDataUnit data = new YACCDataUnit();
             data.tripletQuantity = 1 + data1.tripletQuantity + data3.tripletQuantity;
-            data.tripletOperand = new TripletOperand(tripletIndex);
+            data.tripletOperand = new TripletOperand(tripletIndex, listOfTriplets);
 
             $$ = new ParserVal(data);
         }
@@ -915,7 +915,7 @@ basic_expr
 
             YACCDataUnit data = new YACCDataUnit();
             data.tripletQuantity = 1 + data1.tripletQuantity + data3.tripletQuantity;
-            data.tripletOperand = new TripletOperand(tripletIndex);
+            data.tripletOperand = new TripletOperand(tripletIndex, listOfTriplets);
 
             $$ = new ParserVal(data);
         }
@@ -952,7 +952,7 @@ term
 
             YACCDataUnit data = new YACCDataUnit();
             data.tripletQuantity = 1 + data1.tripletQuantity;
-            data.tripletOperand = new TripletOperand(tripletIndex);
+            data.tripletOperand = new TripletOperand(tripletIndex, listOfTriplets);
 
             $$ = new ParserVal(data);
         }
@@ -984,7 +984,7 @@ term
 
             YACCDataUnit data = new YACCDataUnit();
             data.tripletQuantity = 1 + data1.tripletQuantity;
-            data.tripletOperand = new TripletOperand(tripletIndex);
+            data.tripletOperand = new TripletOperand(tripletIndex, listOfTriplets);
 
             $$ = new ParserVal(data);
         }
@@ -1016,13 +1016,13 @@ factor
             }
 
             YACCDataUnit data = new YACCDataUnit();
-            data.tripletOperand = new TripletOperand(referencedEntry);
+            data.tripletOperand = new TripletOperand(referencedEntry, listOfTriplets);
             $$ = new ParserVal(data);
         }
     | constante
         {
             YACCDataUnit data = new YACCDataUnit();
-            data.tripletOperand = new TripletOperand(getSTEntry($1));
+            data.tripletOperand = new TripletOperand(getSTEntry($1), listOfTriplets);
             $$ = new ParserVal(data);
         }
     ;
@@ -1147,7 +1147,7 @@ procedimiento
 
             listOfTriplets.replaceTriplet(data1.reservedTriplet, new Triplet(
                 "JMP",
-                new TripletOperand(1 + data1.reservedTriplet + data.tripletQuantity),
+                new TripletOperand(1 + data1.reservedTriplet + data.tripletQuantity, listOfTriplets),
                 null
             ));
 
@@ -1199,7 +1199,7 @@ do_until
 
             int bodyStartTriplet = data2.firstTriplet;
 
-            Triplet triplet = new Triplet("JNZ", new TripletOperand(bodyStartTriplet), null);
+            Triplet triplet = new Triplet("JNZ", new TripletOperand(bodyStartTriplet, listOfTriplets), null);
             int tripletID = listOfTriplets.addTriplet(triplet);
 
             YACCDataUnit data = new YACCDataUnit();
