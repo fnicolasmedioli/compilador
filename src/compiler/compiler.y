@@ -852,7 +852,7 @@ basic_expr
 
             Triplet t = semanticHelper.getTriplet(operand1, operand2, "+", listOfTriplets, sumCompatibilityTable);
 
-            if (t.getType() == null) {
+            if (t == null) {
                 compiler.reportSemanticError("No se pueden sumar variables de distinto tipo", getTokenLocation($2));
                 $$ = new ParserVal(new YACCInvalidDataUnit());
                 break;
@@ -884,7 +884,7 @@ basic_expr
 
             Triplet t = semanticHelper.getTriplet(operand1, operand2, "-", listOfTriplets, sumCompatibilityTable);
 
-            if (t.getType() == null) {
+            if (t == null) {
                 compiler.reportSemanticError("No se pueden restar variables de distinto tipo", getTokenLocation($2));
                 $$ = new ParserVal(new YACCInvalidDataUnit());
                 break;
@@ -920,11 +920,12 @@ term
 
             Triplet t = semanticHelper.getTriplet(operand1, operand2, "*", listOfTriplets, mulCompatibilityTable);
 
-            if (t.getType() == null) {
-                compiler.reportSemanticError("No se pueden dividir variables de distinto tipo", getTokenLocation($2));
+            if (t == null) {
+                compiler.reportSemanticError("No se pueden multiplicar variables de distinto tipo", getTokenLocation($2));
                 $$ = new ParserVal(new YACCInvalidDataUnit());
                 break;
             }
+
 
             t.setMemoryAssociation(new MemoryAssociation(symbolTable.createAuxVar(t.getType()), t.getType().getSize(), t.getType()));
 
@@ -952,7 +953,7 @@ term
 
             Triplet t = semanticHelper.getTriplet(operand1, operand2, "/", listOfTriplets, divCompatibilityTable);
 
-            if (t.getType() == null) {
+            if (t == null) {
                 compiler.reportSemanticError("No se pueden dividir variables de distinto tipo", getTokenLocation($2));
                 $$ = new ParserVal(new YACCInvalidDataUnit());
                 break;

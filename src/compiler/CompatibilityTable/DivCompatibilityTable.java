@@ -10,15 +10,15 @@ public class DivCompatibilityTable implements ICompatibilityTable {
         int dataTypesQuantity = DataType.values().length;
         matrix = new DataType[dataTypesQuantity][dataTypesQuantity];
 
-        setSymmetric(_uint, _uint, DataType.DOUBLE);
+        setSymmetric(_uint, _uint, DataType.BOOLEAN);
 
         //setSymmetric(_uint, _long, DataType.DOUBLE);
         // matrix[_uint][_double] = DataType.DOUBLE;
 
-        setSymmetric(_long, _long, DataType.DOUBLE);
+        setSymmetric(_long, _long, DataType.BOOLEAN);
         // matrix[_long][_double] = DataType.DOUBLE;
 
-        setSymmetric(_double, _double, DataType.DOUBLE);
+        setSymmetric(_double, _double, DataType.BOOLEAN);
 
         //setSymmetric(_double, _long, DataType.DOUBLE);
 

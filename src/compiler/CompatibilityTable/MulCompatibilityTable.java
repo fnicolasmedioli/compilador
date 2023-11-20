@@ -11,9 +11,9 @@ public class MulCompatibilityTable implements ICompatibilityTable {
         int dataTypesQuantity = DataType.values().length;
         matrix = new DataType[dataTypesQuantity][dataTypesQuantity];
 
-        setSymmetric(_uint, _uint, DataType.LONG);
-        setSymmetric(_long, _long, DataType.LONG);
-        setSymmetric(_double, _double, DataType.DOUBLE);
+        setSymmetric(_uint, _uint, DataType.BOOLEAN);
+        setSymmetric(_long, _long, DataType.BOOLEAN);
+        setSymmetric(_double, _double, DataType.BOOLEAN);
     }
 
     public DataType calcDataType(DataType a, DataType b)

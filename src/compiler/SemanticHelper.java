@@ -361,8 +361,18 @@ public class SemanticHelper {
 			type2 = listOfTriplets.getTriplet(operand2.getIndex()).getType();
 		}
 
-		t.setDataType(compatibilityTable.calcDataType(type1, type2));
+		DataType typeAux = compatibilityTable.calcDataType(type1, type2);
 
+		
+		if (typeAux == null)
+		{
+			return null;
+		}else{
+			if (operation == "/")
+				t.setDataType(DataType.DOUBLE);
+			else
+				t.setDataType(type1);
+		}
 		return t;
 	}
 
