@@ -2,7 +2,11 @@ package compiler;
 
 import compiler.x86.Translator;
 
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.PriorityQueue;
 
 public class Compiler {
@@ -55,9 +59,41 @@ public class Compiler {
 		System.out.println("\nCodigo Assembler");
 		System.out.println(listOfAssemblerCode);
 
-		System.out.println(translator.getAssemblyCode());
+		createAssembly(translator.getAssemblyCode());
+
+		
 	}
 
+	public void createAssembly(String assemblyCode){
+
+		String pathAssembly = "assembly.asm";
+
+        try {
+            File assembly = new File(pathAssembly);
+            if (assembly.createNewFile()) {
+                System.out.println("Archivo creado: " + assembly.getName());
+
+                // Escribir contenido en el archivo
+                FileWriter writer = new FileWriter(assembly, false);
+                BufferedWriter bufferEscritor = new BufferedWriter(writer);
+                
+                // Contenido a escribir en el archivo
+                String code = assemblyCode;
+                
+                // Escribir en el archivo
+                bufferEscritor.write(code);
+                
+                // Cerrar el BufferedWriter
+                bufferEscritor.close();
+                System.out.println("Contenido agregado al archivo.");
+            } else {
+                System.out.println("El archivo ya existe.");
+            }
+        } catch (IOException e) {
+            System.out.println("Ocurrió un error al crear o escribir en el archivo.");
+            e.printStackTrace();
+        }
+	}
 	public int yylex()
 	{
 		return lexicalAnalyzer.getToken();
