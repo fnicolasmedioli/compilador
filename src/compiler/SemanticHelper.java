@@ -474,4 +474,5 @@ public class SemanticHelper {
 			declareRecursive(t, scope + ":" + lexeme, recDataTypeEntry, currentClassEntryKey, true);
 		}
 	}
+
 }

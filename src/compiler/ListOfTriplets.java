@@ -2,12 +2,18 @@ package compiler;
 
 import java.util.Vector;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.HashMap;
 
 public class ListOfTriplets implements Iterable<Triplet> {
     private final Vector<Triplet> tripletList;
+    private final HashMap<Integer, LinkedList<String>> tags;
+
+    private int incrementalCounter = 0;
 
     public ListOfTriplets() {
         this.tripletList = new Vector<Triplet>();
+        tags = new HashMap<>();
     }
 
     public int addTriplet(Triplet t) {
@@ -65,5 +71,32 @@ public class ListOfTriplets implements Iterable<Triplet> {
                 throw new UnsupportedOperationException();
             }
         };
+    }
+
+    public void addTag(int index, String tag)
+    {
+        if (!tags.containsKey(index))
+            tags.put(index, new LinkedList<>());
+        tags.get(index).add(tag);
+    }
+
+    public LinkedList<String> getTags(int index)
+    {
+        return ((tags.containsKey(index)) ? tags.get(index) : new LinkedList<>());
+    }
+
+    public void printTags()
+    {
+        System.out.println(tags);
+    }
+
+    public String getNewIfTag()
+    {
+        return String.format("@@@if_end_%d", incrementalCounter++);
+    }
+
+    public String getIncrementalNum()
+    {
+        return String.format("%d", incrementalCounter++);
     }
 }

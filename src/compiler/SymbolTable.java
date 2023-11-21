@@ -164,4 +164,13 @@ public class SymbolTable {
 
 		return toReturn;
 	}
+
+	public static String encodeString(String str)
+	{
+		return str
+			.replace(":", "_")
+			.replace(".", "_")
+			.replace("%", "_");
+	}
+
 }

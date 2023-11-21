@@ -1,5 +1,7 @@
 package compiler;
 
+import jdk.nashorn.internal.ir.Symbol;
+
 public class MemoryAssociation {
 
     private String tag = null;
@@ -8,14 +10,14 @@ public class MemoryAssociation {
 
     public MemoryAssociation(String tag, int size, DataType dataType)
     {
-        this.tag = this.encode(tag);
+        this.tag = SymbolTable.encodeString(tag);
         this.size = size;
         this.dataType = dataType;
     }
 
     public MemoryAssociation(String tag)
     {
-        this.tag = this.encode(tag);
+        this.tag = SymbolTable.encodeString(tag);
     }
 
     public MemoryAssociation(int size)
@@ -68,13 +70,5 @@ public class MemoryAssociation {
                 "DataType -> " +
                 dataType +
                 "'";
-    }
-
-    private String encode(String str)
-    {
-        return str
-            .replace(":", "_")
-            .replace(".", "_")
-            .replace("%", "_");
     }
 }

@@ -17,7 +17,7 @@ public class Translator {
 
     public Translator(Compiler compiler, ListOfTriplets listOfTriplets) {
         this.symbolTable = compiler.getSymbolTable();
-        this.tripletTranslator = new TripletTranslator(symbolTable);
+        this.tripletTranslator = new TripletTranslator(symbolTable, listOfTriplets);
         this.listOfTriplets = listOfTriplets;
     }
 
@@ -31,7 +31,7 @@ public class Translator {
     public String craftHeaderSection()
     {
         return
-            ".386\n" +
+            ".586\n" +
             ".model flat, stdcall\n\n" +
             "option casemap :none\n" +
             "include \\masm32\\include\\windows.inc\n" +
@@ -92,13 +92,28 @@ public class Translator {
         return sb.toString();
     }
 
-    public String craftCodeSection()
-    {
+    public String craftCodeSection() {
         StringBuilder sb = new StringBuilder();
 
         sb.append(".code\n");
+        sb.append("start:\n\n");
+
+        sb.append("jmp @@imprimir_mensaje_end\n");
+        sb.append("@@imprimir_mensaje:\n");
+        sb.append("pop eax\n");
+        sb.append("invoke MessageBox, NULL, eax, eax, MB_OK\n");
+        sb.append("ret\n");
+        sb.append("@@imprimir_mensaje_end:\n\n");
+
+        int tripletID = 0;
 
         for (Triplet triplet : listOfTriplets)
+        {
+            // Buscar los tags asociados a el triplet
+
+            for (String tag : listOfTriplets.getTags(tripletID))
+                sb.append(String.format("%s:\n", tag));
+
             switch (triplet.getOperation())
             {
                 case "+":
@@ -116,12 +131,44 @@ public class Translator {
                 case "*":
                     sb.append(tripletTranslator.translateMul(triplet));
                     break;
+                case "PRINT":
+                    sb.append(tripletTranslator.translatePrint(triplet));
+                    break;
+                case "RETURN":
+                    sb.append("ret\n");
+                    break;
+                case "JMP":
+                    sb.append(tripletTranslator.translateJMP(triplet));
+                    break;
+                case ">=":
+                case "<=":
+                case "<":
+                case ">":
+                case "==":
+                case "!!":
+                    sb.append(tripletTranslator.translateCmp(triplet));
+                    break;
+                case "END":
+                    break;
+                case "CJUMP":
+                    Triplet prevTriplet = listOfTriplets.getTriplet(tripletID-1);
+                    sb.append(tripletTranslator.translateCJump(triplet, prevTriplet));
+                    break;
+                case "NEG_CJUMP":
+                    Triplet prevTriplet2 = listOfTriplets.getTriplet(tripletID-1);
+                    sb.append(tripletTranslator.translateNegCJump(triplet, prevTriplet2));
+                    break;
                 default:
                     sb.append("Operacion no implementada: ").append(triplet.getOperation()).append("\n");
                     break;
             }
+            tripletID++;
+        }
 
         sb.append("\n");
+        sb.append("fin:\n");
+        sb.append("invoke ExitProcess, 0\n");
+        sb.append("end start");
 
         return sb.toString();
     }
@@ -131,9 +178,6 @@ public class Translator {
         LinkedList<FlattenObjectItem> toReturn = new LinkedList<>();
 
         List<String> rawChildsEntryKeys = symbolTable.getChildrenOf(entryKey);
-
-        System.out.println("Antes del filtro");
-        System.out.println(rawChildsEntryKeys);
 
         // Eliminar hijos que son objetos (No tendran memoria al no ser primitivos)
 

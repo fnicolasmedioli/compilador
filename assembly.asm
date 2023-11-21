@@ -1,4 +1,4 @@
-.386
+.586
 .model flat, stdcall
 
 option casemap :none
@@ -9,13 +9,37 @@ includelib \masm32\lib\kernel32.lib
 includelib \masm32\lib\masm32.lib
 
 .data
-4_ui dw 4
-3_ui dw 3
+0_ui dw 0
+1_ui dw 1
+10_ui dw 10
 
 .code
-mov eax, 4_ui
-mul 3_ui
+start:
+
+jmp @@imprimir_mensaje_end
+@@imprimir_mensaje:
+pop eax
+invoke MessageBox, NULL, eax, eax, MB_OK
+ret
+@@imprimir_mensaje_end:
+
+mov eax, 0_ui
+mov a_global, eax
+do_until_0:
+mov eax, a_global
+add eax, 1_ui
 mov @aux0, eax
 mov eax, @aux0
-mov var1_global, eax
+mov a_global, eax
+mov eax, a_global
+cmp eax, 10_ui
+pushfd
+pop eax
+not eax
+push eax
+popfd
+je do_until_0
 
+fin:
+invoke ExitProcess, 0
+end start

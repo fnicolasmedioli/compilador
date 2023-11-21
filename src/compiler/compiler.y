@@ -87,6 +87,7 @@ condicion
             if (triplet.getType() == null)
             {
                 compiler.reportSemanticError("No se pueden comparar tipos de datos", ((YACCDataUnit)$2.obj).tokensData.get(0).getLocation());
+                $$ = new ParserVal(new YACCInvalidDataUnit());
                 break;
             }
 
@@ -95,6 +96,8 @@ condicion
             YACCDataUnit data = new YACCDataUnit();
             data.firstTriplet = tripletID;
             data.tripletQuantity = 1 + data1.tripletQuantity + data3.tripletQuantity;
+            data.lexeme = compLexeme;
+            data.dataType = triplet.getType();
 
             $$ = new ParserVal(data);
         }
@@ -713,14 +716,19 @@ sentencia_if
 
             int jzToBackpatch = data3.reservedTriplet;
 
+            String comp = data3.lexeme;
+
+            int end_if = 1 + jzToBackpatch + data5.tripletQuantity;
             listOfTriplets.replaceTriplet(
                 jzToBackpatch,
                 new Triplet(
-                    "JZ",
-                    new TripletOperand(1 + jzToBackpatch + data5.tripletQuantity, listOfTriplets),
+                    "CJUMP",
+                    new TripletOperand(end_if, listOfTriplets),
                     null
                 )
             );
+
+            listOfTriplets.addTag(end_if, listOfTriplets.getNewIfTag());
 
             YACCDataUnit data = new YACCDataUnit();
             data.tripletQuantity = 1 + data3.tripletQuantity + data5.tripletQuantity;
@@ -737,25 +745,35 @@ sentencia_if
 
             int jzToBackpatch = data3.reservedTriplet;
 
+            String comp = data3.lexeme;
+
+            int end_if = 1 + jzToBackpatch + data5.tripletQuantity;
+
             listOfTriplets.replaceTriplet(
                 jzToBackpatch,
                 new Triplet(
-                    "JZ",
-                    new TripletOperand(1 + jzToBackpatch + data5.tripletQuantity, listOfTriplets),
+                    "CJUMP",
+                    new TripletOperand(end_if, listOfTriplets),
                     null
                 )
             );
 
+            listOfTriplets.addTag(end_if, listOfTriplets.getNewIfTag());
+
             int jmpToBackpatch = data5.reservedTriplet;
+
+            int end_if_else = 1 + jmpToBackpatch + data7.tripletQuantity;
 
             listOfTriplets.replaceTriplet(
                 jmpToBackpatch,
                 new Triplet(
                     "JMP",
-                    new TripletOperand(1 + jmpToBackpatch + data7.tripletQuantity, listOfTriplets),
+                    new TripletOperand(end_if_else, listOfTriplets),
                     null
                 )
             );
+
+            listOfTriplets.addTag(end_if_else, listOfTriplets.getNewIfTag());
 
             YACCDataUnit data = new YACCDataUnit();
             data.tripletQuantity = 2 + data3.tripletQuantity + data5.tripletQuantity + data7.tripletQuantity;
@@ -1128,6 +1146,12 @@ procedimiento
             LocatedSymbolTableEntry argDataType = hasArgument ? data3.tokensData.get(0) : null;
             LocatedSymbolTableEntry argName = hasArgument ? data3.tokensData.get(1) : null;
 
+            // Agregar tag de inicio
+
+            int bodyFirstTripletID = listOfTriplets.getSize() - data4.tripletQuantity;
+
+            listOfTriplets.addTag(bodyFirstTripletID, SymbolTable.encodeString("@@" + funcEntryKey));
+
             semanticHelper.declareFunction(getCurrentScopeStr(), $2.obj, argDataType);
 
             if (hasArgument)
@@ -1143,14 +1167,6 @@ procedimiento
             data.tripletQuantity = data4.tripletQuantity;
             data.referencedEntryKey = funcLexeme + ":" + getCurrentScopeStr();
 
-            // Backpatch del salto
-
-            listOfTriplets.replaceTriplet(data1.reservedTriplet, new Triplet(
-                "JMP",
-                new TripletOperand(1 + data1.reservedTriplet + data.tripletQuantity, listOfTriplets),
-                null
-            ));
-
             Triplet lastTriplet = listOfTriplets.getLastTriplet();
 
             if (lastTriplet.getOperation().equals("RETURN") == false)
@@ -1159,8 +1175,21 @@ procedimiento
 
                 Triplet returnTriplet = new Triplet("RETURN", null, null);
                 listOfTriplets.addTriplet(returnTriplet);
+                data.tripletQuantity++;
                 System.out.println("Se agrego un terceto return implicitamente");
             }
+
+            // Backpatch del salto
+
+            int jumpToTriplet = 1 + data1.reservedTriplet + data.tripletQuantity;
+
+            listOfTriplets.replaceTriplet(data1.reservedTriplet, new Triplet(
+                "JMP",
+                new TripletOperand(jumpToTriplet, listOfTriplets),
+                null
+            ));       
+
+            listOfTriplets.addTag(jumpToTriplet, SymbolTable.encodeString("@@" + funcEntryKey + "_end"));
 
             // Agregar a la tabla de simbolos el terceto donde empieza la funcion
 
@@ -1197,15 +1226,17 @@ do_until
 
             // Agregar salto condicional
 
-            int bodyStartTriplet = data2.firstTriplet;
+            int bodyStartTriplet = listOfTriplets.getSize() - data2.tripletQuantity - data5.tripletQuantity;
 
-            Triplet triplet = new Triplet("JNZ", new TripletOperand(bodyStartTriplet, listOfTriplets), null);
+            Triplet triplet = new Triplet("NEG_CJUMP", new TripletOperand(bodyStartTriplet, listOfTriplets), null);
             int tripletID = listOfTriplets.addTriplet(triplet);
 
             YACCDataUnit data = new YACCDataUnit();
             data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
             data.tripletQuantity = 1 + data2.tripletQuantity + data5.tripletQuantity;
             data.firstTriplet = tripletID;
+
+            listOfTriplets.addTag(bodyStartTriplet, "do_until_" + listOfTriplets.getIncrementalNum());
 
             $$ = new ParserVal(data);
         }
@@ -1214,7 +1245,6 @@ do_until
 metodo
     : procedimiento
     ;
-
 
 clase_con_nombre
     : CLASS id_ambito
@@ -1491,6 +1521,7 @@ private void setCurrentID(String id)
 
 public ListOfTriplets getListOfTriplets()
 {
+    listOfTriplets.addTriplet(new Triplet("END", null, null));
     return listOfTriplets;
 }
 

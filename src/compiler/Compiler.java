@@ -54,10 +54,6 @@ public class Compiler {
 		System.out.println("\nLista de tercetos:");
 		System.out.println(listOfTriplets);
 
-		ListOfAssemblerCode listOfAssemblerCode = translate.translateTriplets(listOfTriplets);
-		System.out.println("\nCodigo Assembler");
-		System.out.println(listOfAssemblerCode);
-
 		Translator translator = new Translator(this, listOfTriplets);
 
 		String assemblyCode = translator.getAssemblyCode();
@@ -84,7 +80,7 @@ public class Compiler {
 
 			// Cerrar el BufferedWriter
 			bufferEscritor.close();
-			System.out.println("Contenido agregado al archivo.");
+			System.out.println("\n\nContenido agregado al archivo.");
         } catch (IOException e) {
             System.out.println("Ocurrió un error al crear o escribir en el archivo.");
             e.printStackTrace();
