@@ -1170,16 +1170,21 @@ procedimiento
 
             semanticHelper.declareFunction(getCurrentScopeStr(), $2.obj, argDataType);
 
+            SymbolTableEntry funcEntry = symbolTable.getEntry(funcEntryKey);
+
+            if (currentClassEntryKey != null)
+                funcEntry.setAttrib(AttribKey.METHOD_OF, currentClassEntryKey);
+
             // Agregar atributo del tag a la tabla de simbolos
 
-            symbolTable.getEntry(funcEntryKey).setAttrib(AttribKey.ASSEMBLY_TAG, assemblyTag);
+            funcEntry.setAttrib(AttribKey.ASSEMBLY_TAG, assemblyTag);
 
             if (hasArgument)
             {
                 // Agregar la entryKey del argumento a un attrib de esta funcion
 
                 String argEntryKey = argName.getSTEntry().getLexeme() + ":" + semanticHelper.invertScope(funcEntryKey);
-                symbolTable.getEntry(funcEntryKey).setAttrib(AttribKey.ARG_ENTRY_KEY, argEntryKey);
+                funcEntry.setAttrib(AttribKey.ARG_ENTRY_KEY, argEntryKey);
             }
 
             YACCDataUnit data = new YACCDataUnit();

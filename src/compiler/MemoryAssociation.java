@@ -1,16 +1,22 @@
 package compiler;
 
-import jdk.nashorn.internal.ir.Symbol;
-
 public class MemoryAssociation {
 
     private String tag = null;
+    private int offset = -1;
     private int size = -1;
     private DataType dataType = null;
 
     public MemoryAssociation(String tag, int size, DataType dataType)
     {
         this.tag = SymbolTable.encodeString(tag);
+        this.size = size;
+        this.dataType = dataType;
+    }
+
+    public MemoryAssociation(int offset, int size, DataType dataType)
+    {
+        this.offset = offset;
         this.size = size;
         this.dataType = dataType;
     }
@@ -70,5 +76,10 @@ public class MemoryAssociation {
                 "DataType -> " +
                 dataType +
                 "'";
+    }
+
+    public int getOffset()
+    {
+        return offset;
     }
 }

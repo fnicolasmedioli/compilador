@@ -189,4 +189,16 @@ public class SymbolTable {
 			.replace("%", "_");
 	}
 
+	/*
+	public int getClassSize(String classEntryKey)
+	{
+		SymbolTableEntry entry = getEntry(classEntryKey);
+
+		if (entry == null) return -1;
+
+		MemoryAssociation mem = (MemoryAssociation)entry.getAttrib(AttribKey.MEMORY_ASSOCIATION);
+
+
+	}*/
+
 }

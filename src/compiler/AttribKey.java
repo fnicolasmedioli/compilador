@@ -12,7 +12,8 @@ public enum AttribKey {
     FIRST_TRIPLET("Primer terceto de la instruccion"),
     MEMORY_ASSOCIATION("Asociacion de memoria"),
     IS_CONSTANT("Es una constante"),
-    ASSEMBLY_TAG("Tag en assembly");
+    ASSEMBLY_TAG("Tag en assembly"),
+    METHOD_OF("Clase asociada al metodo");
 
     private final String str;
     AttribKey(String str)

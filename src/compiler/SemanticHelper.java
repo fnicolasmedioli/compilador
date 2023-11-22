@@ -254,7 +254,7 @@ public class SemanticHelper {
 			}
 		}
 
-		if (currentClassEntryKey != null && isRecursion == false) {
+		if (currentClassEntryKey != null && !isRecursion) {
 			// Sumar el tamaño de la variable * cantidad al tamaño total de la clase
 			MemoryAssociation currentClassMemoryAssociation = (MemoryAssociation)(symbolTable.getEntry(currentClassEntryKey).getAttrib(AttribKey.MEMORY_ASSOCIATION));
 			currentClassMemoryAssociation.addSize(varSize * varLexemeList.size());
