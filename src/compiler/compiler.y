@@ -530,7 +530,7 @@ sentencia_ejecutable
             // Agregar terceto de invocacion
 
             Triplet invokeTriplet = new Triplet(
-                "INVOKE",
+                "CALL",
                 new TripletOperand(referencedEntry, listOfTriplets),
                 data2.tripletOperand
             );
@@ -1128,8 +1128,6 @@ procedimiento
                 break;
             }
 
-            System.out.println("La cantidad de tercetos dentro de la funcion es: " + data4.tripletQuantity);
-
             String funcLexeme = getSTEntry($2).getLexeme();
 
             String funcEntryKey = funcLexeme + ":" + getCurrentScopeStr();
@@ -1150,9 +1148,16 @@ procedimiento
 
             int bodyFirstTripletID = listOfTriplets.getSize() - data4.tripletQuantity;
 
-            listOfTriplets.addTag(bodyFirstTripletID, SymbolTable.encodeString("@@" + funcEntryKey));
+            String assemblyTag = SymbolTable.encodeString("@@" + funcEntryKey);
+
+            listOfTriplets.addTag(bodyFirstTripletID, assemblyTag);
+
 
             semanticHelper.declareFunction(getCurrentScopeStr(), $2.obj, argDataType);
+
+            // Agregar atributo del tag a la tabla de simbolos
+
+            symbolTable.getEntry(funcEntryKey).setAttrib(AttribKey.ASSEMBLY_TAG, assemblyTag);
 
             if (hasArgument)
             {
@@ -1160,6 +1165,11 @@ procedimiento
 
                 String scopeAdentro = getCurrentScopeStr() + ":" + getSTEntry($2).getLexeme();
                 semanticHelper.declareArg(scopeAdentro, argName, argDataType);
+
+                // Agregar la entryKey del argumento a un attrib de esta funcion
+
+                String argEntryKey = argName.getSTEntry().getLexeme() + ":" + scopeAdentro;
+                symbolTable.getEntry(funcEntryKey).setAttrib(AttribKey.ARG_ENTRY_KEY, argEntryKey);
             }
 
             YACCDataUnit data = new YACCDataUnit();

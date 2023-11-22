@@ -17,12 +17,33 @@ public class TripletTranslator {
     {
         TripletOperand o1 = triplet.getOperand1();
         TripletOperand o2 = triplet.getOperand2();
+        DataType operandsType = o1.getMemoryAssociation().getDataType();
 
         String s = "";
 
-        s += String.format("mov eax, %s\n", o1.getMemoryAssociation().getTag());
-        s += String.format("add eax, %s\n", o2.getMemoryAssociation().getTag());
-        s += String.format("mov %s, eax\n", triplet.getMemoryAssociation().getTag());
+        switch (operandsType)
+        {
+            case LONG:
+                s += String.format("mov eax, %s\n", o1.getMemoryAssociation().getTag());
+                s += String.format("add eax, %s\n", o2.getMemoryAssociation().getTag());
+                s += String.format("mov %s, eax\n", triplet.getMemoryAssociation().getTag());
+                break;
+            case UINT:
+                s += String.format("mov ax, %s\n", o1.getMemoryAssociation().getTag());
+                s += String.format("mov cx, %s\n", o2.getMemoryAssociation().getTag());
+                s += "add ax, cx\n";
+                s += String.format("mov %s, ax\n", triplet.getMemoryAssociation().getTag());
+                break;
+            case DOUBLE:
+                s += String.format("fld %s\n", o1.getMemoryAssociation().getTag());
+                s += String.format("fld %s\n", o2.getMemoryAssociation().getTag());
+                s += "fadd\n";
+                s += String.format("fstp %s\n", triplet.getMemoryAssociation().getTag());
+                break;
+            default:
+                s += "No deberia estar viendo esto\n";
+                break;
+        }
 
         return s;
     }
@@ -31,12 +52,33 @@ public class TripletTranslator {
     {
         TripletOperand o1 = triplet.getOperand1();
         TripletOperand o2 = triplet.getOperand2();
+        DataType operandsType = o1.getMemoryAssociation().getDataType();
 
         String s = "";
 
-        s += String.format("mov eax, %s\n", o1.getMemoryAssociation().getTag());
-        s += String.format("sub eax, %s\n", o2.getMemoryAssociation().getTag());
-        s += String.format("mov %s, eax\n", triplet.getMemoryAssociation().getTag());
+        switch (operandsType)
+        {
+            case LONG:
+                s += String.format("mov eax, %s\n", o1.getMemoryAssociation().getTag());
+                s += String.format("sub eax, %s\n", o2.getMemoryAssociation().getTag());
+                s += String.format("mov %s, eax\n", triplet.getMemoryAssociation().getTag());
+                break;
+            case UINT:
+                s += String.format("mov ax, %s\n", o1.getMemoryAssociation().getTag());
+                s += String.format("mov cx, %s\n", o2.getMemoryAssociation().getTag());
+                s += "sub ax, cx\n";
+                s += String.format("mov %s, ax\n", triplet.getMemoryAssociation().getTag());
+                break;
+            case DOUBLE:
+                s += String.format("fld %s\n", o1.getMemoryAssociation().getTag());
+                s += String.format("fld %s\n", o2.getMemoryAssociation().getTag());
+                s += "fsub\n";
+                s += String.format("fstp %s\n", triplet.getMemoryAssociation().getTag());
+                break;
+            default:
+                s += "No deberia estar viendo esto\n";
+                break;
+        }
 
         return s;
     }
@@ -117,11 +159,25 @@ public class TripletTranslator {
     {
         TripletOperand o1 = triplet.getOperand1();
         TripletOperand o2 = triplet.getOperand2();
+        DataType operandsType = o1.getMemoryAssociation().getDataType();
 
         String s = "";
 
-        s += String.format("mov eax, %s\n", o2.getMemoryAssociation().getTag());
-        s += String.format("mov %s, eax\n", o1.getMemoryAssociation().getTag());
+        switch(operandsType)
+        {
+            case LONG:
+                s += String.format("mov eax, %s\n", o2.getMemoryAssociation().getTag());
+                s += String.format("mov %s, eax\n", o1.getMemoryAssociation().getTag());
+                break;
+            case UINT:
+                s += String.format("mov ax, %s\n", o2.getMemoryAssociation().getTag());
+                s += String.format("mov %s, ax\n", o1.getMemoryAssociation().getTag());
+                break;
+            case DOUBLE:
+                s += String.format("fld %s\n", o2.getMemoryAssociation().getTag());
+                s += String.format("fst %s\n", o1.getMemoryAssociation().getTag());
+                break;
+        }
 
         return s;
     }
@@ -249,6 +305,55 @@ public class TripletTranslator {
         s += "push eax\n";
         s += "popfd\n";
         s += translateCJump(jumpTriplet, compTriplet);
+
+        return s;
+    }
+
+    public String translateCall(Triplet triplet)
+    {
+        TripletOperand o1 = triplet.getOperand1();
+        TripletOperand o2 = triplet.getOperand2();
+
+        String s = "";
+
+        SymbolTableEntry stEntry = o1.getstEntry();
+
+        Object _argEntryKey = stEntry.getAttrib(AttribKey.ARG_ENTRY_KEY);
+        String argEntryKey = ((_argEntryKey != null) ? (String)_argEntryKey : null);
+
+        System.out.println("argEntryKey:" + argEntryKey);
+
+        if (argEntryKey != null)
+        {
+            String argTag = o2.getMemoryAssociation().getTag();
+            DataType argDataType = o2.getMemoryAssociation().getDataType();
+
+            switch (argDataType)
+            {
+                case LONG:
+                    s += String.format("mov eax, %s\n", argTag);
+                    s += String.format("mov %s, eax\n", SymbolTable.encodeString(argEntryKey));
+                    break;
+                case UINT:
+                    s += String.format("mov ax, %s\n", argTag);
+                    s += String.format("mov %s, ax\n", SymbolTable.encodeString(argEntryKey));
+                    break;
+                case DOUBLE:
+                    s += String.format("fld %s\n", argTag);
+                    // s += "fstp qword [esp]\n";
+                    s += String.format("fstp %s\n", SymbolTable.encodeString(argEntryKey));
+                    break;
+                case STRING:
+                    s += String.format("mov eax, addr %s\n", argTag);
+                    s += String.format("mov %s, eax\n", SymbolTable.encodeString(argEntryKey));
+                    break;
+                default:
+                    s += "No deberia estar viendo esto\n";
+                    break;
+            }
+        }
+
+        s += "call " + stEntry.getAttrib(AttribKey.ASSEMBLY_TAG) + "\n";
 
         return s;
     }

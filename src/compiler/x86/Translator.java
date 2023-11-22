@@ -158,6 +158,9 @@ public class Translator {
                     Triplet prevTriplet2 = listOfTriplets.getTriplet(tripletID-1);
                     sb.append(tripletTranslator.translateNegCJump(triplet, prevTriplet2));
                     break;
+                case "CALL":
+                    sb.append(tripletTranslator.translateCall(triplet));
+                    break;
                 default:
                     sb.append("Operacion no implementada: ").append(triplet.getOperation()).append("\n");
                     break;
