@@ -44,7 +44,13 @@ public class Translator {
     private String getConstantDeclarationLine(String entryKey)
     {
         SymbolTableEntry entry = symbolTable.getEntry(entryKey);
+
+        if (entry == null) return "getConstantDeclarationLine() - entry == null para " + entryKey + "\n";
+
         MemoryAssociation memoryAssociation = (MemoryAssociation)entry.getAttrib(AttribKey.MEMORY_ASSOCIATION);
+
+        if (memoryAssociation == null) return "getConstantDeclarationLine() - memoryAssociation == null para " + entryKey + "\n";
+
         DataType dataType = (DataType)entry.getAttrib(AttribKey.DATA_TYPE);
 
         String tag = memoryAssociation.getTag();
@@ -76,6 +82,29 @@ public class Translator {
         }
     }
 
+    private String getVarDeclarationLine(String entryKey)
+    {
+        SymbolTableEntry entry = symbolTable.getEntry(entryKey);
+        MemoryAssociation memoryAssociation = (MemoryAssociation)entry.getAttrib(AttribKey.MEMORY_ASSOCIATION);
+        DataType dataType = (DataType)entry.getAttrib(AttribKey.DATA_TYPE);
+
+        String tag = memoryAssociation.getTag();
+
+        switch (dataType)
+        {
+            case LONG:
+            case STRING:
+            case OBJECT:
+                return String.format("%s dd ?\n", tag);
+            case UINT:
+                return String.format("%s dw ?\n", tag);
+            case DOUBLE:
+                return String.format("%s dq\n", tag);
+            default:
+                return "No deberia estar viendo esto\n";
+        }
+    }
+
     public String craftDataSection()
     {
         StringBuilder sb = new StringBuilder();
@@ -86,6 +115,11 @@ public class Translator {
 
         for (String constantKey : constantsKeys)
             sb.append(getConstantDeclarationLine(constantKey));
+
+        List<String> varsKeys = symbolTable.getVarList();
+
+        for (String varKey : varsKeys)
+            sb.append(getVarDeclarationLine(varKey));
 
         sb.append("\n");
 

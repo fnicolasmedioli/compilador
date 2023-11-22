@@ -321,8 +321,6 @@ public class TripletTranslator {
         Object _argEntryKey = stEntry.getAttrib(AttribKey.ARG_ENTRY_KEY);
         String argEntryKey = ((_argEntryKey != null) ? (String)_argEntryKey : null);
 
-        System.out.println("argEntryKey:" + argEntryKey);
-
         if (argEntryKey != null)
         {
             String argTag = o2.getMemoryAssociation().getTag();

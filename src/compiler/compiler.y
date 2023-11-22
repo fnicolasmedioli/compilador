@@ -1108,16 +1108,18 @@ procedimiento_args
 
             DataType argDataType = semanticHelper.tokenIDtoDataType.get(argDataTypeTokenData.getSTEntry().getTokenID());
             String argName = argNameTokenData.getSTEntry().getLexeme();
+            String entryKey = argName + ":" + getCurrentScopeStr() + ":" + getCurrentID();
 
             symbolTable.addNewEntry(
                 new SymbolTableEntry(
                     Parser.ID,
                     argName
                 ),
-                argName + ":" + getCurrentScopeStr() + ":" + getCurrentID()
+                entryKey
             )
             .setAttrib(AttribKey.ID_TYPE, IDType.VAR_ATTRIB)
-            .setAttrib(AttribKey.DATA_TYPE, argDataType);
+            .setAttrib(AttribKey.DATA_TYPE, argDataType)
+            .setAttrib(AttribKey.MEMORY_ASSOCIATION, new MemoryAssociation(entryKey));
 
             $$ = new ParserVal(data);
         }

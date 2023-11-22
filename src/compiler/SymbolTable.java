@@ -165,6 +165,22 @@ public class SymbolTable {
 		return toReturn;
 	}
 
+	public List<String> getVarList()
+	{
+		LinkedList<String> toReturn = new LinkedList<>();
+
+		for (String key : table.keySet())
+		{
+			SymbolTableEntry entry = table.get(key);
+			if (entry.isPredefined()) continue;
+			if (entry.getAttrib(AttribKey.ID_TYPE) != IDType.VAR_ATTRIB) continue;
+
+			toReturn.add(key);
+		}
+
+		return toReturn;
+	}
+
 	public static String encodeString(String str)
 	{
 		return str
