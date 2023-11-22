@@ -305,7 +305,7 @@ declaracion_variable
                     attribsSet.add(lexeme + ":" + getCurrentScopeStr());
             }
 
-            semanticHelper.declareRecursive(lexemeList, getCurrentScopeStr(), data1.tokensData.get(0).getSTEntry(), currentClassEntryKey, false);
+            semanticHelper.declareRecursive(lexemeList, getCurrentScopeStr(), data1.tokensData.get(0).getSTEntry(), currentClassEntryKey);
 
             YACCDataUnit data = new YACCDataUnit();
 

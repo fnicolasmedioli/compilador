@@ -13,7 +13,9 @@ public enum AttribKey {
     MEMORY_ASSOCIATION("Asociacion de memoria"),
     IS_CONSTANT("Es una constante"),
     ASSEMBLY_TAG("Tag en assembly"),
-    METHOD_OF("Clase asociada al metodo");
+    METHOD_OF("Clase asociada al metodo"),
+    ATTRIB_OF_CLASS("Atributo de clase"),
+    ORIGINAL_KEY("Key del atributo original");
 
     private final String str;
     AttribKey(String str)

@@ -109,7 +109,7 @@ public class SemanticHelper {
 		return classScope.substring(i+1) + ":" + classScope.substring(0, i);
 	}
 
-	public void declareRecursive(LinkedList<String> varLexemeList, String scope, SymbolTableEntry dataTypeEntry, String currentClassEntryKey, boolean isRecursion)
+	public void _declareRecursive(LinkedList<String> varLexemeList, String scope, SymbolTableEntry dataTypeEntry, String currentClassEntryKey, boolean isRecursion, String originalScope)
 	{
 		DataType dataType = tokenIDtoDataType.get(dataTypeEntry.getTokenID());
 
@@ -140,11 +140,14 @@ public class SemanticHelper {
 			varSize = ((MemoryAssociation)(classEntry.getAttrib(AttribKey.MEMORY_ASSOCIATION))).getSize();
 		}
 
+
 		// Para cada token en DATATYPE a; b; c
 
 		for (String varLexeme : varLexemeList)
 		{
 			String varEntryKey = varLexeme + ":" + scope;
+
+			String originalEntryKey = varLexeme + ":" + originalScope;
 
 			if (symbolTable.getEntry(varEntryKey) != null)
 			{
@@ -166,6 +169,15 @@ public class SemanticHelper {
 			.setAttrib(AttribKey.ID_TYPE, IDType.VAR_ATTRIB)
 			.setAttrib(AttribKey.DATA_TYPE, dataType)
 			.setAttrib(AttribKey.MEMORY_ASSOCIATION, new MemoryAssociation(varEntryKey));
+
+			if (currentClassEntryKey != null)
+				varEntry.setAttrib(AttribKey.ATTRIB_OF_CLASS, currentClassEntryKey);
+
+			if (isRecursion && currentClassEntryKey == null) {
+				// Todos los atributos (incluidos sub-atributos) de instancias entran en este if
+				// System.out.println("Entry key: " + varEntryKey + ", original: " + originalEntryKey);
+				varEntry.setAttrib(AttribKey.ORIGINAL_KEY, originalEntryKey);
+			}
 
 			// Si es un tipo de dato primitivo, setear el size inmediatamente
 
@@ -249,7 +261,17 @@ public class SemanticHelper {
 					lexeme.add(subVarName);
 					String subVarScope = invertScope(varEntryKey);
 
-					declareRecursive(lexeme, subVarScope, recDataTypeEntry, currentClassEntryKey, true);
+					if (originalScope != null) {
+						if (isRecursion) {
+							_declareRecursive(lexeme, subVarScope, recDataTypeEntry, currentClassEntryKey, true, invertScope(varLexeme + ":" + originalScope));
+						} else {
+							_declareRecursive(lexeme, subVarScope, recDataTypeEntry, currentClassEntryKey, true, originalScope);
+						}
+					}
+					else {
+						_declareRecursive(lexeme, subVarScope, recDataTypeEntry, currentClassEntryKey, true, null);
+					}
+
 				}
 			}
 		}
@@ -259,6 +281,20 @@ public class SemanticHelper {
 			MemoryAssociation currentClassMemoryAssociation = (MemoryAssociation)(symbolTable.getEntry(currentClassEntryKey).getAttrib(AttribKey.MEMORY_ASSOCIATION));
 			currentClassMemoryAssociation.addSize(varSize * varLexemeList.size());
 		}
+	}
+
+	public void declareRecursive(LinkedList<String> varLexemeList, String scope, SymbolTableEntry dataTypeEntry, String currentClassEntryKey)
+	{
+		String originalKeyScope = null;
+
+		if (dataTypeEntry.getTokenID() == Parser.ID && currentClassEntryKey == null)
+		{
+			originalKeyScope = getEntryKeyByScope(dataTypeEntry.getLexeme(), scope);
+			if (originalKeyScope != null)
+				originalKeyScope = invertScope(originalKeyScope);
+		}
+
+		_declareRecursive(varLexemeList, scope, dataTypeEntry, currentClassEntryKey, false, originalKeyScope);
 	}
 
 	public boolean declareClass(String scope, LocatedSymbolTableEntry classTokenData)
@@ -448,7 +484,7 @@ public class SemanticHelper {
 
 			LinkedList<String> t = new LinkedList<>();
 			t.add(attribName);
-			declareRecursive(t, scope + ":" + lexeme, recDataTypeEntry, currentClassEntryKey, true);
+			_declareRecursive(t, scope + ":" + lexeme, recDataTypeEntry, currentClassEntryKey, true, null);
 		}
 	}
 
