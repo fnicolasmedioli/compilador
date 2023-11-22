@@ -15,7 +15,7 @@ public class SemanticHelper {
 
 	private final Compiler compiler;
 	private final SymbolTable symbolTable;
-	private final static HashMap<Integer, DataType> tokenIDtoDataType;
+	public final static HashMap<Integer, DataType> tokenIDtoDataType;
 
 	static {
 		tokenIDtoDataType = new HashMap<>();
@@ -288,29 +288,6 @@ public class SemanticHelper {
 			.setAttrib(AttribKey.MEMORY_ASSOCIATION, new MemoryAssociation(0));
 
 		return true;
-	}
-
-	public void declareArg(String scope, Object _argNameTokenData, Object _dataTypeTokenData)
-	{
-		LocatedSymbolTableEntry argNameTokenData = (LocatedSymbolTableEntry)_argNameTokenData;
-		LocatedSymbolTableEntry dataTypeTokenData = (LocatedSymbolTableEntry)_dataTypeTokenData;
-
-		DataType dataType = tokenIDtoDataType.get(dataTypeTokenData.getSTEntry().getTokenID());
-		if (dataType == null)
-		{
-			System.out.println("Error critico!");
-			return;
-		}
-
-		symbolTable.addNewEntry(
-			new SymbolTableEntry(
-				Parser.ID,
-				argNameTokenData.getSTEntry().getLexeme()
-			),
-		argNameTokenData.getSTEntry().getLexeme() + ":" + scope
-		)
-		.setAttrib(AttribKey.ID_TYPE, IDType.ARGNAME)
-		.setAttrib(AttribKey.DATA_TYPE, dataType);
 	}
 
 	public SymbolTableEntry declareFunction(String scope, Object _idTokenData)

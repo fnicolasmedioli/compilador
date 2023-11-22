@@ -129,10 +129,7 @@ acceso_memoria
             YACCDataUnit data1 = (YACCDataUnit)$1.obj;
 
             if (!data1.isValid())
-            {
-                $$ = new ParserVal(new YACCInvalidDataUnit());
                 break;
-            }
 
             // Chequear que el ultimo elemento sea objeto
 
@@ -215,11 +212,11 @@ acceso_memoria
                     getTokenLocation($1)
                 );
 
-                $$ = new ParserVal(new YACCInvalidDataUnit());
+                YACCDataUnit data = new YACCInvalidDataUnit();
+                data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
+                $$ = new ParserVal(data);
                 break;
             }
-
-            // SymbolTableEntry referencedEntry = symbolTable.getEntry(referencedEntryKey);
 
             YACCDataUnit data = new YACCDataUnit();
             data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
@@ -379,8 +376,6 @@ argumentos_reales
 sentencia_ejecutable
     : acceso_memoria op_asignacion_aumentada expr ','
         {
-            // Chequar que data1 y data3 no tiren error
-
             YACCDataUnit data1 = (YACCDataUnit)$1.obj;
             YACCDataUnit data2 = (YACCDataUnit)$2.obj;
             YACCDataUnit data3 = (YACCDataUnit)$3.obj;
@@ -1071,21 +1066,7 @@ cerrar_scope
     ;
 
 
-procedimiento_args
-    : '(' tipo_basico ID ')'
-        {
-            YACCDataUnit data = new YACCDataUnit();
 
-            data.tokensData.add((LocatedSymbolTableEntry)$2.obj);
-            data.tokensData.add((LocatedSymbolTableEntry)$3.obj);
-
-            $$ = new ParserVal(data);
-        }
-    | '(' ')'
-        {
-            $$ = new ParserVal(new YACCDataUnit());
-        }
-    ;
 
 procedimiento_cuerpo
     : abrir_scope cerrar_scope
@@ -1098,7 +1079,6 @@ procedimiento_cuerpo
         }
     ;
 
-
 void_con_reserva
     : VOID
         {
@@ -1110,6 +1090,40 @@ void_con_reserva
             data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
 
             $$ = new ParserVal(data);
+        }
+    ;
+
+procedimiento_args
+    : '(' tipo_basico ID ')'
+        {
+            YACCDataUnit data = new YACCDataUnit();
+
+            data.tokensData.add((LocatedSymbolTableEntry)$2.obj);
+            data.tokensData.add((LocatedSymbolTableEntry)$3.obj);
+
+            // Agregar argumento a la tabla de simbolos
+
+            LocatedSymbolTableEntry argDataTypeTokenData = (LocatedSymbolTableEntry)$2.obj;
+            LocatedSymbolTableEntry argNameTokenData = (LocatedSymbolTableEntry)$3.obj;
+
+            DataType argDataType = semanticHelper.tokenIDtoDataType.get(argDataTypeTokenData.getSTEntry().getTokenID());
+            String argName = argNameTokenData.getSTEntry().getLexeme();
+
+            symbolTable.addNewEntry(
+                new SymbolTableEntry(
+                    Parser.ID,
+                    argName
+                ),
+                argName + ":" + getCurrentScopeStr() + ":" + getCurrentID()
+            )
+            .setAttrib(AttribKey.ID_TYPE, IDType.VAR_ATTRIB)
+            .setAttrib(AttribKey.DATA_TYPE, argDataType);
+
+            $$ = new ParserVal(data);
+        }
+    | '(' ')'
+        {
+            $$ = new ParserVal(new YACCDataUnit());
         }
     ;
 
@@ -1152,7 +1166,6 @@ procedimiento
 
             listOfTriplets.addTag(bodyFirstTripletID, assemblyTag);
 
-
             semanticHelper.declareFunction(getCurrentScopeStr(), $2.obj, argDataType);
 
             // Agregar atributo del tag a la tabla de simbolos
@@ -1161,14 +1174,9 @@ procedimiento
 
             if (hasArgument)
             {
-                // Declarar la variable del argumento en el scope del procedimiento
-
-                String scopeAdentro = getCurrentScopeStr() + ":" + getSTEntry($2).getLexeme();
-                semanticHelper.declareArg(scopeAdentro, argName, argDataType);
-
                 // Agregar la entryKey del argumento a un attrib de esta funcion
 
-                String argEntryKey = argName.getSTEntry().getLexeme() + ":" + scopeAdentro;
+                String argEntryKey = argName.getSTEntry().getLexeme() + ":" + semanticHelper.invertScope(funcEntryKey);
                 symbolTable.getEntry(funcEntryKey).setAttrib(AttribKey.ARG_ENTRY_KEY, argEntryKey);
             }
 
@@ -1179,14 +1187,13 @@ procedimiento
 
             Triplet lastTriplet = listOfTriplets.getLastTriplet();
 
-            if (lastTriplet.getOperation().equals("RETURN") == false)
+            if (lastTriplet.getOperation() == null || lastTriplet.getOperation().equals("RETURN") == false)
             {
                 // Entonces agregar un RETURN implicitamente
 
                 Triplet returnTriplet = new Triplet("RETURN", null, null);
                 listOfTriplets.addTriplet(returnTriplet);
                 data.tripletQuantity++;
-                System.out.println("Se agrego un terceto return implicitamente");
             }
 
             // Backpatch del salto
