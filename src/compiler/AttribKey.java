@@ -8,6 +8,7 @@ public enum AttribKey {
     ARG_TYPE("Tipo de argumento"),
     ARG_ENTRY_KEY("Entry Key del argumento"),
     ATTRIBS_SET("Conjunto de atributos"),
+    ATTRIBS_OFFSETS("Offsets de atributos"),
     METHODS_SET("Conjunto de metodos"),
     FIRST_TRIPLET("Primer terceto de la instruccion"),
     MEMORY_ASSOCIATION("Asociacion de memoria"),

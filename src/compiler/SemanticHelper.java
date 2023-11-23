@@ -488,4 +488,38 @@ public class SemanticHelper {
 		}
 	}
 
+	public int calcClassSize(String classEntryKey)
+	{
+		SymbolTableEntry classEntry = symbolTable.getEntry(classEntryKey);
+
+		if (classEntry.getAttrib(AttribKey.ID_TYPE) != IDType.CLASSNAME)
+		{
+			System.out.println("Error, no es una clase: " + classEntryKey);
+			return 0;
+		}
+
+		int totalSize = 0;
+
+		HashSet<String> attribsSet = (HashSet<String>)(classEntry.getAttrib(AttribKey.ATTRIBS_SET));
+
+		for (String attribEntryKey : attribsSet)
+		{
+			SymbolTableEntry attribEntry = symbolTable.getEntry(attribEntryKey);
+
+			int attribSize = 0;
+
+			if (attribEntry.getAttrib(AttribKey.DATA_TYPE) != DataType.OBJECT)
+				attribSize = ((DataType)attribEntry.getAttrib(AttribKey.DATA_TYPE)).getSize();
+			else
+			{
+				String attribClassEntryKey = (String)attribEntry.getAttrib(AttribKey.INSTANCE_OF);
+				attribSize = calcClassSize(attribClassEntryKey);
+			}
+
+			totalSize += attribSize;
+		}
+
+		return totalSize;
+	}
+
 }
