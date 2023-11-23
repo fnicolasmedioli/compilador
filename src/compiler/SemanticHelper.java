@@ -171,18 +171,70 @@ public class SemanticHelper {
 			.setAttrib(AttribKey.MEMORY_ASSOCIATION, new MemoryAssociation(varEntryKey));
 
 			if (currentClassEntryKey != null)
+			{
+				SymbolTableEntry currentClassEntry = symbolTable.getEntry(currentClassEntryKey);
+
 				varEntry.setAttrib(AttribKey.ATTRIB_OF_CLASS, currentClassEntryKey);
 
+				HashMap<String, Integer> offsetsMap = (HashMap<String, Integer>)(currentClassEntry.getAttrib(AttribKey.ATTRIBS_OFFSETS));
+
+				int offset = ((MemoryAssociation)symbolTable.getEntry(currentClassEntryKey).getAttrib(AttribKey.MEMORY_ASSOCIATION)).getSize();
+
+				offsetsMap.put(varEntryKey, offset);
+
+				if (dataType != DataType.OBJECT)
+				{
+					MemoryAssociation currentClassMemoryAssociation = (MemoryAssociation)(symbolTable.getEntry(currentClassEntryKey).getAttrib(AttribKey.MEMORY_ASSOCIATION));
+					currentClassMemoryAssociation.addSize(varSize * varLexemeList.size());
+				}
+			}
+
+			int offset = -1;
+
 			if (isRecursion && currentClassEntryKey == null) {
+
 				// Todos los atributos (incluidos sub-atributos) de instancias entran en este if
 				// System.out.println("Entry key: " + varEntryKey + ", original: " + originalEntryKey);
 				varEntry.setAttrib(AttribKey.ORIGINAL_KEY, originalEntryKey);
+
+				SymbolTableEntry originalEntry = symbolTable.getEntry(originalEntryKey);
+				if (originalEntry == null)
+				{
+					System.out.println("No se encontro la original:" + originalEntryKey);
+					return;
+				}
+				String higherClassEntryKey = ((originalEntry.getAttrib(AttribKey.ATTRIB_OF_CLASS) != null) ? (String)originalEntry.getAttrib(AttribKey.ATTRIB_OF_CLASS) : null);
+
+				if (higherClassEntryKey == null)
+				{
+					System.out.println("higherClassEntryKey == null para " + originalEntryKey);
+					return;
+				}
+
+				// Agarrar su offset de ahi
+
+				SymbolTableEntry higherClassEntry = symbolTable.getEntry(higherClassEntryKey);
+
+				if (higherClassEntry == null)
+				{
+					System.out.println("higherClassEntry es null para " + higherClassEntryKey);
+					return;
+				}
+
+				HashMap<String, Integer> offsetsMap = (HashMap<String, Integer>)(higherClassEntry.getAttrib(AttribKey.ATTRIBS_OFFSETS));
+
+				offset = offsetsMap.get(originalEntryKey);
 			}
 
 			// Si es un tipo de dato primitivo, setear el size inmediatamente
 
 			if (dataType.hasSize())
-				varEntry.setAttrib(AttribKey.MEMORY_ASSOCIATION, new MemoryAssociation(varEntryKey, varSize, dataType));
+			{
+				if (offset == -1)
+					varEntry.setAttrib(AttribKey.MEMORY_ASSOCIATION, new MemoryAssociation(varEntryKey, varSize, dataType));
+				else
+					varEntry.setAttrib(AttribKey.MEMORY_ASSOCIATION, new MemoryAssociation(offset, varSize, dataType));
+			}
 
 			// Y si es tipo objeto hacerlo recursivamente
 
@@ -190,7 +242,10 @@ public class SemanticHelper {
 			{
 				// Setear el tamaño del objeto como el tamaño de todos los atributos de la clase
 
-				varEntry.setAttrib(AttribKey.MEMORY_ASSOCIATION, new MemoryAssociation(varEntryKey, varSize, dataType));
+				if (offset == -1)
+					varEntry.setAttrib(AttribKey.MEMORY_ASSOCIATION, new MemoryAssociation(varEntryKey, varSize, dataType));
+				else
+					varEntry.setAttrib(AttribKey.MEMORY_ASSOCIATION, new MemoryAssociation(offset, varSize, dataType));
 
 				varEntry.setAttrib(AttribKey.INSTANCE_OF, classEntryKey);
 
@@ -275,12 +330,6 @@ public class SemanticHelper {
 				}
 			}
 		}
-
-		if (currentClassEntryKey != null && !isRecursion) {
-			// Sumar el tamaño de la variable * cantidad al tamaño total de la clase
-			MemoryAssociation currentClassMemoryAssociation = (MemoryAssociation)(symbolTable.getEntry(currentClassEntryKey).getAttrib(AttribKey.MEMORY_ASSOCIATION));
-			currentClassMemoryAssociation.addSize(varSize * varLexemeList.size());
-		}
 	}
 
 	public void declareRecursive(LinkedList<String> varLexemeList, String scope, SymbolTableEntry dataTypeEntry, String currentClassEntryKey)
@@ -321,7 +370,8 @@ public class SemanticHelper {
 			.setAttrib(AttribKey.ID_TYPE, IDType.CLASSNAME)
 			.setAttrib(AttribKey.ATTRIBS_SET, new HashSet<String>())
 			.setAttrib(AttribKey.METHODS_SET, new HashSet<String>())
-			.setAttrib(AttribKey.MEMORY_ASSOCIATION, new MemoryAssociation(0));
+			.setAttrib(AttribKey.MEMORY_ASSOCIATION, new MemoryAssociation(0))
+			.setAttrib(AttribKey.ATTRIBS_OFFSETS, new HashMap<String, Integer>());
 
 		return true;
 	}

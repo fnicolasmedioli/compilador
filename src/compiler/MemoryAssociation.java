@@ -58,9 +58,17 @@ public class MemoryAssociation {
         return this.size != -1;
     }
 
+    public boolean usesOffset()
+    {
+        return this.offset != -1;
+    }
+
     @Override
     public String toString()
     {
+        if (offset != -1)
+            return "Offset: '"+ offset + "'";
+
         if (tag == null)
             return "Size -> '" + size + "'";
 
