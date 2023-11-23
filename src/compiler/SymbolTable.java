@@ -127,9 +127,11 @@ public class SymbolTable {
 
 	public String createAuxVar(DataType dataType)
 	{
-		String name = "@aux" + auxVarCounter++;
+		String name = encodeString("@aux" + auxVarCounter++);
 		addNewEntry(new SymbolTableEntry(), name)
-			.setAttrib(AttribKey.DATA_TYPE, dataType);
+			.setAttrib(AttribKey.DATA_TYPE, dataType)
+			.setAttrib(AttribKey.IS_AUX_VAR, true)
+			.setAttrib(AttribKey.MEMORY_ASSOCIATION, new MemoryAssociation(name, dataType.getSize(), dataType));
 		return name;
 	}
 
@@ -172,6 +174,13 @@ public class SymbolTable {
 		for (String key : table.keySet())
 		{
 			SymbolTableEntry entry = table.get(key);
+
+			if (entry.getAttrib(AttribKey.IS_AUX_VAR) != null)
+			{
+				toReturn.add(key);
+				continue;
+			}
+
 			if (entry.isPredefined()) continue;
 			if (entry.getAttrib(AttribKey.ID_TYPE) != IDType.VAR_ATTRIB) continue;
 			if (entry.getAttrib(AttribKey.ATTRIB_OF_CLASS) != null) continue;

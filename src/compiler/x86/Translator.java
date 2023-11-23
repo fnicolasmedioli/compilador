@@ -87,6 +87,11 @@ public class Translator {
     private String getVarDeclarationLine(String entryKey)
     {
         SymbolTableEntry entry = symbolTable.getEntry(entryKey);
+
+        System.out.println(entry);
+        System.out.println(entryKey);
+
+
         MemoryAssociation memoryAssociation = (MemoryAssociation)entry.getAttrib(AttribKey.MEMORY_ASSOCIATION);
         DataType dataType = (DataType)entry.getAttrib(AttribKey.DATA_TYPE);
 
