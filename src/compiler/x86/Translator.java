@@ -113,6 +113,8 @@ public class Translator {
 
         sb.append(".data\n");
 
+        sb.append("___temp_double___ dq ?\n");
+
         List<String> constantsKeys = symbolTable.getConstantList();
 
         for (String constantKey : constantsKeys)
