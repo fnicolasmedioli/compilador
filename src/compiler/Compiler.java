@@ -2,12 +2,8 @@ package compiler;
 
 import compiler.x86.Translator;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.PriorityQueue;
+import java.io.*;
 
 public class Compiler {
 
@@ -16,7 +12,7 @@ public class Compiler {
 	private final PriorityQueue<SyntacticStructureResult> syntacticStructuresFound;
 	private final CompilerMessagePrinter messagePrinter;
 	private int errorCount;
-	private final Translate translate;
+	//private final Translate translate;
 	private final SemanticHelper semanticHelper;
 
 	public Compiler(String sourceFileName) throws FileNotFoundException
@@ -30,7 +26,7 @@ public class Compiler {
 		);
 		this.messagePrinter = new CompilerMessagePrinter(this);
 		this.errorCount = 0;
-		this.translate = new Translate(this);
+		//this.translate = new Translate(this);
 	}
 
 	public void compile()
@@ -52,10 +48,10 @@ public class Compiler {
 			messagePrinter.printGreen("Parsing correcto");
 		else
 			messagePrinter.error("Hubo errores en el parsing");
-		System.out.println();
-		messagePrinter.printTokenList();
-		CompilerMessagePrinter.printFoundSyntacticalStrucutres(syntacticStructuresFound);
-		CompilerMessagePrinter.printSymbolTable(getSymbolTable());
+		//System.out.println();
+		//messagePrinter.printTokenList();
+		//CompilerMessagePrinter.printFoundSyntacticalStrucutres(syntacticStructuresFound);
+		//CompilerMessagePrinter.printSymbolTable(getSymbolTable());
 
 		if (errorCount > 0)
 		{
@@ -65,16 +61,93 @@ public class Compiler {
 
 		ListOfTriplets listOfTriplets = parser.getListOfTriplets();
 		System.out.println("\nLista de tercetos:");
-		System.out.println(listOfTriplets);
+		//System.out.println(listOfTriplets);
 
 		Translator translator = new Translator(this, listOfTriplets);
 
 		String assemblyCode = translator.getAssemblyCode();
-		System.out.println(assemblyCode);
-		createAssembly(translator.getAssemblyCode());
+		//System.out.println(assemblyCode);
+		
+		String assemblyArch = createAssembly(assemblyCode);
+		
+		compileCode(assemblyArch);
+
+		deleteAssemblyCode(assemblyArch);
+
+
 	}
 
-	public void createAssembly(String assemblyCode){
+	public void deleteAssemblyCode(String archAssembler){
+		String[] archivosAEliminar = {archAssembler + ".asm", archAssembler + ".obj", archAssembler+".exe"}; // Agrega aquí todos los archivos que deseas eliminar
+
+        for (String archivo : archivosAEliminar) {
+            File file = new File(archivo);
+
+            // Verificar si el archivo existe antes de intentar eliminarlo
+            if (file.exists()) {
+                if (file.delete()) {
+                    System.out.println("Archivo " + archivo + " eliminado con éxito.");
+                } else {
+                    System.out.println("No se pudo eliminar el archivo " + archivo);
+                }
+            } else {
+                System.out.println("El archivo " + archivo + " no existe.");
+            }
+        }
+	}
+
+	public void compileCode(String archivoASM){
+			try {
+            // Ruta al directorio donde se encuentran los archivos de masm32
+            String masm32Path = "C:\\masm32\\bin\\"; // Cambia esto a tu ruta real
+
+            // Archivo .asm que quieres ensamblar
+            //String archivoASM = "hello.asm";
+
+            // Comando para ensamblar el archivo .asm
+            String comandoEnsamblar = masm32Path + "ml /c /Zd /coff " + archivoASM;
+
+            // Crear el proceso para ejecutar el comando de ensamblaje
+            ProcessBuilder builder = new ProcessBuilder("cmd.exe", "/c", comandoEnsamblar);
+            builder.redirectErrorStream(true);
+
+            // Ejecutar el proceso
+            Process procesoEnsamblaje = builder.start();
+
+            // Esperar a que termine el proceso de ensamblaje
+            procesoEnsamblaje.waitFor();
+
+            // Comando para crear el objeto
+            String comandoCrearObjeto = masm32Path + "Link /SUBSYSTEM:CONSOLE hello.obj";
+
+            // Crear el proceso para crear el objeto
+            builder = new ProcessBuilder("cmd.exe", "/c", comandoCrearObjeto);
+            builder.redirectErrorStream(true);
+
+            // Ejecutar el proceso
+            Process procesoCrearObjeto = builder.start();
+
+            // Esperar a que termine el proceso de creación del objeto
+            procesoCrearObjeto.waitFor();
+
+            // Comando para ejecutar el programa ensamblado
+            String comandoEjecutar = "cmd.exe /c hello";
+
+            // Ejecutar el programa ensamblado
+            Process procesoEjecutar = Runtime.getRuntime().exec(comandoEjecutar);
+
+            // Leer la salida del programa
+            BufferedReader reader = new BufferedReader(new InputStreamReader(procesoEjecutar.getInputStream()));
+            String linea;
+            while ((linea = reader.readLine()) != null) {
+                System.out.println(linea);
+            }
+
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+	}
+	public String createAssembly(String assemblyCode){
 
 		String pathAssembly = "assembly.asm";
 
@@ -98,6 +171,9 @@ public class Compiler {
             System.out.println("Ocurrió un error al crear o escribir en el archivo.");
             e.printStackTrace();
         }
+
+		return pathAssembly;
+
 	}
 	public int yylex()
 	{
