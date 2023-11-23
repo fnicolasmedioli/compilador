@@ -62,7 +62,7 @@ public class TripletTranslator {
                     s += String.format("mov %s, dword ptr [edx + %d]\n", register, offset);
                     break;
                 case STRING:
-                    s += String.format("mov %s, addr [edx + %d]\n", register, offset);
+                    s += String.format("mov %s, dword ptr [edx + %d]\n", register, offset);
                     break;
                 case UINT:
                     s += String.format("mov %s, word ptr [edx + %d]\n", register, offset);
@@ -343,9 +343,9 @@ public class TripletTranslator {
 
         String s = "";
 
-        s += String.format("mov eax, addr %s\n", o1.getMemoryAssociation().getTag());
+        s += loadFromMemory(o1.getMemoryAssociation(), "eax");
         s += "push eax\n";
-        s += "call imprimir_mensaje\n";
+        s += "call @@imprimir_mensaje\n";
 
         return s;
     }

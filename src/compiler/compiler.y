@@ -589,11 +589,21 @@ sentencia_ejecutable
         }
     | PRINT imprimible ','
         {
+            YACCDataUnit data2 = (YACCDataUnit)$2.obj;
+
             compiler.addFoundSyntacticStructure(
                 new SyntacticStructureResult("Sentencia PRINT", getTokenLocation($1))
             );
 
-            Triplet triplet = new Triplet("PRINT", new TripletOperand(getSTEntry($2), listOfTriplets), null);
+            if (!data2.isValid())
+            {
+                $$ = new ParserVal(new YACCInvalidDataUnit());
+                break;
+            }
+
+            SymbolTableEntry entry = symbolTable.getEntry(data2.referencedEntryKey);
+
+            Triplet triplet = new Triplet("PRINT", new TripletOperand(entry, listOfTriplets), null);
             int tripletID = listOfTriplets.addTriplet(triplet);
 
             YACCDataUnit data = new YACCDataUnit();
@@ -623,8 +633,49 @@ sentencia_ejecutable
 
 imprimible
     : CTE_STRING
-    | CTE_UINT
-    | CTE_LONG
+        {
+            YACCDataUnit data = new YACCDataUnit();
+            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
+            data.tripletOperand = new TripletOperand(getSTEntry($1), listOfTriplets);
+            data.referencedEntryKey = getSTEntry($1).getLexeme();
+
+            $$ = new ParserVal(data);
+        }
+    | acceso_memoria
+        {
+            YACCDataUnit data = (YACCDataUnit)$1.obj;
+
+            if (!data.isValid())
+            {
+                $$ = new ParserVal(new YACCInvalidDataUnit());
+                break;
+            }
+
+            SymbolTableEntry referencedEntry = symbolTable.getEntry(data.referencedEntryKey);
+
+            if (referencedEntry.getAttrib(AttribKey.ID_TYPE) != IDType.VAR_ATTRIB)
+            {
+                compiler.reportSemanticError(String.format("El ID '%s' no es una variable", referencedEntry.getLexeme()), data.tokensData.get(0).getLocation());
+
+                $$ = new ParserVal(new YACCInvalidDataUnit());
+                break;
+            }
+
+            if (referencedEntry.getAttrib(AttribKey.DATA_TYPE) != DataType.STRING)
+            {
+                compiler.reportSemanticError(String.format("El ID '%s' no es de tipo STRING", referencedEntry.getLexeme()), data.tokensData.get(0).getLocation());
+
+                $$ = new ParserVal(new YACCInvalidDataUnit());
+                break;
+            }
+
+            YACCDataUnit newData = new YACCDataUnit();
+            newData.tokensData.add(data.tokensData.get(0));
+            newData.tripletOperand = new TripletOperand(referencedEntry, listOfTriplets);
+            newData.referencedEntryKey = data.referencedEntryKey;
+
+            $$ = new ParserVal(newData);
+        }
     ;
 
 lista_sentencias
