@@ -15,11 +15,23 @@ public class TripletTranslator {
 
     private String loadFromMemory(MemoryAssociation memoryAssociation, String register)
     {
+        if (memoryAssociation == null)
+        {
+            System.out.println("loadFromMemory() - memoryAssociation == null");
+            return "";
+        }
+
         String s = "";
 
         String tag = memoryAssociation.getTag();
         int offset = memoryAssociation.getOffset();
         DataType dataType = memoryAssociation.getDataType();
+
+        if (dataType == null)
+        {
+            System.out.println("La memoryAssociation no tiene dataType: " + memoryAssociation);
+            return "";
+        }
 
         if (!memoryAssociation.usesOffset())
         {
@@ -300,14 +312,15 @@ public class TripletTranslator {
         TripletOperand o2 = triplet.getOperand2();
         MemoryAssociation o1MemoryAssociation = o1.getMemoryAssociation();
         MemoryAssociation o2MemoryAssociation = o2.getMemoryAssociation();
+
         DataType operandsType = o1.getMemoryAssociation().getDataType();
-        MemoryAssociation resultMemoryAssociation = triplet.getMemoryAssociation();
 
         String s = "";
 
         switch(operandsType)
         {
             case LONG:
+            case STRING:
                 s += loadFromMemory(o2MemoryAssociation, "eax");
                 s += saveToMemory(o1MemoryAssociation, "eax");
                 break;
