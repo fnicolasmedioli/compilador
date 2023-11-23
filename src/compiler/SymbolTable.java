@@ -186,7 +186,7 @@ public class SymbolTable {
 
 	public static String encodeString(String str)
 	{
-		return str
+		return "_" + str
 			.replace(":", "_")
 			.replace(".", "_")
 			.replace("%", "_");
