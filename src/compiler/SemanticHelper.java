@@ -405,9 +405,12 @@ public class SemanticHelper {
 	{
 		if (argToken == null)
 			return declareFunction(scope, _idTokenData);
-
-		DataType argDataType = tokenIDtoDataType.get( ((LocatedSymbolTableEntry)argToken).getSTEntry().getTokenID() );
-		return declareFunction(scope, _idTokenData).setAttrib(AttribKey.ARG_TYPE, argDataType);
+		else
+		{
+			DataType argDataType = tokenIDtoDataType.get( ((LocatedSymbolTableEntry)argToken).getSTEntry().getTokenID() );
+			return declareFunction(scope, _idTokenData)
+					.setAttrib(AttribKey.ARG_TYPE, argDataType);
+		}
 	}
 
 	public LinkedList<String> scopeStrToList(String scopeStr)

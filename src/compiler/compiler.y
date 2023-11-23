@@ -1152,7 +1152,7 @@ procedimiento_args
             )
             .setAttrib(AttribKey.ID_TYPE, IDType.VAR_ATTRIB)
             .setAttrib(AttribKey.DATA_TYPE, argDataType)
-            .setAttrib(AttribKey.MEMORY_ASSOCIATION, new MemoryAssociation(entryKey));
+            .setAttrib(AttribKey.MEMORY_ASSOCIATION, new MemoryAssociation(entryKey, argDataType.getSize(), argDataType));
 
             $$ = new ParserVal(data);
         }
