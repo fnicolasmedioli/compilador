@@ -170,6 +170,8 @@ public class SemanticHelper {
 			.setAttrib(AttribKey.DATA_TYPE, dataType)
 			.setAttrib(AttribKey.MEMORY_ASSOCIATION, new MemoryAssociation(varEntryKey));
 
+			boolean memorySettled = false;
+
 			if (currentClassEntryKey != null)
 			{
 				SymbolTableEntry currentClassEntry = symbolTable.getEntry(currentClassEntryKey);
@@ -181,6 +183,12 @@ public class SemanticHelper {
 				int offset = ((MemoryAssociation)symbolTable.getEntry(currentClassEntryKey).getAttrib(AttribKey.MEMORY_ASSOCIATION)).getSize();
 
 				offsetsMap.put(varEntryKey, offset);
+
+				varEntry.setAttrib(AttribKey.MEMORY_ASSOCIATION, new MemoryAssociation(offset, varSize, dataType));
+
+				memorySettled = true;
+
+				System.out.println("Se setea para " + varEntryKey + " el offset " + offset);
 
 				if (dataType != DataType.OBJECT)
 				{
@@ -228,7 +236,7 @@ public class SemanticHelper {
 
 			// Si es un tipo de dato primitivo, setear el size inmediatamente
 
-			if (dataType.hasSize())
+			if (dataType.hasSize() && !memorySettled)
 			{
 				if (offset == -1)
 					varEntry.setAttrib(AttribKey.MEMORY_ASSOCIATION, new MemoryAssociation(varEntryKey, varSize, dataType));
@@ -242,10 +250,13 @@ public class SemanticHelper {
 			{
 				// Setear el tamaño del objeto como el tamaño de todos los atributos de la clase
 
-				if (offset == -1)
-					varEntry.setAttrib(AttribKey.MEMORY_ASSOCIATION, new MemoryAssociation(varEntryKey, varSize, dataType));
-				else
-					varEntry.setAttrib(AttribKey.MEMORY_ASSOCIATION, new MemoryAssociation(offset, varSize, dataType));
+				if (!memorySettled)
+				{
+					if (offset == -1)
+						varEntry.setAttrib(AttribKey.MEMORY_ASSOCIATION, new MemoryAssociation(varEntryKey, varSize, dataType));
+					else
+						varEntry.setAttrib(AttribKey.MEMORY_ASSOCIATION, new MemoryAssociation(offset, varSize, dataType));
+				}
 
 				varEntry.setAttrib(AttribKey.INSTANCE_OF, classEntryKey);
 
