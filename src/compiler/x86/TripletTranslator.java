@@ -502,4 +502,14 @@ public class TripletTranslator {
         return s;
     }
 
+
+    public String translateThis(Triplet triplet)
+    {
+        TripletOperand o1 = triplet.getOperand1();
+
+        MemoryAssociation memoryAssociation = (MemoryAssociation)o1.getstEntry().getAttrib(AttribKey.MEMORY_ASSOCIATION);
+
+        return String.format("mov edx, addr %s\n", memoryAssociation.getTag());
+    }
+
 }

@@ -199,6 +199,9 @@ public class Translator {
                 case "CALL":
                     sb.append(tripletTranslator.translateCall(triplet));
                     break;
+                case "THIS":
+                    sb.append(tripletTranslator.translateThis(triplet));
+                    break;
                 default:
                     sb.append("Operacion no implementada: ").append(triplet.getOperation()).append("\n");
                     break;

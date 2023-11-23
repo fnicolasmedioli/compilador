@@ -425,7 +425,7 @@ sentencia_ejecutable
                 if (leftDataType != listOfTriplets.getTriplet(rightTripletOperand.getIndex()).getType())
                     areSameDataType = false;
 
-            
+
             if (!areSameDataType)
             {
                 compiler.reportSemanticError("Los tipos de datos no son compatibles para la asignacion", data2.tokensData.get(0).getLocation());
@@ -522,6 +522,38 @@ sentencia_ejecutable
                 }
             }
 
+            // Test
+
+            boolean addThisPush = data1.tokensData.size() > 1;
+
+            if (addThisPush)
+            {
+                // Agregar terceto de push
+
+                String thisEntryKey = semanticHelper.getEntryKeyByScope(data1.tokensData.get(0).getSTEntry().getLexeme(), getCurrentScopeStr());
+
+                if (thisEntryKey == null)
+                {
+                    System.out.println("ASSERT ACA: " + thisEntryKey);
+                    compiler.reportSemanticError("No se encuentra el ID: " + data1.tokensData.get(0).getSTEntry().getLexeme(), data1.tokensData.get(0).getLocation());
+                    $$ = new ParserVal(new YACCInvalidDataUnit());
+                    break;
+                }
+
+                SymbolTableEntry thisEntry = symbolTable.getEntry(thisEntryKey);
+
+                System.out.println("Imprimiendo thisEntry: ");
+                System.out.println(thisEntry);
+
+                Triplet pushTriplet = new Triplet(
+                    "THIS",
+                    new TripletOperand(thisEntry, listOfTriplets),
+                    null
+                );
+
+                listOfTriplets.addTriplet(pushTriplet);
+            }
+
             // Agregar terceto de invocacion
 
             Triplet invokeTriplet = new Triplet(
@@ -534,6 +566,7 @@ sentencia_ejecutable
 
             YACCDataUnit data = new YACCDataUnit();
             data.tripletQuantity = 1;
+            if (addThisPush) data.tripletQuantity++;
             data.firstTriplet = tripletID;
 
             $$ = new ParserVal(data);
@@ -1211,7 +1244,7 @@ procedimiento
                 "JMP",
                 new TripletOperand(jumpToTriplet, listOfTriplets),
                 null
-            ));       
+            ));
 
             listOfTriplets.addTag(jumpToTriplet, SymbolTable.encodeString("@@" + funcEntryKey + "_end"));
 

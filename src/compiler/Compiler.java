@@ -35,7 +35,16 @@ public class Compiler {
 
 	public void compile()
 	{
-		boolean yaccSuccess = parser.yyparse() == 0;
+		boolean yaccSuccess = false;
+
+		try
+		{
+			yaccSuccess = parser.yyparse() == 0;
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
 
 		System.out.println();
 
@@ -48,7 +57,11 @@ public class Compiler {
 		CompilerMessagePrinter.printFoundSyntacticalStrucutres(syntacticStructuresFound);
 		CompilerMessagePrinter.printSymbolTable(getSymbolTable());
 
-		if (errorCount > 0) return;
+		if (errorCount > 0)
+		{
+			messagePrinter.error("Corrija los errores para continuar con la compilacion");
+			return;
+		}
 
 		ListOfTriplets listOfTriplets = parser.getListOfTriplets();
 		System.out.println("\nLista de tercetos:");
