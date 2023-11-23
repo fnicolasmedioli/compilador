@@ -174,6 +174,9 @@ public class SymbolTable {
 			SymbolTableEntry entry = table.get(key);
 			if (entry.isPredefined()) continue;
 			if (entry.getAttrib(AttribKey.ID_TYPE) != IDType.VAR_ATTRIB) continue;
+			if (entry.getAttrib(AttribKey.ATTRIB_OF_CLASS) != null) continue;
+			if (entry.getAttrib(AttribKey.ORIGINAL_KEY) != null) continue;
+			if (entry.getAttrib(AttribKey.MEMORY_ASSOCIATION) == null) continue;
 
 			toReturn.add(key);
 		}

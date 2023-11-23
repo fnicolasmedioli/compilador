@@ -94,12 +94,14 @@ public class Translator {
         {
             case LONG:
             case STRING:
-            case OBJECT:
                 return String.format("%s dd ?\n", tag);
             case UINT:
                 return String.format("%s dw ?\n", tag);
             case DOUBLE:
                 return String.format("%s dq\n", tag);
+            case OBJECT:
+                int size = memoryAssociation.getSize();
+                return String.format("%s db %d dup(?)\n", tag, size);
             default:
                 return "No deberia estar viendo esto\n";
         }
