@@ -38,3 +38,10 @@ Source.txt
 source.txt
 case.txt
 assembly.asm
+assembly.exe
+assembly.obj
+build/*
+program.obj
+program.asm
+program.exe
+program

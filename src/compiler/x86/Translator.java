@@ -121,6 +121,7 @@ public class Translator {
         sb.append(".data\n");
 
         sb.append("___temp_double___ dq ?\n");
+        sb.append("__overflow_msg__ db 'Overflow detectado. Finaliza la ejecucion', 0\n");
 
         List<String> constantsKeys = symbolTable.getConstantList();
 
@@ -145,10 +146,17 @@ public class Translator {
 
         sb.append("jmp @@imprimir_mensaje_end\n");
         sb.append("@@imprimir_mensaje:\n");
-        sb.append("pop eax\n");
-        sb.append("invoke MessageBox, NULL, eax, eax, MB_OK\n");
+        // sb.append("invoke MessageBox, NULL, eax, eax, MB_OK\n");
+        sb.append("invoke StdOut, eax\n");
         sb.append("ret\n");
         sb.append("@@imprimir_mensaje_end:\n\n");
+
+        sb.append("jmp @@overflow_end\n");
+        sb.append("@@overflow:\n");
+        sb.append("mov eax, offset __overflow_msg__\n");
+        sb.append("call @@imprimir_mensaje\n");
+        sb.append("jmp @@fin\n");
+        sb.append("@@overflow_end:\n\n");
 
         int tripletID = 0;
 
@@ -217,7 +225,7 @@ public class Translator {
         }
 
         sb.append("\n");
-        sb.append("fin:\n");
+        sb.append("@@fin:\n");
         sb.append("invoke ExitProcess, 0\n");
         sb.append("end start");
 

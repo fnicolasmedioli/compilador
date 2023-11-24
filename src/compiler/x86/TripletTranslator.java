@@ -26,6 +26,7 @@ public class TripletTranslator {
         String tag = memoryAssociation.getTag();
         int offset = memoryAssociation.getOffset();
         DataType dataType = memoryAssociation.getDataType();
+        boolean isConstant = memoryAssociation.isConstant();
 
         if (dataType == null)
         {
@@ -38,16 +39,22 @@ public class TripletTranslator {
             switch (dataType)
             {
                 case LONG:
-                    s += String.format("mov %s, %s\n", register, tag);
+                    s += String.format("mov %s, dword ptr [%s]\n", register, tag);
                     break;
                 case STRING:
-                    s += String.format("mov %s, addr %s\n", register, tag);
+                    if (isConstant)
+                        s += String.format("mov %s, offset %s\n", register, tag);
+                    else
+                        s += String.format("mov %s, dword ptr [%s]\n", register, tag);
+                    break;
+                case OBJECT:
+                    s += String.format("mov %s, offset %s\n", register, tag);
                     break;
                 case UINT:
-                    s += String.format("mov %s, %s\n", register, tag);
+                    s += String.format("mov %s, word ptr [%s]\n", register, tag);
                     break;
                 case DOUBLE:
-                    s += String.format("fld %s\n", tag);
+                    s += String.format("fld qword ptr [%s]\n", tag);
                     break;
                 default:
                     s += "No deberia estar viendo esto\n";
@@ -62,7 +69,14 @@ public class TripletTranslator {
                     s += String.format("mov %s, dword ptr [edx + %d]\n", register, offset);
                     break;
                 case STRING:
-                    s += String.format("mov %s, dword ptr [edx + %d]\n", register, offset);
+                    s += "mov ecx, edx\n";
+                    s += String.format("add ecx, %d\n", offset);
+                    s += String.format("mov %s, dword ptr [ecx]\n", register);
+                    break;
+                case OBJECT:
+                    s += "mov ecx, edx\n";
+                    s += String.format("add ecx, %d\n", offset);
+                    s += String.format("mov %s, ecx\n", register);
                     break;
                 case UINT:
                     s += String.format("mov %s, word ptr [edx + %d]\n", register, offset);
@@ -91,13 +105,13 @@ public class TripletTranslator {
             switch (dataType)
             {
                 case LONG:
-                    s += String.format("mov %s, %s\n", tag, register);
+                    s += String.format("mov dword ptr [%s], %s\n", tag, register);
                     break;
                 case STRING:
-                    s += String.format("mov %s, %s\n", tag, register);
+                    s += String.format("mov dword ptr [%s], %s\n", tag, register);
                     break;
                 case UINT:
-                    s += String.format("mov %s, %s\n", tag, register);
+                    s += String.format("mov word ptr [%s], %s\n", tag, register);
                     break;
                 case DOUBLE:
                     s += String.format("fstp %s\n", tag);
@@ -245,7 +259,7 @@ public class TripletTranslator {
                 s += loadFromMemory(o2MemoryAssociation, "ebx");
                 s += String.format("mul ebx\n");
                 s += "test edx, edx\n";
-                s += "jnz .overflow\n";
+                s += "jnz @@overflow\n";
                 s += saveToMemory(resultMemoryAssociation, "eax");
                 break;
             case UINT:
@@ -254,7 +268,7 @@ public class TripletTranslator {
                 s += String.format("mul bx\n");
                 // Resultado queda en ax:dx
                 s += "test dx, dx\n";
-                s += "jnz .overflow\n";
+                s += "jnz @@overflow\n";
                 s += saveToMemory(resultMemoryAssociation, "ax");
                 break;
             case DOUBLE:
@@ -344,7 +358,6 @@ public class TripletTranslator {
         String s = "";
 
         s += loadFromMemory(o1.getMemoryAssociation(), "eax");
-        s += "push eax\n";
         s += "call @@imprimir_mensaje\n";
 
         return s;
@@ -488,19 +501,20 @@ public class TripletTranslator {
             {
                 case LONG:
                     s += loadFromMemory(o2MemoryAssociation, "eax");
-                    s += String.format("mov %s, eax\n", SymbolTable.encodeString(argEntryKey));
+                    s += String.format("mov dword ptr [%s], eax\n", SymbolTable.encodeString(argEntryKey));
                     break;
                 case UINT:
                     s += loadFromMemory(o2MemoryAssociation, "ax");
-                    s += String.format("mov %s, ax\n", SymbolTable.encodeString(argEntryKey));
+                    s += String.format("mov word ptr [%s], ax\n", SymbolTable.encodeString(argEntryKey));
                     break;
                 case DOUBLE:
                     s += loadDoubleFromMemory(o2MemoryAssociation, false);
-                    s += String.format("fstp %s\n", SymbolTable.encodeString(argEntryKey));
+                    s += String.format("fstp qword ptr [%s]\n", SymbolTable.encodeString(argEntryKey));
                     break;
                 case STRING:
+                case OBJECT:
                     s += loadFromMemory(o2MemoryAssociation, "eax");
-                    s += String.format("mov %s, eax\n", SymbolTable.encodeString(argEntryKey));
+                    s += String.format("mov dword ptr [%s], eax\n", SymbolTable.encodeString(argEntryKey));
                     break;
                 default:
                     s += "No deberia estar viendo esto\n";
@@ -522,7 +536,8 @@ public class TripletTranslator {
 
         MemoryAssociation memoryAssociation = (MemoryAssociation)o1.getstEntry().getAttrib(AttribKey.MEMORY_ASSOCIATION);
 
-        return String.format("mov edx, addr %s\n", memoryAssociation.getTag());
+        // return String.format("mov edx, offset %s\n", memoryAssociation.getTag());
+        return loadFromMemory(memoryAssociation, "edx");
     }
 
 }

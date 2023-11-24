@@ -6,6 +6,7 @@ public class MemoryAssociation {
     private int offset = -1;
     private int size = -1;
     private DataType dataType = null;
+    private boolean isConstant = false;
 
     public MemoryAssociation(String tag, int size, DataType dataType)
     {
@@ -67,7 +68,7 @@ public class MemoryAssociation {
     public String toString()
     {
         if (offset != -1)
-            return "Offset: '"+ offset + "'";
+            return "Offset: '"+ offset + "' | DataType -> '" + dataType + "'";
 
         if (tag == null)
             return "Size -> '" + size + "'";
@@ -89,5 +90,15 @@ public class MemoryAssociation {
     public int getOffset()
     {
         return offset;
+    }
+
+    public void setConstant(boolean isConstant)
+    {
+        this.isConstant = isConstant;
+    }
+
+    public boolean isConstant()
+    {
+        return isConstant;
     }
 }

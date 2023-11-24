@@ -15,6 +15,8 @@ public class Compiler {
 	//private final Translate translate;
 	private final SemanticHelper semanticHelper;
 
+	private final String masm32Path = "C:\\masm32\\bin\\";
+
 	public Compiler(String sourceFileName) throws FileNotFoundException
 	{
 		this.lexicalAnalyzer = new LexicalAnalyzer(sourceFileName, this);
@@ -67,114 +69,73 @@ public class Compiler {
 
 		String assemblyCode = translator.getAssemblyCode();
 		//System.out.println(assemblyCode);
-		
-		String assemblyArch = createAssembly(assemblyCode);
-		
-		compileCode(assemblyArch);
 
-		deleteAssemblyCode(assemblyArch);
+		String fileWithoutExtension = "build\\program";
+		String asmFileName = fileWithoutExtension + ".asm";
 
+		boolean saveFileSuccess = saveToFile(assemblyCode, asmFileName);
 
+		if (!saveFileSuccess)
+		{
+			messagePrinter.error("No se pudo guardar el archivo .asm");
+			return;
+		}
+
+		System.out.println("Salida assembly:");
+
+		assembleAndRun(fileWithoutExtension);
 	}
 
-	public void deleteAssemblyCode(String archAssembler){
-		String[] archivosAEliminar = {archAssembler + ".asm", archAssembler + ".obj", archAssembler+".exe"}; // Agrega aquí todos los archivos que deseas eliminar
+	private void assembleAndRun(String fileWithoutExtension) {
 
-        for (String archivo : archivosAEliminar) {
-            File file = new File(archivo);
+		// Comando para ensamblar el archivo .asm
+		String assembleCommand = masm32Path + "ml /c /Zd /coff " + fileWithoutExtension + ".asm";
+		String linkCommand = masm32Path + "Link /SUBSYSTEM:CONSOLE " + fileWithoutExtension + ".obj";
+		String runCommand = "cmd.exe /c " + fileWithoutExtension + ".exe";
 
-            // Verificar si el archivo existe antes de intentar eliminarlo
-            if (file.exists()) {
-                if (file.delete()) {
-                    System.out.println("Archivo " + archivo + " eliminado con éxito.");
-                } else {
-                    System.out.println("No se pudo eliminar el archivo " + archivo);
-                }
-            } else {
-                System.out.println("El archivo " + archivo + " no existe.");
-            }
-        }
-	}
+		try {
+            ProcessBuilder processBuilder = new ProcessBuilder("cmd.exe", "/c", assembleCommand);
+            processBuilder.redirectErrorStream(true);
 
-	public void compileCode(String archivoASM){
-			try {
-            // Ruta al directorio donde se encuentran los archivos de masm32
-            String masm32Path = "C:\\masm32\\bin\\"; // Cambia esto a tu ruta real
+            Process assembleProcess = processBuilder.start();
+			assembleProcess.waitFor(); // blocking
 
-            // Archivo .asm que quieres ensamblar
-            //String archivoASM = "hello.asm";
+            processBuilder = new ProcessBuilder("cmd.exe", "/c", linkCommand);
+			processBuilder.redirectErrorStream(true);
 
-            // Comando para ensamblar el archivo .asm
-            String comandoEnsamblar = masm32Path + "ml /c /Zd /coff " + archivoASM;
+            Process linkProcess = processBuilder.start();
+			linkProcess.waitFor();
 
-            // Crear el proceso para ejecutar el comando de ensamblaje
-            ProcessBuilder builder = new ProcessBuilder("cmd.exe", "/c", comandoEnsamblar);
-            builder.redirectErrorStream(true);
+            Process runProcess = Runtime.getRuntime().exec(runCommand);
 
-            // Ejecutar el proceso
-            Process procesoEnsamblaje = builder.start();
-
-            // Esperar a que termine el proceso de ensamblaje
-            procesoEnsamblaje.waitFor();
-
-            // Comando para crear el objeto
-            String comandoCrearObjeto = masm32Path + "Link /SUBSYSTEM:CONSOLE hello.obj";
-
-            // Crear el proceso para crear el objeto
-            builder = new ProcessBuilder("cmd.exe", "/c", comandoCrearObjeto);
-            builder.redirectErrorStream(true);
-
-            // Ejecutar el proceso
-            Process procesoCrearObjeto = builder.start();
-
-            // Esperar a que termine el proceso de creación del objeto
-            procesoCrearObjeto.waitFor();
-
-            // Comando para ejecutar el programa ensamblado
-            String comandoEjecutar = "cmd.exe /c hello";
-
-            // Ejecutar el programa ensamblado
-            Process procesoEjecutar = Runtime.getRuntime().exec(comandoEjecutar);
-
-            // Leer la salida del programa
-            BufferedReader reader = new BufferedReader(new InputStreamReader(procesoEjecutar.getInputStream()));
-            String linea;
-            while ((linea = reader.readLine()) != null) {
-                System.out.println(linea);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(runProcess.getInputStream()));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                System.out.println(line);
             }
 
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
 	}
-	public String createAssembly(String assemblyCode){
 
-		String pathAssembly = "assembly.asm";
-
-        try {
-            File assembly = new File(pathAssembly);
-
-			// Escribir contenido en el archivo
-			FileWriter writer = new FileWriter(assembly, false);
+	public boolean saveToFile(String text, String fileName) {
+		try
+		{
+			File file = new File(fileName);
+			FileWriter writer = new FileWriter(file, false);
 			BufferedWriter bufferEscritor = new BufferedWriter(writer);
-
-			// Contenido a escribir en el archivo
-			String code = assemblyCode;
-
-			// Escribir en el archivo
-			bufferEscritor.write(code);
-
-			// Cerrar el BufferedWriter
+			bufferEscritor.write(text);
 			bufferEscritor.close();
-			System.out.println("\n\nContenido agregado al archivo.");
-        } catch (IOException e) {
-            System.out.println("Ocurrió un error al crear o escribir en el archivo.");
-            e.printStackTrace();
-        }
-
-		return pathAssembly;
-
+			return true;
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+			return false;
+		}
 	}
+
 	public int yylex()
 	{
 		return lexicalAnalyzer.getToken();

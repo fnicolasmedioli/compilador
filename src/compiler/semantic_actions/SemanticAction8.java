@@ -26,6 +26,9 @@ public class SemanticAction8 implements SemanticAction {
 		else
 		{
 			// Add it to symbol table
+
+			MemoryAssociation mem = new MemoryAssociation(lexeme, lexeme.length() + 1, DataType.STRING);
+			mem.setConstant(true);
 			
 			compiler.setyylval(
 				new LocatedSymbolTableEntry(
@@ -33,7 +36,7 @@ public class SemanticAction8 implements SemanticAction {
 						Parser.CTE_STRING,
 						lexeme
 					)
-					.setAttrib(AttribKey.MEMORY_ASSOCIATION, new MemoryAssociation(lexeme, lexeme.length() + 1, DataType.STRING))
+					.setAttrib(AttribKey.MEMORY_ASSOCIATION, mem)
 					.setAttrib(AttribKey.DATA_TYPE, DataType.STRING))
 					.setAttrib(AttribKey.IS_CONSTANT, true),
 					new TokenLocation(lexicalAnalyzerState.getCurrentLine())
