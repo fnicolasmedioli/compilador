@@ -1,13 +1,17 @@
 package compiler;
 
 public class Triplet {
-    private final String operation;
+    private String operation;
     private final TripletOperand o1;
     private final TripletOperand o2;
     private DataType type;
     private static int cantTriplet = 0;
     private String varTriplet;
     private MemoryAssociation memoryAssociation = null;
+
+    public void setOperation(String operation) {
+        this.operation = operation;
+    }
 
     public Triplet(String operation, TripletOperand o1, TripletOperand o2) {
         this.operation = operation;

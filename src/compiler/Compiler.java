@@ -64,7 +64,7 @@ public class Compiler {
 
 		ListOfTriplets listOfTriplets = parser.getListOfTriplets();
 		System.out.println("\nLista de tercetos:");
-		//System.out.println(listOfTriplets);
+		System.out.println(listOfTriplets);
 
 		Translator translator = new Translator(this, listOfTriplets);
 

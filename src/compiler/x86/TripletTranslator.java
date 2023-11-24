@@ -484,16 +484,33 @@ public class TripletTranslator {
         return s;
     }
 
+    private String negateJumpOP(String jumpOP)
+    {
+        switch (jumpOP)
+        {
+            case ">=":
+                return "<";
+            case "<=":
+                return ">";
+            case ">":
+                return "<=";
+            case "<":
+                return ">=";
+            case "==":
+                return "!!";
+            case "!!":
+                return "==";
+            default:
+                return "No deberia estar viendo esto\n";
+        }
+    }
+
     public String translateNegCJump(Triplet jumpTriplet, Triplet compTriplet)
     {
-        String s = "";
+        String op = negateJumpOP(compTriplet.getOperation());
+        compTriplet.setOperation(op);
 
-        s += "pushfd\n";
-        s += "pop eax\n";
-        s += "not eax\n";
-        s += "push eax\n";
-        s += "popfd\n";
-        s += translateCJump(jumpTriplet, compTriplet);
+        String s = translateCJump(jumpTriplet, compTriplet);
 
         return s;
     }
