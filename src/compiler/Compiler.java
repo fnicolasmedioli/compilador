@@ -50,10 +50,11 @@ public class Compiler {
 			messagePrinter.printGreen("Parsing correcto");
 		else
 			messagePrinter.error("Hubo errores en el parsing");
-		//System.out.println();
-		//messagePrinter.printTokenList();
-		//CompilerMessagePrinter.printFoundSyntacticalStrucutres(syntacticStructuresFound);
-		//CompilerMessagePrinter.printSymbolTable(getSymbolTable());
+
+		System.out.println();
+		messagePrinter.printTokenList();
+		CompilerMessagePrinter.printFoundSyntacticalStrucutres(syntacticStructuresFound);
+		CompilerMessagePrinter.printSymbolTable(getSymbolTable());
 
 		if (errorCount > 0)
 		{
@@ -80,12 +81,16 @@ public class Compiler {
 			messagePrinter.error("No se pudo guardar el archivo .asm");
 			return;
 		}
+		else
+			messagePrinter.printGreen("Archivo .asm generado exitosamente");
 
+		/*
 		System.out.println("Salida assembly:");
-
 		assembleAndRun(fileWithoutExtension);
+		*/
 	}
 
+	/*
 	private void assembleAndRun(String fileWithoutExtension) {
 
 		// Comando para ensamblar el archivo .asm
@@ -118,6 +123,7 @@ public class Compiler {
             e.printStackTrace();
         }
 	}
+	 */
 
 	public boolean saveToFile(String text, String fileName) {
 		try

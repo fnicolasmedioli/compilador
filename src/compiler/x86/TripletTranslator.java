@@ -389,9 +389,30 @@ public class TripletTranslator {
 
         String s = "";
 
-        s += loadFromMemory(o1MemoryAssociation, "eax");
-        s += loadFromMemory(o2MemoryAssociation, "ebx");
-        s += "cmp eax, ebx\n";
+        switch (operandsType)
+        {
+            case LONG:
+            case STRING:
+            case OBJECT:
+                s += loadFromMemory(o1MemoryAssociation, "eax");
+                s += loadFromMemory(o2MemoryAssociation, "ebx");
+                s += "cmp eax, ebx\n";
+                break;
+            case UINT:
+                s += loadFromMemory(o1MemoryAssociation, "ax");
+                s += loadFromMemory(o2MemoryAssociation, "bx");
+                s += "cmp ax, bx\n";
+                break;
+            case DOUBLE:
+                s += loadDoubleFromMemory(o1MemoryAssociation, false);
+                s += loadDoubleFromMemory(o2MemoryAssociation, false);
+                s += "fcomip\n";
+                s += "fstp st(0)\n";
+                break;
+            default:
+                s += "No deberia estar viendo esto\n";
+                break;
+        }
 
         return s;
     }
@@ -423,10 +444,10 @@ public class TripletTranslator {
                     s += String.format("jl %s\n", jumpTag);
                     break;
                 case "==":
-                    s += String.format("je %s\n", jumpTag);
+                    s += String.format("jne %s\n", jumpTag);
                     break;
                 case "!!":
-                    s += String.format("jne %s\n", jumpTag);
+                    s += String.format("je %s\n", jumpTag);
                     break;
             }
         }
