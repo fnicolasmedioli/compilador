@@ -69,15 +69,21 @@ public class Translator {
                 simpleNumber = entry.getLexeme().substring(0, entry.getLexeme().length() - 3);
                 return String.format("%s dw %s\n", tag, simpleNumber);
             case DOUBLE:
-                double numeric = Double.parseDouble(entry.getLexeme().replace('D', 'e').replace('d', 'e'));
+
+                /*
+                double numeric = Double.parseDouble();
                 ByteBuffer buffer = ByteBuffer.allocate(Double.BYTES);
                 buffer.putDouble(numeric);
                 byte[] bytes = buffer.array();
+                 */
+
+                String n = entry.getLexeme().replace('D', 'e').replace('d', 'e');
+                if (n.charAt(n.length()-1) == '.') n += "0";
 
                 return String.format(
-                    "%s db %d %d %d %d %d %d %d %d\n",
+                    "%s dq %s\n",
                     tag,
-                    bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], bytes[5], bytes[6], bytes[7]
+                    n
                 );
             default:
                 return "No deberia estar viendo esto\n";
@@ -101,7 +107,7 @@ public class Translator {
             case UINT:
                 return String.format("%s dw ?\n", tag);
             case DOUBLE:
-                return String.format("%s dq\n", tag);
+                return String.format("%s dq ?\n", tag);
             case OBJECT:
                 int size = memoryAssociation.getSize();
                 return String.format("%s db %d dup(?)\n", tag, size);

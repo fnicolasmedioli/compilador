@@ -114,7 +114,7 @@ public class TripletTranslator {
                     s += String.format("mov word ptr [%s], %s\n", tag, register);
                     break;
                 case DOUBLE:
-                    s += String.format("fstp %s\n", tag);
+                    s += String.format("fstp qword ptr [%s]\n", tag);
                     break;
                 default:
                     s += "No deberia estar viendo esto\n";
@@ -180,13 +180,13 @@ public class TripletTranslator {
             case LONG:
                 s += loadFromMemory(o1MemoryAssociation, "eax");
                 s += loadFromMemory(o2MemoryAssociation, "ebx");
-                s += String.format("add eax, ebx\n");
+                s += "add eax, ebx\n";
                 s += saveToMemory(resultMemoryAssociation, "eax");
                 break;
             case UINT:
                 s += loadFromMemory(o1MemoryAssociation, "ax");
                 s += loadFromMemory(o2MemoryAssociation, "bx");
-                s += String.format("add ax, bx\n");
+                s += "add ax, bx\n";
                 s += saveToMemory(resultMemoryAssociation, "ax");
                 break;
             case DOUBLE:
@@ -406,8 +406,11 @@ public class TripletTranslator {
             case DOUBLE:
                 s += loadDoubleFromMemory(o1MemoryAssociation, false);
                 s += loadDoubleFromMemory(o2MemoryAssociation, false);
-                s += "fcomip\n";
-                s += "fstp st(0)\n";
+
+                s += "fcom\n";
+                s += "fstsw ax\n";
+                s += "sahf\n";
+
                 break;
             default:
                 s += "No deberia estar viendo esto\n";
@@ -426,7 +429,7 @@ public class TripletTranslator {
 
         String s = "";
 
-        if (type == DataType.LONG)
+        if (type == DataType.LONG || type == DataType.DOUBLE)
         {
             // Comparaciones con signo
             switch (comp)
@@ -478,8 +481,8 @@ public class TripletTranslator {
             }
         }
 
-        if (type == DataType.DOUBLE)
-            s += "Salto condicional de double no implementado\n";
+        //if (type == DataType.DOUBLE)
+        //    s += "Salto condicional de double no implementado\n";
 
         return s;
     }
