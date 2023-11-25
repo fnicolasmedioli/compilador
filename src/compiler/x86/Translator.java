@@ -64,7 +64,7 @@ public class Translator {
                 simpleNumber = entry.getLexeme().substring(0, entry.getLexeme().length() - 2);
                 return String.format("%s dd %s\n", tag, simpleNumber);
             case STRING:
-            return String.format("%s db '%s', 0\n", tag, entry.getLexeme().substring(1, entry.getLexeme().length() - 1));
+            return String.format("%s db '%s', 10, 0\n", tag, entry.getLexeme().substring(1, entry.getLexeme().length() - 1));
             case UINT:
                 simpleNumber = entry.getLexeme().substring(0, entry.getLexeme().length() - 3);
                 return String.format("%s dw %s\n", tag, simpleNumber);
@@ -117,7 +117,7 @@ public class Translator {
         sb.append(".data\n");
 
         sb.append("___temp_double___ dq ?\n");
-        sb.append("__overflow_msg__ db 'Overflow detectado. Finaliza la ejecucion', 0\n");
+        sb.append("__overflow_msg__ db 'Overflow detectado. Finaliza la ejecucion', 10, 0\n");
 
         List<String> constantsKeys = symbolTable.getConstantList();
 

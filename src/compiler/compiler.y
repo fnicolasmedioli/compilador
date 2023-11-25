@@ -787,7 +787,7 @@ sentencia_if
             listOfTriplets.replaceTriplet(
                 jzToBackpatch,
                 new Triplet(
-                    "CJUMP",
+                    "NEG_CJUMP",
                     new TripletOperand(end_if, listOfTriplets),
                     null
                 )
@@ -817,7 +817,7 @@ sentencia_if
             listOfTriplets.replaceTriplet(
                 jzToBackpatch,
                 new Triplet(
-                    "CJUMP",
+                    "NEG_CJUMP",
                     new TripletOperand(end_if, listOfTriplets),
                     null
                 )
