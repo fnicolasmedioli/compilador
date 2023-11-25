@@ -42,6 +42,7 @@ public class Compiler {
 		catch(Exception e)
 		{
 			e.printStackTrace();
+			return;
 		}
 
 		System.out.println();

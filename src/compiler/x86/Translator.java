@@ -142,7 +142,9 @@ public class Translator {
 
         sb.append("jmp @@imprimir_mensaje_end\n");
         sb.append("@@imprimir_mensaje:\n");
+        sb.append("pushad\n");
         sb.append("invoke StdOut, eax\n");
+        sb.append("popad\n");
         sb.append("ret\n");
         sb.append("@@imprimir_mensaje_end:\n\n");
 

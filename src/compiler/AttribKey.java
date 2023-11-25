@@ -17,7 +17,8 @@ public enum AttribKey {
     METHOD_OF("Clase asociada al metodo"),
     ATTRIB_OF_CLASS("Atributo de clase"),
     ORIGINAL_KEY("Key del atributo original"),
-    IS_AUX_VAR("Es variable auxiliar");
+    IS_AUX_VAR("Es variable auxiliar"),
+    IS_ATTRIB("Es atributo");
 
     private final String str;
     AttribKey(String str)

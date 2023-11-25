@@ -174,6 +174,8 @@ public class SemanticHelper {
 
 			if (currentClassEntryKey != null)
 			{
+				varEntry.setAttrib(AttribKey.IS_ATTRIB, true);
+
 				SymbolTableEntry currentClassEntry = symbolTable.getEntry(currentClassEntryKey);
 
 				varEntry.setAttrib(AttribKey.ATTRIB_OF_CLASS, currentClassEntryKey);

@@ -193,6 +193,22 @@ acceso_memoria
                 String propertyEntryKey = getSTEntry($3).getLexeme() + ":" + semanticHelper.invertScope(data1.referencedEntryKey);
                 data1.referencedEntryKey = propertyEntryKey;
             }
+
+            boolean addThisPush = (data1.tokensData.size() == 1) && currentClassEntryKey == null;
+
+            if (addThisPush)
+            {
+                // Agregar terceto de push
+
+                Triplet pushTriplet = new Triplet(
+                    "THIS",
+                    new TripletOperand(lastTokenEntry, listOfTriplets),
+                    null
+                );
+
+                listOfTriplets.addTriplet(pushTriplet);
+            }
+
             data1.tokensData.add((LocatedSymbolTableEntry)$3.obj);
             $$ = new ParserVal(data1);
         }
@@ -522,35 +538,6 @@ sentencia_ejecutable
                 }
             }
 
-            // Test
-
-            boolean addThisPush = data1.tokensData.size() > 1;
-
-            if (addThisPush)
-            {
-                // Agregar terceto de push
-
-                String thisEntryKey = semanticHelper.getEntryKeyByScope(data1.tokensData.get(0).getSTEntry().getLexeme(), getCurrentScopeStr());
-
-                if (thisEntryKey == null)
-                {
-                    System.out.println("ASSERT ACA: " + thisEntryKey);
-                    compiler.reportSemanticError("No se encuentra el ID: " + data1.tokensData.get(0).getSTEntry().getLexeme(), data1.tokensData.get(0).getLocation());
-                    $$ = new ParserVal(new YACCInvalidDataUnit());
-                    break;
-                }
-
-                SymbolTableEntry thisEntry = symbolTable.getEntry(thisEntryKey);
-
-                Triplet pushTriplet = new Triplet(
-                    "THIS",
-                    new TripletOperand(thisEntry, listOfTriplets),
-                    null
-                );
-
-                listOfTriplets.addTriplet(pushTriplet);
-            }
-
             // Agregar terceto de invocacion
 
             Triplet invokeTriplet = new Triplet(
@@ -563,7 +550,9 @@ sentencia_ejecutable
 
             YACCDataUnit data = new YACCDataUnit();
             data.tripletQuantity = 1;
-            if (addThisPush) data.tripletQuantity++;
+            
+            if (data1.tokensData.size() > 1) data.tripletQuantity++;
+
             data.firstTriplet = tripletID;
 
             $$ = new ParserVal(data);
