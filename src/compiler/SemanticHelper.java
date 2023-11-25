@@ -188,8 +188,6 @@ public class SemanticHelper {
 
 				memorySettled = true;
 
-				System.out.println("Se setea para " + varEntryKey + " el offset " + offset);
-
 				if (dataType != DataType.OBJECT)
 				{
 					MemoryAssociation currentClassMemoryAssociation = (MemoryAssociation)(symbolTable.getEntry(currentClassEntryKey).getAttrib(AttribKey.MEMORY_ASSOCIATION));

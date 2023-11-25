@@ -7,7 +7,6 @@ if %ERRORLEVEL% neq 0 (
     echo:
     echo No se pudo ensamblar
     echo:
-    pause
     exit /b %ERRORLEVEL%
 )
 
@@ -17,13 +16,9 @@ if %ERRORLEVEL% neq 0 (
     echo:
     echo: No se pudo linkear
     echo:
-    pause
     exit /b %ERRORLEVEL%
 )
 
 echo Salida del programa:
 echo:
 program.exe
-
-echo:
-pause

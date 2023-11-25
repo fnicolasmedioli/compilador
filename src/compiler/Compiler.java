@@ -69,7 +69,6 @@ public class Compiler {
 		Translator translator = new Translator(this, listOfTriplets);
 
 		String assemblyCode = translator.getAssemblyCode();
-		//System.out.println(assemblyCode);
 
 		String fileWithoutExtension = "build\\program";
 		String asmFileName = fileWithoutExtension + ".asm";
@@ -81,13 +80,43 @@ public class Compiler {
 			messagePrinter.error("No se pudo guardar el archivo .asm");
 			return;
 		}
-		else
-			messagePrinter.printGreen("Archivo .asm generado exitosamente");
 
-		/*
-		System.out.println("Salida assembly:");
-		assembleAndRun(fileWithoutExtension);
-		*/
+		String s = runASM();
+
+		System.out.println(s);
+	}
+
+	private String runASM()
+	{
+		String runCommand = String.format("\"cd %s/scripts && run_masm.bat\"", System.getProperty("user.dir"));
+
+		StringBuilder output = new StringBuilder();
+
+		try
+		{
+			Process runProcess = null;
+
+			ProcessBuilder processBuilder = new ProcessBuilder("cmd.exe", "/c", runCommand);
+
+			processBuilder.redirectErrorStream(true);
+			runProcess = processBuilder.start();
+
+			BufferedReader reader = new BufferedReader(new InputStreamReader(runProcess.getInputStream()));
+
+			String line;
+			while ((line = reader.readLine()) != null) {
+				output.append(line).append("\n");
+			}
+
+			int exitCode = runProcess.waitFor();
+		}
+		catch (IOException | InterruptedException e)
+		{
+			e.printStackTrace();
+			return null;
+		}
+
+		return output.toString();
 	}
 
 	/*
@@ -126,6 +155,18 @@ public class Compiler {
 	 */
 
 	public boolean saveToFile(String text, String fileName) {
+
+		File folder = new File("build");
+
+		if (!folder.exists()) {
+			boolean success = folder.mkdirs();
+			if (!success)
+			{
+				messagePrinter.error("No se pudo crear la carpeta build");
+				return false;
+			}
+		}
+
 		try
 		{
 			File file = new File(fileName);
@@ -137,7 +178,6 @@ public class Compiler {
 		}
 		catch (IOException e)
 		{
-			e.printStackTrace();
 			return false;
 		}
 	}

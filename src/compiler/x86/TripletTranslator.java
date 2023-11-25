@@ -524,8 +524,6 @@ public class TripletTranslator {
 
         SymbolTableEntry stEntry = o1.getstEntry();
 
-        System.out.println(stEntry);
-
         Object _argEntryKey = stEntry.getAttrib(AttribKey.ARG_ENTRY_KEY);
         String argEntryKey = ((_argEntryKey != null) ? (String)_argEntryKey : null);
 

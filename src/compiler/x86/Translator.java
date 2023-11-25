@@ -88,10 +88,6 @@ public class Translator {
     {
         SymbolTableEntry entry = symbolTable.getEntry(entryKey);
 
-        System.out.println(entry);
-        System.out.println(entryKey);
-
-
         MemoryAssociation memoryAssociation = (MemoryAssociation)entry.getAttrib(AttribKey.MEMORY_ASSOCIATION);
         DataType dataType = (DataType)entry.getAttrib(AttribKey.DATA_TYPE);
 
@@ -146,7 +142,6 @@ public class Translator {
 
         sb.append("jmp @@imprimir_mensaje_end\n");
         sb.append("@@imprimir_mensaje:\n");
-        // sb.append("invoke MessageBox, NULL, eax, eax, MB_OK\n");
         sb.append("invoke StdOut, eax\n");
         sb.append("ret\n");
         sb.append("@@imprimir_mensaje_end:\n\n");

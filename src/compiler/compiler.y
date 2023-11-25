@@ -542,9 +542,6 @@ sentencia_ejecutable
 
                 SymbolTableEntry thisEntry = symbolTable.getEntry(thisEntryKey);
 
-                System.out.println("Imprimiendo thisEntry: ");
-                System.out.println(thisEntry);
-
                 Triplet pushTriplet = new Triplet(
                     "THIS",
                     new TripletOperand(thisEntry, listOfTriplets),
