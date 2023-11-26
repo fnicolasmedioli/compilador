@@ -1,0 +1,18 @@
+{
+    VOID a(){
+        CLASS clase2{
+
+        },
+    },
+
+    CLASS clase1{
+        UINT var1,
+
+    },
+
+    CLASS clase2{
+            
+    },
+
+    clase2 aux,
+}

@@ -1,0 +1,12 @@
+{
+    CLASS clase1{
+        UINT var1,
+
+    },
+
+    CLASS clase1{
+            
+    },
+
+    clase1 aux,
+}

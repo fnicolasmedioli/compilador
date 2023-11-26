@@ -1,0 +1,14 @@
+{
+    VOID m(){
+        VOID a(){
+        
+        },
+    },
+
+    VOID a(){
+        PRINT %HOLA%,        
+    },
+
+    a(),
+
+}

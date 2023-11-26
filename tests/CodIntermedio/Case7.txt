@@ -1,0 +1,12 @@
+{
+    VOID a(){
+
+    },
+
+    VOID a(){
+        PRINT %HOLA%,        
+    },
+
+    a(),
+
+}

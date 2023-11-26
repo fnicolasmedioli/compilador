@@ -1,0 +1,11 @@
+{
+    VOID m()
+    {
+        UINT var1,
+    },
+
+    UINT var1,
+
+    var1 = 4_ui,
+
+}

@@ -1,0 +1,8 @@
+{
+    CLASS clase1{
+        UINT var1,
+    },
+
+    clase1 a,
+
+}
