@@ -229,6 +229,8 @@ public class TripletTranslator {
             case UINT:
                 s += loadFromMemory(o1MemoryAssociation, "ax");
                 s += loadFromMemory(o2MemoryAssociation, "bx");
+                s += String.format("cmp ax, bx\n");
+                s += String.format("jb @@overflow_resta\n");
                 s += String.format("sub ax, bx\n");
                 s += saveToMemory(resultMemoryAssociation, "ax");
                 break;

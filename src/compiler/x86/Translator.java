@@ -127,6 +127,7 @@ public class Translator {
         sb.append("___temp_double___ dq ?\n");
         sb.append("__overflow_mul_msg__ db 'Overflow detectado. Finaliza la ejecucion', 10, 0\n");
         sb.append("__overflow_suma_msg__ db 'Overflow en suma de DOUBLEs detectado. Finaliza la ejecucion', 10, 0\n");
+        sb.append("__overflow_resta_msg__ db 'Overflow en resta de UINTs detectado. Finaliza la ejecucion', 10, 0\n");
         sb.append("___str_formatter___ db '%s', 0\n");
         sb.append("___long_formatter___ db '%d', 0\n");
         sb.append("___uint_formatter___ db '%d', 0\n");
@@ -179,6 +180,14 @@ public class Translator {
         sb.append("call printf\n");
         sb.append("jmp @@fin\n");
         sb.append("@@overflow_suma_end:\n\n");
+
+        sb.append("jmp @@overflow_resta_end\n");
+        sb.append("@@overflow_resta:\n");
+        sb.append("push offset __overflow_resta_msg__\n");
+        sb.append("push offset ___str_formatter___\n");
+        sb.append("call printf\n");
+        sb.append("jmp @@fin\n");
+        sb.append("@@overflow_resta_end:\n\n");
 
         int tripletID = 0;
 
