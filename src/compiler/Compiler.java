@@ -57,7 +57,7 @@ public class Compiler {
 		CompilerMessagePrinter.printFoundSyntacticalStrucutres(syntacticStructuresFound);
 		CompilerMessagePrinter.printSymbolTable(getSymbolTable());
 
-		if (errorCount > 0)
+		if (!yaccSuccess || errorCount > 0)
 		{
 			messagePrinter.error("Corrija los errores para continuar con la compilacion");
 			return;

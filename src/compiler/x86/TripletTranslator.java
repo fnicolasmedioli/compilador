@@ -193,6 +193,11 @@ public class TripletTranslator {
                 s += loadDoubleFromMemory(o1MemoryAssociation, false);
                 s += loadDoubleFromMemory(o2MemoryAssociation, false);
                 s += "fadd\n";
+                /*
+                s += "fstsw ax\n";
+                s += "sahf\n";
+                s += "js @@overflow_suma\n";
+                 */
                 s += saveToMemory(resultMemoryAssociation, null);
                 break;
             default:
@@ -224,11 +229,8 @@ public class TripletTranslator {
             case UINT:
                 s += loadFromMemory(o1MemoryAssociation, "ax");
                 s += loadFromMemory(o2MemoryAssociation, "bx");
-                s += String.format("cmp ax, bx\n");
-                s += String.format("jb @@overflow\n");
                 s += String.format("sub ax, bx\n");
                 s += saveToMemory(resultMemoryAssociation, "ax");
-
                 break;
             case DOUBLE:
                 s += loadDoubleFromMemory(o1MemoryAssociation, false);
@@ -262,7 +264,7 @@ public class TripletTranslator {
                 s += loadFromMemory(o2MemoryAssociation, "ebx");
                 s += String.format("mul ebx\n");
                 s += "test edx, edx\n";
-                s += "jnz @@overflow\n";
+                s += "jnz @@overflow_mul\n";
                 s += saveToMemory(resultMemoryAssociation, "eax");
                 break;
             case UINT:
@@ -271,7 +273,7 @@ public class TripletTranslator {
                 s += String.format("mul bx\n");
                 // Resultado queda en ax:dx
                 s += "test dx, dx\n";
-                s += "jnz @@overflow\n";
+                s += "jnz @@overflow_mul\n";
                 s += saveToMemory(resultMemoryAssociation, "ax");
                 break;
             case DOUBLE:
@@ -354,14 +356,75 @@ public class TripletTranslator {
         return s;
     }
 
+    private String retrieveAddress(MemoryAssociation mem, String register)
+    {
+        String s = "";
+
+        if (mem.usesOffset())
+        {
+            s += String.format("mov %s, edx\n", register);
+            s += String.format("add %s, %d\n", register, mem.getOffset());
+        }
+        else
+        {
+            s += String.format("mov %s, offset %s\n", register, mem.getTag());
+        }
+
+        return s;
+    }
+
     public String translatePrint(Triplet triplet)
     {
         TripletOperand o1 = triplet.getOperand1();
 
+        if (o1 == null)
+        {
+            // Imprimir salto de linea
+
+            String s = "";
+            s += "push offset ___newline___\n";
+            s += "call printf\n";
+            return s;
+        }
+
         String s = "";
 
-        s += loadFromMemory(o1.getMemoryAssociation(), "eax");
-        s += "call @@imprimir_mensaje\n";
+        switch (o1.getMemoryAssociation().getDataType())
+        {
+            case LONG:
+                s += loadFromMemory(o1.getMemoryAssociation(), "eax");
+                s += "push eax\n";
+                s += "push offset ___long_formatter___\n";
+                s += "call printf\n";
+                break;
+            case UINT:
+                s += loadFromMemory(o1.getMemoryAssociation(), "ax");
+                s += "cwde\n";
+                s += "push eax\n";
+                s += "push offset ___uint_formatter___\n";
+                s += "call printf\n";
+                break;
+            case DOUBLE:
+                s += retrieveAddress(o1.getMemoryAssociation(), "ecx");
+                s += "push dword ptr [ecx + 4]\n";
+                s += "push dword ptr [ecx]\n";
+                s += "push offset ___double_formatter___\n";
+                s += "call printf\n";
+                break;
+            case STRING:
+                s += loadFromMemory(o1.getMemoryAssociation(), "eax");
+                s += "push eax\n";
+                s += "push offset ___str_formatter___\n";
+                s += "call printf\n";
+                break;
+            //case OBJECT:
+            //    s += loadFromMemory(o1.getMemoryAssociation(), "eax");
+            //    s += "call @@imprimir_objeto\n";
+            //    break;
+            default:
+                s += "No deberia estar viendo esto\n";
+                break;
+        }
 
         return s;
     }
@@ -407,8 +470,8 @@ public class TripletTranslator {
                 s += "cmp ax, bx\n";
                 break;
             case DOUBLE:
-                s += loadDoubleFromMemory(o1MemoryAssociation, false);
                 s += loadDoubleFromMemory(o2MemoryAssociation, false);
+                s += loadDoubleFromMemory(o1MemoryAssociation, false);
 
                 s += "fcom\n";
                 s += "fstsw ax\n";
@@ -432,7 +495,7 @@ public class TripletTranslator {
 
         String s = "";
 
-        if (type == DataType.LONG || type == DataType.DOUBLE)
+        if (type == DataType.LONG)
         {
             // Comparaciones con signo
             switch (comp)
@@ -458,7 +521,7 @@ public class TripletTranslator {
             }
         }
 
-        if (type == DataType.UINT)
+        if (type == DataType.UINT || type == DataType.DOUBLE)
         {
             // Comparaciones sin signo
             switch (comp)
@@ -580,6 +643,41 @@ public class TripletTranslator {
 
         // return String.format("mov edx, offset %s\n", memoryAssociation.getTag());
         return loadFromMemory(memoryAssociation, "edx");
+    }
+
+    public String translateUItoD(Triplet triplet)
+    {
+        TripletOperand o1 = triplet.getOperand1();
+        MemoryAssociation o1MemoryAssociation = o1.getMemoryAssociation();
+        MemoryAssociation resultMemoryAssociation = triplet.getMemoryAssociation();
+
+        String s = "";
+
+        s += loadFromMemory(o1MemoryAssociation, "ax");
+        s += "cwde\n";
+        s += "push eax\n";
+        s += "fild dword ptr [esp]\n";
+        s += "add esp, 4\n";
+        s += saveToMemory(resultMemoryAssociation, null);
+
+        return s;
+    }
+
+    public String translateLtoD(Triplet triplet)
+    {
+        TripletOperand o1 = triplet.getOperand1();
+        MemoryAssociation o1MemoryAssociation = o1.getMemoryAssociation();
+        MemoryAssociation resultMemoryAssociation = triplet.getMemoryAssociation();
+
+        String s = "";
+
+        s += loadFromMemory(o1MemoryAssociation, "eax");
+        s += "push eax\n";
+        s += "fild dword ptr [esp]\n";
+        s += "add esp, 4\n";
+        s += saveToMemory(resultMemoryAssociation, null);
+
+        return s;
     }
 
 }

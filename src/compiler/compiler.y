@@ -587,9 +587,25 @@ sentencia_ejecutable
                 break;
             }
 
-            SymbolTableEntry entry = symbolTable.getEntry(data2.referencedEntryKey);
+            // SymbolTableEntry entry = symbolTable.getEntry(data2.referencedEntryKey);
 
-            Triplet triplet = new Triplet("PRINT", new TripletOperand(entry, listOfTriplets), null);
+            Triplet triplet = new Triplet("PRINT", data2.tripletOperand, null);
+            int tripletID = listOfTriplets.addTriplet(triplet);
+
+            YACCDataUnit data = new YACCDataUnit();
+            data.firstTriplet = tripletID;
+            data.tripletQuantity = 1;
+            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
+
+            $$ = new ParserVal(data);
+        }
+    | PRINT ','
+        {
+            compiler.addFoundSyntacticStructure(
+                new SyntacticStructureResult("Sentencia PRINT", getTokenLocation($1))
+            );
+
+            Triplet triplet = new Triplet("PRINT", null, null);
             int tripletID = listOfTriplets.addTriplet(triplet);
 
             YACCDataUnit data = new YACCDataUnit();
@@ -618,50 +634,7 @@ sentencia_ejecutable
     ;
 
 imprimible
-    : CTE_STRING
-        {
-            YACCDataUnit data = new YACCDataUnit();
-            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
-            data.tripletOperand = new TripletOperand(getSTEntry($1), listOfTriplets);
-            data.referencedEntryKey = getSTEntry($1).getLexeme();
-
-            $$ = new ParserVal(data);
-        }
-    | acceso_memoria
-        {
-            YACCDataUnit data = (YACCDataUnit)$1.obj;
-
-            if (!data.isValid())
-            {
-                $$ = new ParserVal(new YACCInvalidDataUnit());
-                break;
-            }
-
-            SymbolTableEntry referencedEntry = symbolTable.getEntry(data.referencedEntryKey);
-
-            if (referencedEntry.getAttrib(AttribKey.ID_TYPE) != IDType.VAR_ATTRIB)
-            {
-                compiler.reportSemanticError(String.format("El ID '%s' no es una variable", referencedEntry.getLexeme()), data.tokensData.get(0).getLocation());
-
-                $$ = new ParserVal(new YACCInvalidDataUnit());
-                break;
-            }
-
-            if (referencedEntry.getAttrib(AttribKey.DATA_TYPE) != DataType.STRING)
-            {
-                compiler.reportSemanticError(String.format("El ID '%s' no es de tipo STRING", referencedEntry.getLexeme()), data.tokensData.get(0).getLocation());
-
-                $$ = new ParserVal(new YACCInvalidDataUnit());
-                break;
-            }
-
-            YACCDataUnit newData = new YACCDataUnit();
-            newData.tokensData.add(data.tokensData.get(0));
-            newData.tripletOperand = new TripletOperand(referencedEntry, listOfTriplets);
-            newData.referencedEntryKey = data.referencedEntryKey;
-
-            $$ = new ParserVal(newData);
-        }
+    : expr
     ;
 
 lista_sentencias
@@ -859,24 +832,93 @@ sentencia_if
 
 constante
     : CTE_UINT
+        {
+            YACCDataUnit data = new YACCDataUnit();
+            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
+            $$ = new ParserVal(data);
+        }
     | CTE_STRING
+        {
+            YACCDataUnit data = new YACCDataUnit();
+            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
+            $$ = new ParserVal(data);
+        }
     | CTE_DOUBLE
+        {
+            YACCDataUnit data = new YACCDataUnit();
+            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
+            $$ = new ParserVal(data);
+        }
     | CTE_LONG
         {
             if (!ConstantRange.isValidLONG(getSTEntry($1).getLexeme(), false))
+            {
                 compiler.reportLexicalError("El rango de LONG es [-2147483648, 2147483647]", getTokenLocation($1));
+                $$ = new ParserVal(new YACCInvalidDataUnit());
+                break;
+            }
+            YACCDataUnit data = new YACCDataUnit();
+            data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
+            $$ = new ParserVal(data);
         }
     | '-' CTE_LONG
         {
-            getSTEntry($2).addNegativeSign();
+            String lexeme = "-" + getSTEntry($2).getLexeme();
+            SymbolTableEntry existsAlready = symbolTable.getEntry(lexeme);
+
+            if (existsAlready != null)
+            {
+                YACCDataUnit data = new YACCDataUnit();
+                data.tokensData.add(new LocatedSymbolTableEntry(existsAlready, getTokenLocation($1)));
+                $$ = new ParserVal(data);
+                break;
+            }
+
+            SymbolTableEntry newEntry = symbolTable.addNewEntry(
+                new SymbolTableEntry(
+                    Parser.CTE_LONG,
+                    lexeme
+                )
+                .setAttrib(AttribKey.DATA_TYPE, DataType.LONG)
+                .setAttrib(AttribKey.IS_CONSTANT, true)
+                .setAttrib(AttribKey.MEMORY_ASSOCIATION, new MemoryAssociation(lexeme, DataType.LONG.getSize(), DataType.LONG))
+            );
+
+            YACCDataUnit data = new YACCDataUnit();
+            data.tokensData.add(new LocatedSymbolTableEntry(newEntry, getTokenLocation($1)));
+            $$ = new ParserVal(data);
         }
     | '-' CTE_DOUBLE
         {
-            getSTEntry($2).addNegativeSign();
+            String lexeme = "-" + getSTEntry($2).getLexeme();
+            SymbolTableEntry existsAlready = symbolTable.getEntry(lexeme);
+
+            if (existsAlready != null)
+            {
+                YACCDataUnit data = new YACCDataUnit();
+                data.tokensData.add(new LocatedSymbolTableEntry(existsAlready, getTokenLocation($1)));
+                $$ = new ParserVal(data);
+                break;
+            }
+
+            SymbolTableEntry newEntry = symbolTable.addNewEntry(
+                new SymbolTableEntry(
+                    Parser.CTE_DOUBLE,
+                    lexeme
+                )
+                .setAttrib(AttribKey.DATA_TYPE, DataType.DOUBLE)
+                .setAttrib(AttribKey.IS_CONSTANT, true)
+                .setAttrib(AttribKey.MEMORY_ASSOCIATION, new MemoryAssociation(lexeme, DataType.DOUBLE.getSize(), DataType.DOUBLE))
+            );
+
+            YACCDataUnit data = new YACCDataUnit();
+            data.tokensData.add(new LocatedSymbolTableEntry(newEntry, getTokenLocation($1)));
+            $$ = new ParserVal(data);
         }
     | '-' CTE_UINT
         {
             compiler.reportLexicalError("Las constantes tipo UINT no pueden ser negativas", getTokenLocation($1));
+            $$ = new ParserVal(new YACCInvalidDataUnit());
         }
     ;
 
@@ -928,6 +970,8 @@ expr
             }
 
             Triplet convTriplet = new Triplet(tripletOP, data3.tripletOperand, null, DataType.DOUBLE);
+            convTriplet.setMemoryAssociation(new MemoryAssociation(symbolTable.createAuxVar(DataType.DOUBLE), DataType.DOUBLE.getSize(), DataType.DOUBLE));
+
             int tripletID = listOfTriplets.addTriplet(convTriplet);
 
             data3.tripletOperand = new TripletOperand(tripletID, listOfTriplets);
@@ -1104,8 +1148,16 @@ factor
         }
     | constante
         {
+            YACCDataUnit data1 = (YACCDataUnit)$1.obj;
+
+            if (!data1.isValid())
+            {
+                $$ = new ParserVal(new YACCInvalidDataUnit());
+                break;
+            }
+
             YACCDataUnit data = new YACCDataUnit();
-            data.tripletOperand = new TripletOperand(getSTEntry($1), listOfTriplets);
+            data.tripletOperand = new TripletOperand(data1.tokensData.get(0).getSTEntry(), listOfTriplets);
             $$ = new ParserVal(data);
         }
     ;

@@ -201,7 +201,9 @@ public class SymbolTable {
 			.replace("%", "_")
 			.replace(" ", "_")
 			.replace(",", "_")
-			.replace("?", "_");
+			.replace("?", "_")
+			.replace("-", "m")
+			.replace("+", "p");
 	}
 
 	/*
