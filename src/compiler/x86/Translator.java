@@ -230,6 +230,7 @@ public class Translator {
         sb.append("\n");
         sb.append("@@fin:\n");
         sb.append("invoke ExitProcess, 0\n");
+
         sb.append("end start");
 
         return sb.toString();
