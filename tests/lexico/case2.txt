@@ -1,21 +1,25 @@
 ** Constantes con el primer y ultimo valor fuera del rango (Para cada tipo de datos asignado).
 ** Se espera que funcione MAL
 {
+	LONG var1,
+	UINT var2,
+	DOUBLE var3,
+
 	** tipo LONG
-	variable = -2147483649_l,
+	var1 = -2147483649_l,
 	
 	** tipo LONG
-	variable = 2147483648_l,
+	var1 = 2147483648_l,
 	
 	** tipo UINT
-	variable = -1_ui,
+	var2= -1_ui,
 	
 	** tipo UINT
-	variable = 65536_ui,
+	var2 = 65536_ui,
 	
 	** tipo DOUBLE
-	variable = -1.7976931348623159d+308,
+	var3 = -1.7976931348623159d+308,
 	
 	** tipo DOUBLE
-	variable = 1.7976931348623159d+308,
+	var3 = 1.7976931348623159d+308,
 }

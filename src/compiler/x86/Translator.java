@@ -79,7 +79,7 @@ public class Translator {
                 byte[] bytes = buffer.array();
                  */
 
-                String n = entry.getLexeme().replace('D', 'e').replace('d', 'e');
+                String n = "" + Double.parseDouble(entry.getLexeme().replace('D', 'e').replace('d', 'e'));
                 if (n.charAt(n.length()-1) == '.') n += "0";
 
                 return String.format(

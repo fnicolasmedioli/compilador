@@ -1,6 +1,9 @@
 ** Cadenas bien y mal escritas.
 ** Se pretende que funcione MAL
 {
+	STRING str_bien_escrita,
+	STRING str_mal_escrita,
+	
 	str_bien_escrita = %esta es una cadena
 		bien escrita%,
 	str_mal_escrita = "cadena mal escrita",

@@ -1,6 +1,10 @@
 ** Palabras reservadas escritas en minusculas y mayusculas.
 ** Se espera que funcione BIEN
 {
+	LONG do,
+	STRING string,
+	STRING return,
+	
 	do = 25_l,
 	return = %hola%,
 	string = %string%,

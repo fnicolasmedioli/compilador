@@ -1,21 +1,25 @@
 ** Constantes con el primer y ultimo valor dentro del rango (Para cada tipo de datos asignado).
 ** Se espera que funcione BIEN
-{
-	** tipo LONG
-	variable = -2147483648_l,
+{	
+	LONG var1,
+	UINT var2,
+	DOUBLE var3,
+
+	** tipo long
+	var1 = -2147483648_l,
 	
-	** tipo LONG
-	variable = 2147483647_l,
+	** tipo long
+	var1 = 2147483647_l,
 	
-	** tipo UINT
-	variable = 0_ui,
+	** tipo uint
+	var2 = 0_ui,
 	
-	** tipo UINT
-	variable = 65535_ui,
+	** tipo uint
+	var2 = 65535_ui,
 	
-	** tipo DOUBLE
-	variable = -1.7976931348623157d+308,
+	** tipo double
+	var3 = -1.7976931348623157d+308,
 	
-	** tipo DOUBLE
-	variable = 1.7976931348623157d+308,
+	** tipo double
+	var3 = 1.7976931348623157d+308,
 }
