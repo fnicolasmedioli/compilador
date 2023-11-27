@@ -410,11 +410,6 @@ sentencia_ejecutable
             String referencedEntryKey = data1.referencedEntryKey;
             SymbolTableEntry referencedEntry = symbolTable.getEntry(referencedEntryKey);
 
-
-
-            System.out.println("Referenced -> " + referencedEntryKey);
-
-
             // Chequar que sea una variable
 
             if (referencedEntry.getAttrib(AttribKey.ID_TYPE) != IDType.VAR_ATTRIB)
@@ -756,12 +751,6 @@ sentencia_if
             YACCDataUnit data3 = (YACCDataUnit)$3.obj;
             YACCDataUnit data5 = (YACCDataUnit)$5.obj;
 
-
-            System.out.println("IF simple:");
-            System.out.println("Dentro de condicion: " + data3.tripletQuantity);
-            System.out.println("Dentro del cuerpo: " + data5.tripletQuantity);
-
-
             int jzToBackpatch = data3.reservedTriplet;
 
             String comp = data3.lexeme;
@@ -788,19 +777,9 @@ sentencia_if
         }
     | IF '(' condicion_if_reserva ')' cuerpo_if_reserva ELSE cuerpo_else END_IF
         {
-
-
-
             YACCDataUnit data3 = (YACCDataUnit)$3.obj;
             YACCDataUnit data5 = (YACCDataUnit)$5.obj;
             YACCDataUnit data7 = (YACCDataUnit)$7.obj;
-
-
-            System.out.println("IF compuesto:");
-            System.out.println("Dentro de condicion: " + data3.tripletQuantity);
-            System.out.println("Dentro del cuerpo: " + data5.tripletQuantity);
-            System.out.println("Dentro del else: " + data7.tripletQuantity);
-
 
             int jzToBackpatch = data3.reservedTriplet;
 

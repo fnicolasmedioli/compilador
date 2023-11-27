@@ -260,11 +260,6 @@ public class Translator {
                     sb.append(tripletTranslator.translateCall(triplet, prevTriplet));
                     break;
                 case "THIS":
-
-                    //System.out.println("se setea this");
-                    //System.out.println(triplet.getOperand1());
-                    //System.out.println(triplet.getOperand1().getMemoryAssociation());
-
                     sb.append(tripletTranslator.loadFromMemory(triplet.getOperand1().getMemoryAssociation(), "edx"));
                     break;
                 case "UITOD":
