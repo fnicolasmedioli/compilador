@@ -22,7 +22,7 @@ public class ListOfTriplets implements Iterable<Triplet> {
     }
 
     public Triplet getTriplet(int index) {
-        return this.tripletList.elementAt(index);
+        return ((index >= 0) ? this.tripletList.elementAt(index) : null);
     }
 
     public void replaceTriplet(int index, Triplet newTriplet)

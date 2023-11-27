@@ -190,6 +190,7 @@ public class Translator {
         sb.append("@@overflow_resta_end:\n\n");
 
         int tripletID = 0;
+        Triplet prevTriplet = null;
 
         for (Triplet triplet : listOfTriplets)
         {
@@ -247,18 +248,19 @@ public class Translator {
                 case "END":
                     break;
                 case "CJUMP":
-                    Triplet prevTriplet = listOfTriplets.getTriplet(tripletID-1);
+                    prevTriplet = listOfTriplets.getTriplet(tripletID-1);
                     sb.append(tripletTranslator.translateCJump(triplet, prevTriplet));
                     break;
                 case "NEG_CJUMP":
-                    Triplet prevTriplet2 = listOfTriplets.getTriplet(tripletID-1);
-                    sb.append(tripletTranslator.translateNegCJump(triplet, prevTriplet2));
+                    prevTriplet = listOfTriplets.getTriplet(tripletID-1);
+                    sb.append(tripletTranslator.translateNegCJump(triplet, prevTriplet));
                     break;
                 case "CALL":
-                    sb.append(tripletTranslator.translateCall(triplet));
+                    prevTriplet = listOfTriplets.getTriplet(tripletID-1);
+                    sb.append(tripletTranslator.translateCall(triplet, prevTriplet));
                     break;
                 case "THIS":
-                    sb.append(tripletTranslator.translateThis(triplet));
+                    sb.append(tripletTranslator.loadFromMemory(triplet.getOperand1().getMemoryAssociation(), "edx"));
                     break;
                 case "UITOD":
                     sb.append(tripletTranslator.translateUItoD(triplet));
@@ -271,6 +273,7 @@ public class Translator {
                     break;
             }
             tripletID++;
+            tripletTranslator.setLastWasThis(triplet.getOperation().equals("THIS"));
         }
 
         sb.append("\n");

@@ -69,15 +69,15 @@ public class MemoryAssociation {
     public String toString()
     {
         if (offset != -1)
-            return "Offset: '" + offset + "' | DataType -> '" + dataType + "'";
+            return "offsetRespectEBP: " + offsetRespectEBP + " Offset: '" + offset + "' | DataType -> '" + dataType + "'";
 
         if (tag == null)
-            return "Size -> '" + size + "'";
+            return "offsetRespectEBP: " + offsetRespectEBP + " Size -> '" + size + "'";
 
         if (!hasSize())
-            return "Tag -> '" + tag + "'";
+            return "offsetRespectEBP: " + offsetRespectEBP + " Tag -> '" + tag + "'";
 
-        return "Tag -> '" +
+        return "offsetRespectEBP: " + offsetRespectEBP + " Tag -> '" +
                 tag +
                 "' | '" +
                 "Size -> '" +
@@ -103,9 +103,10 @@ public class MemoryAssociation {
         return isConstant;
     }
 
-    public void setOffsetRespectEBP()
+    public MemoryAssociation setOffsetRespectEBP()
     {
         this.offsetRespectEBP = true;
+        return this;
     }
 
     public boolean isOffsetRespectEBP()
