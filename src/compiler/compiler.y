@@ -8,7 +8,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Arrays;
 
-import compiler.semantic.*;
 import compiler.CompatibilityTable.*;
 
 %}
@@ -410,6 +409,11 @@ sentencia_ejecutable
 
             String referencedEntryKey = data1.referencedEntryKey;
             SymbolTableEntry referencedEntry = symbolTable.getEntry(referencedEntryKey);
+
+
+
+            System.out.println("Referenced -> " + referencedEntryKey);
+
 
             // Chequar que sea una variable
 
@@ -1576,14 +1580,18 @@ cuerpo_clase
 implementacion_metodos
     : implementacion_metodos metodo ','
         {
+            YACCDataUnit data = (YACCDataUnit)$2.obj;
+
             compiler.addFoundSyntacticStructure(
-                new SyntacticStructureResult("Método distribuido", getTokenLocation($2))
+                new SyntacticStructureResult("Método distribuido", data.tokensData.get(0).getLocation())
             );
         }
     | metodo ','
         {
+            YACCDataUnit data = (YACCDataUnit)$1.obj;
+
             compiler.addFoundSyntacticStructure(
-                new SyntacticStructureResult("Método distribuido", getTokenLocation($1))
+                new SyntacticStructureResult("Método distribuido", data.tokensData.get(0).getLocation())
             );
         }
     ;

@@ -8,5 +8,8 @@
     {
         acumulador -= c,
         c -= 1_l,
-    } UNTIL (c < 0_l),
+        PRINT %iteracion %,
+        PRINT c,
+        PRINT,
+    } UNTIL (c == 0_l),
 }

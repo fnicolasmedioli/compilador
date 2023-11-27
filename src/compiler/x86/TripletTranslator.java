@@ -385,6 +385,9 @@ public class TripletTranslator {
 
         DataType operandsType = o1.getMemoryAssociation().getDataType();
 
+        System.out.println("Memory association de o1:");
+        System.out.println(o1MemoryAssociation);
+
         String s = "";
 
         switch(operandsType)

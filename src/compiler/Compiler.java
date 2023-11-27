@@ -12,7 +12,6 @@ public class Compiler {
 	private final PriorityQueue<SyntacticStructureResult> syntacticStructuresFound;
 	private final CompilerMessagePrinter messagePrinter;
 	private int errorCount;
-	//private final Translate translate;
 	private final SemanticHelper semanticHelper;
 
 	private final String masm32Path = "C:\\masm32\\bin\\";
@@ -119,41 +118,6 @@ public class Compiler {
 
 		return output.toString();
 	}
-
-	/*
-	private void assembleAndRun(String fileWithoutExtension) {
-
-		// Comando para ensamblar el archivo .asm
-		String assembleCommand = masm32Path + "ml /c /Zd /coff " + fileWithoutExtension + ".asm";
-		String linkCommand = masm32Path + "Link /SUBSYSTEM:CONSOLE " + fileWithoutExtension + ".obj";
-		String runCommand = "cmd.exe /c " + fileWithoutExtension + ".exe";
-
-		try {
-            ProcessBuilder processBuilder = new ProcessBuilder("cmd.exe", "/c", assembleCommand);
-            processBuilder.redirectErrorStream(true);
-
-            Process assembleProcess = processBuilder.start();
-			assembleProcess.waitFor(); // blocking
-
-            processBuilder = new ProcessBuilder("cmd.exe", "/c", linkCommand);
-			processBuilder.redirectErrorStream(true);
-
-            Process linkProcess = processBuilder.start();
-			linkProcess.waitFor();
-
-            Process runProcess = Runtime.getRuntime().exec(runCommand);
-
-            BufferedReader reader = new BufferedReader(new InputStreamReader(runProcess.getInputStream()));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                System.out.println(line);
-            }
-
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
-	}
-	 */
 
 	public boolean saveToFile(String text, String fileName) {
 

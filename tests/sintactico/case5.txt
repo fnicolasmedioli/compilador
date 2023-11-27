@@ -20,4 +20,8 @@
             PRINT %se envia encomienda%,
         },
     },
+
+    empleado emp1,
+
+    emp1.enviar_encomienda(),
 }

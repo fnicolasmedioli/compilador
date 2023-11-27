@@ -3,8 +3,6 @@ package compiler;
 import java.util.List;
 import java.util.PriorityQueue;
 
-import compiler.syntacticTree.*;
-
 public class CompilerMessagePrinter {
 	
 	private static final String ANSI_YELLOW = "\u001B[33m";
@@ -52,13 +50,7 @@ public class CompilerMessagePrinter {
 			System.out.print(compiler.getSymbolTable().getTokenDescription((short)token) + " ");
 		System.out.println("\n");
 	}
-	
-	static public void printSyntacticTree(PrintableSyntacticTree root)
-	{
-		System.out.println("Estructuras sintacticas encontradas:");
-		root.print(0);
-	}
-	
+
 	static public void printFoundSyntacticalStrucutres(PriorityQueue<SyntacticStructureResult> syntacticStructuresFound)
 	{
 		if (syntacticStructuresFound.isEmpty())
