@@ -1329,13 +1329,22 @@ procedimiento
 
             int jumpToTriplet = 1 + data1.reservedTriplet + data.tripletQuantity;
 
-            listOfTriplets.replaceTriplet(data1.reservedTriplet, new Triplet(
+            Triplet patchedTriplet = new Triplet(
                 "JMP",
                 new TripletOperand(jumpToTriplet, listOfTriplets),
                 null
-            ));
+            );
+
+            listOfTriplets.replaceTriplet(data1.reservedTriplet, patchedTriplet);
 
             listOfTriplets.addTag(jumpToTriplet, SymbolTable.encodeString("@@" + funcEntryKey + "_end"));
+
+            if (data4.tripletQuantity > 0)
+            {
+                // Setear al primer triplet, que es el inicio del procedimiento
+                Triplet q = listOfTriplets.getTriplet(data4.firstTriplet);
+                q.setTripletInfo((new TripletInfo()).setProcedureInit());
+            }
 
             // Agregar a la tabla de simbolos el terceto donde empieza la funcion
 

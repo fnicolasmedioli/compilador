@@ -8,6 +8,7 @@ public class Triplet {
     private static int cantTriplet = 0;
     private String varTriplet;
     private MemoryAssociation memoryAssociation = null;
+    private TripletInfo tripletInfo = null;
 
     public void setOperation(String operation) {
         this.operation = operation;
@@ -54,7 +55,7 @@ public class Triplet {
     @Override
     public String toString()
     {
-        return String.format("'%s' [%s] [%s] Type: %s [%s] Mem: %s", operation, getOperand1(), getOperand2(), type, varTriplet, memoryAssociation);
+        return String.format("'%s' [%s] [%s] Type: %s [%s] Mem: %s | Info: %s", operation, getOperand1(), getOperand2(), type, varTriplet, memoryAssociation, tripletInfo);
     }
 
     public void setDataType(DataType dataType) {
@@ -67,6 +68,18 @@ public class Triplet {
 
     public MemoryAssociation getMemoryAssociation(){
         return this.memoryAssociation;
+    }
+
+    public void setTripletInfo(TripletInfo tripletInfo) {
+        this.tripletInfo = tripletInfo;
+    }
+
+    public TripletInfo getTripletInfo() {
+        return this.tripletInfo;
+    }
+
+    public boolean hasTripletInfo() {
+        return this.tripletInfo != null;
     }
 }
 

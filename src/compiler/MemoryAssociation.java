@@ -7,6 +7,7 @@ public class MemoryAssociation {
     private int size = -1;
     private DataType dataType = null;
     private boolean isConstant = false;
+    private boolean offsetRespectEBP = false;
 
     public MemoryAssociation(String tag, int size, DataType dataType)
     {
@@ -68,7 +69,7 @@ public class MemoryAssociation {
     public String toString()
     {
         if (offset != -1)
-            return "Offset: '"+ offset + "' | DataType -> '" + dataType + "'";
+            return "Offset: '" + offset + "' | DataType -> '" + dataType + "'";
 
         if (tag == null)
             return "Size -> '" + size + "'";
@@ -100,5 +101,15 @@ public class MemoryAssociation {
     public boolean isConstant()
     {
         return isConstant;
+    }
+
+    public void setOffsetRespectEBP()
+    {
+        this.offsetRespectEBP = true;
+    }
+
+    public boolean isOffsetRespectEBP()
+    {
+        return offsetRespectEBP;
     }
 }

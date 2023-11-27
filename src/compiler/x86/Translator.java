@@ -198,6 +198,17 @@ public class Translator {
             for (String tag : listOfTriplets.getTags(tripletID))
                 sb.append(String.format("%s:\n", tag));
 
+            if (triplet.hasTripletInfo())
+            {
+                TripletInfo tripletInfo = triplet.getTripletInfo();
+
+                if (tripletInfo.procedureInit)
+                {
+                    sb.append("push ebp\n");
+                    sb.append("mov ebp, esp\n");
+                }
+            }
+
             switch (triplet.getOperation())
             {
                 case "+":
@@ -219,6 +230,7 @@ public class Translator {
                     sb.append(tripletTranslator.translatePrint(triplet));
                     break;
                 case "RETURN":
+                    sb.append("pop ebp\n");
                     sb.append("ret\n");
                     break;
                 case "JMP":
