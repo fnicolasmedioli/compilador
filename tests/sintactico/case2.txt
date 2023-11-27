@@ -11,5 +11,6 @@
     },
 
     persona p1,
-    p1.set_nombre(),
+    p1.set_nombre(%Facundo%),
+    
 }

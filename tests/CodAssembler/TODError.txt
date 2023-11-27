@@ -1,0 +1,11 @@
+{
+    UINT var1,
+    var1 = 7_ui,
+
+    DOUBLE var2,
+    var2 = 1.51,
+    
+    DOUBLE var3,
+    
+    var3 = var1 + var2,
+}

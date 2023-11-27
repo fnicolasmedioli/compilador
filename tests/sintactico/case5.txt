@@ -10,7 +10,7 @@
     {
         LONG id_empleado,
 
-        persona, ** Herencia por composicion
+        persona p1, ** Herencia por composicion
     },
 
     IMPL FOR empleado:

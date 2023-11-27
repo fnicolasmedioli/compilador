@@ -3,7 +3,7 @@
     LONG a; b,
 
     a = 25_l,
-    b = 35_ui,
+    b = 35_l,
 
     IF (a < b)
     {
@@ -18,4 +18,9 @@
         END_IF,
     }
     END_IF,
+
+    PRINT,
+    PRINT,
+    PRINT,
+    PRINT,
 }
