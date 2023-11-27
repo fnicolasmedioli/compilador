@@ -1,0 +1,27 @@
+{
+    CLASS persona
+    {
+        STRING nombre,
+    },
+
+    CLASS profesor
+    {
+        UINT id_empleado,
+        persona,
+
+        VOID saludar()
+        {
+            PRINT %hola soy el profesor %,
+            PRINT id_empleado,
+            PRINT % y mi nombre es %,
+            PRINT persona.nombre,
+        },
+    },
+
+    profesor prof1,
+
+    prof1.persona.nombre = %jose%,
+    prof1.id_empleado = 25_ui,
+
+    prof1.saludar(),
+}

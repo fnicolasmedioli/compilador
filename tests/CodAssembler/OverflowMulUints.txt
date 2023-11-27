@@ -1,0 +1,12 @@
+{
+    UINT var1,
+    UINT var2,
+    UINT var3,
+
+    var2 = 10000_ui,
+
+    var1 = 20000_ui,
+
+    var3 = var1 * var2,
+
+}

@@ -69,15 +69,15 @@ public class MemoryAssociation {
     public String toString()
     {
         if (offset != -1)
-            return "offsetRespectEBP: " + offsetRespectEBP + " Offset: '" + offset + "' | DataType -> '" + dataType + "'";
+            return "Offset respecto a EBP: " + offsetRespectEBP + " | Offset: '" + offset + "' | DataType -> '" + dataType + "'";
 
         if (tag == null)
-            return "offsetRespectEBP: " + offsetRespectEBP + " Size -> '" + size + "'";
+            return "Size -> '" + size + "'";
 
         if (!hasSize())
-            return "offsetRespectEBP: " + offsetRespectEBP + " Tag -> '" + tag + "'";
+            return "Tag -> '" + tag + "'";
 
-        return "offsetRespectEBP: " + offsetRespectEBP + " Tag -> '" +
+        return "Tag -> '" +
                 tag +
                 "' | '" +
                 "Size -> '" +
