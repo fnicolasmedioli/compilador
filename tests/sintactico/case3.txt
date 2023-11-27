@@ -18,9 +18,4 @@
         END_IF,
     }
     END_IF,
-
-    PRINT,
-    PRINT,
-    PRINT,
-    PRINT,
 }

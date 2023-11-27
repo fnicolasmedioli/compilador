@@ -594,7 +594,7 @@ sentencia_ejecutable
 
             YACCDataUnit data = new YACCDataUnit();
             data.firstTriplet = tripletID;
-            data.tripletQuantity = 1;
+            data.tripletQuantity = 1 + data2.tripletQuantity;
             data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
 
             $$ = new ParserVal(data);
@@ -752,11 +752,18 @@ sentencia_if
             YACCDataUnit data3 = (YACCDataUnit)$3.obj;
             YACCDataUnit data5 = (YACCDataUnit)$5.obj;
 
+
+            System.out.println("IF simple:");
+            System.out.println("Dentro de condicion: " + data3.tripletQuantity);
+            System.out.println("Dentro del cuerpo: " + data5.tripletQuantity);
+
+
             int jzToBackpatch = data3.reservedTriplet;
 
             String comp = data3.lexeme;
 
             int end_if = 1 + jzToBackpatch + data5.tripletQuantity;
+
             listOfTriplets.replaceTriplet(
                 jzToBackpatch,
                 new Triplet(
@@ -777,9 +784,19 @@ sentencia_if
         }
     | IF '(' condicion_if_reserva ')' cuerpo_if_reserva ELSE cuerpo_else END_IF
         {
+
+
+
             YACCDataUnit data3 = (YACCDataUnit)$3.obj;
             YACCDataUnit data5 = (YACCDataUnit)$5.obj;
             YACCDataUnit data7 = (YACCDataUnit)$7.obj;
+
+
+            System.out.println("IF compuesto:");
+            System.out.println("Dentro de condicion: " + data3.tripletQuantity);
+            System.out.println("Dentro del cuerpo: " + data5.tripletQuantity);
+            System.out.println("Dentro del else: " + data7.tripletQuantity);
+
 
             int jzToBackpatch = data3.reservedTriplet;
 
@@ -814,7 +831,7 @@ sentencia_if
             listOfTriplets.addTag(end_if_else, listOfTriplets.getNewIfTag());
 
             YACCDataUnit data = new YACCDataUnit();
-            data.tripletQuantity = 2 + data3.tripletQuantity + data5.tripletQuantity + data7.tripletQuantity;
+            data.tripletQuantity = 1 + data3.tripletQuantity + data5.tripletQuantity + data7.tripletQuantity;
             data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
             data.firstTriplet = data3.reservedTriplet;
 
@@ -944,8 +961,6 @@ expr
                 break;
             }
 
-            data3.tripletQuantity++;
-
             String tripletOP = null;
 
             switch (exprDataType)
@@ -976,6 +991,7 @@ expr
 
             data3.tripletOperand = new TripletOperand(tripletID, listOfTriplets);
             data3.dataType = DataType.DOUBLE;
+            data3.tripletQuantity++;
 
             $$ = new ParserVal(data3);
         }

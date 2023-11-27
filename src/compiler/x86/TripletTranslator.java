@@ -584,10 +584,10 @@ public class TripletTranslator {
                     s += String.format("jl %s\n", jumpTag);
                     break;
                 case "==":
-                    s += String.format("jne %s\n", jumpTag);
+                    s += String.format("je %s\n", jumpTag);
                     break;
                 case "!!":
-                    s += String.format("je %s\n", jumpTag);
+                    s += String.format("jne %s\n", jumpTag);
                     break;
             }
         }
