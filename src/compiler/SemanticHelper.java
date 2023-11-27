@@ -109,8 +109,10 @@ public class SemanticHelper {
 		return classScope.substring(i+1) + ":" + classScope.substring(0, i);
 	}
 
-	public void _declareRecursive(LinkedList<String> varLexemeList, String scope, SymbolTableEntry dataTypeEntry, String currentClassEntryKey, boolean isRecursion, String originalScope)
+	public LinkedList<String> _declareRecursive(LinkedList<String> varLexemeList, String scope, SymbolTableEntry dataTypeEntry, String currentClassEntryKey, boolean isRecursion, String originalScope)
 	{
+		LinkedList<String> declared = new LinkedList<String>();
+
 		DataType dataType = tokenIDtoDataType.get(dataTypeEntry.getTokenID());
 
 		HashSet<String> subVarsSet = null;
@@ -131,7 +133,7 @@ public class SemanticHelper {
 				compiler.reportSemanticError(
 					String.format("La clase '%s' no esta definida en el ambito local", dataTypeEntry.getLexeme()), null
 				);
-				return;
+				return declared;
 			}
 
 			classEntry = symbolTable.getEntry(classEntryKey);
@@ -169,6 +171,8 @@ public class SemanticHelper {
 			.setAttrib(AttribKey.ID_TYPE, IDType.VAR_ATTRIB)
 			.setAttrib(AttribKey.DATA_TYPE, dataType)
 			.setAttrib(AttribKey.MEMORY_ASSOCIATION, new MemoryAssociation(varEntryKey));
+
+			declared.add(varEntryKey);
 
 			boolean memorySettled = false;
 
@@ -209,14 +213,14 @@ public class SemanticHelper {
 				if (originalEntry == null)
 				{
 					System.out.println("No se encontro la original:" + originalEntryKey);
-					return;
+					return declared;
 				}
 				String higherClassEntryKey = ((originalEntry.getAttrib(AttribKey.ATTRIB_OF_CLASS) != null) ? (String)originalEntry.getAttrib(AttribKey.ATTRIB_OF_CLASS) : null);
 
 				if (higherClassEntryKey == null)
 				{
 					System.out.println("higherClassEntryKey == null para " + originalEntryKey);
-					return;
+					return declared;
 				}
 
 				// Agarrar su offset de ahi
@@ -226,7 +230,7 @@ public class SemanticHelper {
 				if (higherClassEntry == null)
 				{
 					System.out.println("higherClassEntry es null para " + higherClassEntryKey);
-					return;
+					return declared;
 				}
 
 				HashMap<String, Integer> offsetsMap = (HashMap<String, Integer>)(higherClassEntry.getAttrib(AttribKey.ATTRIBS_OFFSETS));
@@ -274,7 +278,7 @@ public class SemanticHelper {
 					if (subVarEntry == null)
 					{
 						System.out.println("Error critico 14");
-						return;
+						return declared;
 					}
 
 					String subVarName = subVarEntry.getLexeme();
@@ -329,21 +333,23 @@ public class SemanticHelper {
 
 					if (originalScope != null) {
 						if (isRecursion) {
-							_declareRecursive(lexeme, subVarScope, recDataTypeEntry, currentClassEntryKey, true, invertScope(varLexeme + ":" + originalScope));
+							declared.addAll(_declareRecursive(lexeme, subVarScope, recDataTypeEntry, currentClassEntryKey, true, invertScope(varLexeme + ":" + originalScope)));
 						} else {
-							_declareRecursive(lexeme, subVarScope, recDataTypeEntry, currentClassEntryKey, true, originalScope);
+							declared.addAll(_declareRecursive(lexeme, subVarScope, recDataTypeEntry, currentClassEntryKey, true, originalScope));
 						}
 					}
 					else {
-						_declareRecursive(lexeme, subVarScope, recDataTypeEntry, currentClassEntryKey, true, null);
+						declared.addAll(_declareRecursive(lexeme, subVarScope, recDataTypeEntry, currentClassEntryKey, true, null));
 					}
 
 				}
 			}
 		}
+
+		return declared;
 	}
 
-	public void declareRecursive(LinkedList<String> varLexemeList, String scope, SymbolTableEntry dataTypeEntry, String currentClassEntryKey)
+	public LinkedList<String> declareRecursive(LinkedList<String> varLexemeList, String scope, SymbolTableEntry dataTypeEntry, String currentClassEntryKey)
 	{
 		String originalKeyScope = null;
 
@@ -354,7 +360,11 @@ public class SemanticHelper {
 				originalKeyScope = invertScope(originalKeyScope);
 		}
 
-		_declareRecursive(varLexemeList, scope, dataTypeEntry, currentClassEntryKey, false, originalKeyScope);
+		System.out.println("Empieza declaracion");
+		LinkedList<String> toReturn = _declareRecursive(varLexemeList, scope, dataTypeEntry, currentClassEntryKey, false, originalKeyScope);
+		System.out.println("Se declaro: " + toReturn);
+		System.out.println("Finaliza declaracion");
+		return toReturn;
 	}
 
 	public boolean declareClass(String scope, LocatedSymbolTableEntry classTokenData)
@@ -453,8 +463,23 @@ public class SemanticHelper {
 		return t;
 	}
 
+	/*
 	public void declareCompos(LocatedSymbolTableEntry composTokenData, String scope, String currentClassEntryKey)
 	{
+
+		System.out.println("Se declara composicion lexema: " + composTokenData.getSTEntry().getLexeme());
+
+		System.out.println("Scope -> " + scope);
+
+		// public void declareRecursive(LinkedList<String> varLexemeList, String scope, SymbolTableEntry dataTypeEntry, String currentClassEntryKey)
+
+		LinkedList<String> lexemeList = new LinkedList<>();
+		lexemeList.add(composTokenData.getSTEntry().getLexeme());
+
+		declareRecursive(lexemeList, scope, composTokenData.getSTEntry(), currentClassEntryKey);
+
+
+
 		String composEntryKey = getEntryKeyByScope(composTokenData.getSTEntry().getLexeme(), scope);
 
 		if (composEntryKey == null)
@@ -550,7 +575,10 @@ public class SemanticHelper {
 			t.add(attribName);
 			_declareRecursive(t, scope + ":" + lexeme, recDataTypeEntry, currentClassEntryKey, true, null);
 		}
+
 	}
+
+	 */
 
 	public int calcClassSize(String classEntryKey)
 	{

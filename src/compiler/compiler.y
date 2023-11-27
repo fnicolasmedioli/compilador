@@ -1531,23 +1531,45 @@ cuerpo_clase
         }
     | cuerpo_clase ID ','
         {
-            String composLexeme = getSTEntry($2).getLexeme();
+            LinkedList<String> lexemeList = new LinkedList<>();
+            lexemeList.add(getSTEntry($2).getLexeme());
 
-            semanticHelper.declareCompos((LocatedSymbolTableEntry)$2.obj, getCurrentScopeStr(), currentClassEntryKey);
+            LinkedList<String> declaredKeys = semanticHelper.declareRecursive(lexemeList, getCurrentScopeStr(), getSTEntry($2), currentClassEntryKey);
+
+            SymbolTableEntry classEntry = symbolTable.getEntry(currentClassEntryKey);
+            HashSet<String> attribsSet = (HashSet<String>)(classEntry.getAttrib(AttribKey.ATTRIBS_SET));
+
+            for (String declared : declaredKeys)
+                attribsSet.add(declared);
+
+            YACCDataUnit data = new YACCDataUnit();
 
             compiler.addFoundSyntacticStructure(
                 new SyntacticStructureResult("Herencia por composicion", getTokenLocation($2))
             );
+
+            $$ = new ParserVal(new YACCDataUnit());
         }
     | ID ','
         {
-            String composLexeme = getSTEntry($1).getLexeme();
+            LinkedList<String> lexemeList = new LinkedList<>();
+            lexemeList.add(getSTEntry($1).getLexeme());
 
-            semanticHelper.declareCompos((LocatedSymbolTableEntry)$1.obj, getCurrentScopeStr(), currentClassEntryKey);
+            LinkedList<String> declaredKeys = semanticHelper.declareRecursive(lexemeList, getCurrentScopeStr(), getSTEntry($1), currentClassEntryKey);
+
+            SymbolTableEntry classEntry = symbolTable.getEntry(currentClassEntryKey);
+            HashSet<String> attribsSet = (HashSet<String>)(classEntry.getAttrib(AttribKey.ATTRIBS_SET));
+
+            for (String declared : declaredKeys)
+                attribsSet.add(declared);
+
+            YACCDataUnit data = new YACCDataUnit();
 
             compiler.addFoundSyntacticStructure(
                 new SyntacticStructureResult("Herencia por composicion", getTokenLocation($1))
             );
+
+            $$ = new ParserVal(new YACCDataUnit());
         }
     ;
 
