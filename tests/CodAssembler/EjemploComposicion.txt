@@ -1,0 +1,25 @@
+** Se espera que ande BIEN
+{
+
+    CLASS trabajo
+    {
+        UINT id,
+    },
+
+    CLASS persona
+    {
+        STRING nombre,
+        trabajo,
+
+        VOID imprimir_persona()
+        {
+            PRINT %nombre%,
+            PRINT trabajo.id,
+        },
+    },
+
+    persona p1,
+
+    p1.trabajo.id = 25_ui,
+    p1.imprimir_persona(),
+}
