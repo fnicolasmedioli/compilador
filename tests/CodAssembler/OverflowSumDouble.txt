@@ -1,0 +1,10 @@
+{
+    DOUBLE var1,
+    DOUBLE var2,
+    DOUBLE var3,
+
+    var1 =  1.7976931348623157D+308,
+    var2 =  1.7976931348623157D+308,
+    
+    var3 = var1 + var2,
+}

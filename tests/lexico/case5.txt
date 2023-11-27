@@ -1,6 +1,8 @@
 ** Identificadores con letras, digitos y _
 ** Se espera que funcione BIEN
 {
+	STRING id_con_guiones_y_num,
+	UINT id_25,
 	id_con_guiones_y_num = %test%,
 	id_25 = 25_ui,
 }

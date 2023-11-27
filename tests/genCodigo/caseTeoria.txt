@@ -1,8 +1,0 @@
-{
-DOUBLE flete,
-flete = 3.2,
-DOUBLE costo,
-costo = 2.1,
-DOUBLE precio,
-precio = flete + costo * 1.5,
-}
