@@ -242,11 +242,19 @@ public class TripletTranslator {
                 s += loadDoubleFromMemory(o1MemoryAssociation, false);
                 s += loadDoubleFromMemory(o2MemoryAssociation, false);
                 s += "fadd\n";
-                /*
-                s += "fstsw ax\n";
-                s += "sahf\n";
-                s += "js @@overflow_suma\n";
-                 */
+
+                s += "fst qword ptr [___temp_double___]\n";
+                s += "mov eax, dword ptr [___temp_double___]\n";
+                s += "mov edx, dword ptr [___temp_double___ + 4]\n";
+
+                s += "cmp eax, 0\n";
+                s += "jne @@no_overflow_suma\n";
+                s += "and edx, 7FF00000h\n";
+                s += "cmp edx, 7FF00000h\n";
+                s += "jne @@no_overflow_suma\n";
+                s += "jmp @@overflow_suma\n";
+                s += "@@no_overflow_suma:\n";
+
                 s += saveToMemory(resultMemoryAssociation, null);
                 break;
             default:
