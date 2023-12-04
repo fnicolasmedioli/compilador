@@ -364,6 +364,13 @@ public class TripletTranslator {
         {
             case LONG:
             case UINT:
+
+                String reg = (operandsType == DataType.LONG) ? "eax" : "ax";
+
+                s += loadFromMemory(o2MemoryAssociation, reg);
+                s += String.format("cmp %s, 0\n", reg);
+                s += "jz @@zero_div_error\n";
+
                 // Primero el dividendo (va en ST1)
                 s += loadDoubleFromMemory(o1MemoryAssociation, true);
                 s += loadDoubleFromMemory(o2MemoryAssociation, true);
@@ -374,6 +381,10 @@ public class TripletTranslator {
                 s += loadDoubleFromMemory(o1MemoryAssociation, false);
                 s += loadDoubleFromMemory(o2MemoryAssociation, false);
                 s += "fdiv\n";
+                s += "fstsw ax\n";
+                s += "and eax, 4h\n";
+                s += "cmp eax, 4h\n";
+                s += "jz @@zero_div_error\n";
                 s += saveToMemory(resultMemoryAssociation, null);
                 break;
             default:

@@ -128,6 +128,7 @@ public class Translator {
         sb.append("__overflow_mul_msg__ db 'Overflow detectado. Finaliza la ejecucion', 10, 0\n");
         sb.append("__overflow_suma_msg__ db 'Overflow en suma de DOUBLEs detectado. Finaliza la ejecucion', 10, 0\n");
         sb.append("__overflow_resta_msg__ db 'Overflow en resta de UINTs detectado. Finaliza la ejecucion', 10, 0\n");
+        sb.append("__zero_div_error_msg__ db 'Division por cero detectada. Finaliza la ejecucion', 10, 0\n");
         sb.append("___str_formatter___ db '%s', 0\n");
         sb.append("___long_formatter___ db '%d', 0\n");
         sb.append("___uint_formatter___ db '%d', 0\n");
@@ -154,40 +155,6 @@ public class Translator {
 
         sb.append(".code\n");
         sb.append("start:\n\n");
-
-        sb.append("jmp @@imprimir_mensaje_end\n");
-        sb.append("@@imprimir_mensaje:\n");
-        sb.append("pushad\n");
-        sb.append("push eax\n");
-        sb.append("push offset ___str_formatter___\n");
-        sb.append("call printf\n");
-        sb.append("popad\n");
-        sb.append("ret\n");
-        sb.append("@@imprimir_mensaje_end:\n\n");
-
-        sb.append("jmp @@overflow_mul_end\n");
-        sb.append("@@overflow_mul:\n");
-        sb.append("push offset __overflow_mul_msg__\n");
-        sb.append("push offset ___str_formatter___\n");
-        sb.append("call printf\n");
-        sb.append("jmp @@fin\n");
-        sb.append("@@overflow_mul_end:\n\n");
-
-        sb.append("jmp @@overflow_suma_end\n");
-        sb.append("@@overflow_suma:\n");
-        sb.append("push offset __overflow_suma_msg__\n");
-        sb.append("push offset ___str_formatter___\n");
-        sb.append("call printf\n");
-        sb.append("jmp @@fin\n");
-        sb.append("@@overflow_suma_end:\n\n");
-
-        sb.append("jmp @@overflow_resta_end\n");
-        sb.append("@@overflow_resta:\n");
-        sb.append("push offset __overflow_resta_msg__\n");
-        sb.append("push offset ___str_formatter___\n");
-        sb.append("call printf\n");
-        sb.append("jmp @@fin\n");
-        sb.append("@@overflow_resta_end:\n\n");
 
         int tripletID = 0;
         Triplet prevTriplet = null;
@@ -277,6 +244,49 @@ public class Translator {
         }
 
         sb.append("\n");
+
+        sb.append("jmp @@imprimir_mensaje_end\n");
+        sb.append("@@imprimir_mensaje:\n");
+        sb.append("pushad\n");
+        sb.append("push eax\n");
+        sb.append("push offset ___str_formatter___\n");
+        sb.append("call printf\n");
+        sb.append("popad\n");
+        sb.append("ret\n");
+        sb.append("@@imprimir_mensaje_end:\n\n");
+
+        sb.append("jmp @@overflow_mul_end\n");
+        sb.append("@@overflow_mul:\n");
+        sb.append("push offset __overflow_mul_msg__\n");
+        sb.append("push offset ___str_formatter___\n");
+        sb.append("call printf\n");
+        sb.append("jmp @@fin\n");
+        sb.append("@@overflow_mul_end:\n\n");
+
+        sb.append("jmp @@overflow_suma_end\n");
+        sb.append("@@overflow_suma:\n");
+        sb.append("push offset __overflow_suma_msg__\n");
+        sb.append("push offset ___str_formatter___\n");
+        sb.append("call printf\n");
+        sb.append("jmp @@fin\n");
+        sb.append("@@overflow_suma_end:\n\n");
+
+        sb.append("jmp @@overflow_resta_end\n");
+        sb.append("@@overflow_resta:\n");
+        sb.append("push offset __overflow_resta_msg__\n");
+        sb.append("push offset ___str_formatter___\n");
+        sb.append("call printf\n");
+        sb.append("jmp @@fin\n");
+        sb.append("@@overflow_resta_end:\n\n");
+
+        sb.append("jmp @@zero_div_error_end\n");
+        sb.append("@@zero_div_error:\n");
+        sb.append("push offset __zero_div_error_msg__\n");
+        sb.append("push offset ___str_formatter___\n");
+        sb.append("call printf\n");
+        sb.append("jmp @@fin\n");
+        sb.append("@@zero_div_error_end:\n\n");
+
         sb.append("@@fin:\n");
         sb.append("invoke ExitProcess, 0\n");
         sb.append("end start");
