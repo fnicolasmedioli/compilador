@@ -1,0 +1,12 @@
+** Genera error, no se puede dividir por cero
+{
+    UINT a; b,
+    DOUBLE c,
+
+    a = 2_ui,
+    b = 0_ui,
+
+    c = a / b,
+
+    PRINT %esto nunca se ejecuta%,
+}

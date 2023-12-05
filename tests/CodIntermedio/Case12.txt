@@ -1,0 +1,15 @@
+** Se ejecuta bien, buen uso de forward declaration
+{
+    CLASS clase_persona
+    {
+        STRING nombre,
+        clase_laburo laburo,
+    },
+
+    CLASS clase_laburo
+    {
+        UINT id_empleado,
+    },
+
+    PRINT %ejecucion correcta%,
+}

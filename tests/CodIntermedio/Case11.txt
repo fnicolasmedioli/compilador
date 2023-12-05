@@ -1,0 +1,10 @@
+** No funciona, uso incorrecto de forward
+{
+    CLASS clase_persona
+    {
+        STRING nombre,
+        clase_inexistente inex,
+    },
+
+    PRINT %esto nunca se ejecuta%,
+}
