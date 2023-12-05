@@ -13,6 +13,7 @@ public class YACCDataUnit {
     public int reservedTriplet;
     public String referencedEntryKey;
     protected boolean valid;
+    public boolean forwarded = false;
 
     public LocatedSymbolTableEntry getLastTokenData()
     {

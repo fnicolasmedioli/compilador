@@ -17,6 +17,8 @@ public class SemanticHelper {
 	private final SymbolTable symbolTable;
 	public final static HashMap<Integer, DataType> tokenIDtoDataType;
 
+	private final LinkedList<ForwardData> forwardClasses = new LinkedList<>();
+
 	static {
 		tokenIDtoDataType = new HashMap<>();
 		tokenIDtoDataType.put((int)Parser.DOUBLE, DataType.DOUBLE);
@@ -365,19 +367,21 @@ public class SemanticHelper {
 			);
 			return false;
 		}
-		else
-			symbolTable.addNewEntry(
-				new SymbolTableEntry(
-					Parser.ID,
-					classTokenData.getSTEntry().getLexeme()
-				),
-				classEntryKey
-			)
-			.setAttrib(AttribKey.ID_TYPE, IDType.CLASSNAME)
-			.setAttrib(AttribKey.ATTRIBS_SET, new HashSet<String>())
-			.setAttrib(AttribKey.METHODS_SET, new HashSet<String>())
-			.setAttrib(AttribKey.MEMORY_ASSOCIATION, new MemoryAssociation(0))
-			.setAttrib(AttribKey.ATTRIBS_OFFSETS, new HashMap<String, Integer>());
+
+		symbolTable.addNewEntry(
+			new SymbolTableEntry(
+				Parser.ID,
+				classTokenData.getSTEntry().getLexeme()
+			),
+			classEntryKey
+		)
+		.setAttrib(AttribKey.ID_TYPE, IDType.CLASSNAME)
+		.setAttrib(AttribKey.ATTRIBS_SET, new HashSet<String>())
+		.setAttrib(AttribKey.METHODS_SET, new HashSet<String>())
+		.setAttrib(AttribKey.MEMORY_ASSOCIATION, new MemoryAssociation(0))
+		.setAttrib(AttribKey.ATTRIBS_OFFSETS, new HashMap<String, Integer>());
+
+		updateForwardDeclarations(classEntryKey);
 
 		return true;
 	}
@@ -445,5 +449,54 @@ public class SemanticHelper {
 				t.setDataType(type1);
 		}
 		return t;
+	}
+
+	public void addRequestedForwardClass(ForwardData data)
+	{
+		forwardClasses.add(data);
+	}
+
+	public void updateForwardDeclarations(String classEntryKey)
+	{
+		System.out.println("Se actualizan las fowardrd");
+
+		SymbolTableEntry classEntry = symbolTable.getEntry(classEntryKey);
+
+		LinkedList<ForwardData> clon = new LinkedList<>(forwardClasses);
+
+		for (ForwardData data : clon)
+		{
+			String possibleEntryKey = getEntryKeyByScope(data.getClassLexeme(), data.getSearchScope());
+
+			System.out.println("Possible entr key: " + possibleEntryKey);
+			System.out.println("Class entry key: " + classEntryKey);
+
+
+			if (possibleEntryKey != null && possibleEntryKey.equals(classEntryKey))
+			{
+				System.out.println("Se encuentra una forward");
+				SymbolTableEntry varEntry = symbolTable.getEntry(data.getVarLexeme() + ":" + data.getSearchScope());
+
+				// La clase que el forward buscaba es la que se declaro
+
+				// Declarar la variable
+
+				declareRecursive(
+					new LinkedList<String>() {{ add(data.getVarLexeme()); }},
+					data.getSearchScope(),
+					classEntry,
+					null
+				);
+
+				// Eliminarla de la lista
+
+				forwardClasses.remove(data);
+			}
+		}
+	}
+
+	public boolean isForwardListEmpty()
+	{
+		return forwardClasses.isEmpty();
 	}
 }

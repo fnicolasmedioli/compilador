@@ -267,9 +267,10 @@ tipo_de_dato
 
             if (classEntryKey == null)
             {
-                compiler.reportSemanticError("No se encuentra la clase: " + getSTEntry($1).getLexeme(), getTokenLocation($1));
+                // compiler.reportSemanticError("No se encuentra la clase: " + getSTEntry($1).getLexeme(), getTokenLocation($1));
                 YACCDataUnit data = new YACCInvalidDataUnit();
                 data.tokensData.add((LocatedSymbolTableEntry)$1.obj);
+                data.forwarded = true;
                 $$ = new ParserVal(data);
                 break;
             }
@@ -297,6 +298,19 @@ declaracion_variable
     : tipo_de_dato lista_identificadores ','
         {
             YACCDataUnit data1 = (YACCDataUnit)$1.obj;
+
+            if (data1.forwarded)
+            {
+                for (LocatedSymbolTableEntry tokenData : (LinkedList<LocatedSymbolTableEntry>)($2.obj))
+                    // semanticHelper.addRequestedForwardClass(new ForwardData(data1.tokensData.get(0).getSTEntry().getLexeme(), getCurrentScopeStr(), tokenData.getSTEntry().getLexeme()));
+                semanticHelper.addRequestedForwardClass(
+                    new ForwardData(
+                        getCurrentScopeStr(),
+                        data1.tokensData.get(0).getSTEntry().getLexeme(),
+                        tokenData.getSTEntry().getLexeme()
+                    )
+                );
+            }
 
             if (!data1.isValid())
             {
@@ -549,7 +563,7 @@ sentencia_ejecutable
 
             YACCDataUnit data = new YACCDataUnit();
             data.tripletQuantity = 1;
-            
+
             if (data1.tokensData.size() > 1) data.tripletQuantity++;
 
             data.firstTriplet = tripletID;
