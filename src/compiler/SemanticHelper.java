@@ -458,8 +458,6 @@ public class SemanticHelper {
 
 	public void updateForwardDeclarations(String classEntryKey)
 	{
-		System.out.println("Se actualizan las fowardrd");
-
 		SymbolTableEntry classEntry = symbolTable.getEntry(classEntryKey);
 
 		LinkedList<ForwardData> clon = new LinkedList<>(forwardClasses);

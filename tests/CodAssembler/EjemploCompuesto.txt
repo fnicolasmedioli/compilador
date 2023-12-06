@@ -1,0 +1,27 @@
+{
+    CLASS clase_persona
+    {
+        STRING nombre,
+    },
+
+    CLASS clase_empleado
+    {
+        clase_persona persona,
+        UINT id_empleado,
+
+        VOID imprimir_datos()
+        {
+            PRINT %me llamo %,
+            PRINT persona.nombre,
+            PRINT % y soy el empleado nro %,
+            PRINT id_empleado,
+        },
+    },
+
+    clase_empleado emp1,
+
+    emp1.persona.nombre = %javier%,
+    emp1.id_empleado = 414_ui,
+
+    emp1.imprimir_datos(),
+}
